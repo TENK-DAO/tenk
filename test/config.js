@@ -15,6 +15,7 @@ module.exports = function getConfig(network = 'mainnet') {
 				explorerUrl: "https://explorer.testnet.near.org",
 				...config,
 				GAS: "200000000000000",
+				gas: "200000000000000",
 				DEFAULT_NEW_ACCOUNT_AMOUNT: "5",
 				DEFAULT_NEW_CONTRACT_AMOUNT: "5",
 				GUESTS_ACCOUNT_SECRET:

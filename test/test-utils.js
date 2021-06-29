@@ -6,7 +6,7 @@ const { KeyPair, Account, Contract, utils: { format: { parseNearAmount } } } = n
 const { near, credentials, connection, keyStore, contract, contractAccount } = require('./near-utils');
 const getConfig = require('./config');
 const {
-	networkId, contractName, contractMethods,
+	networkId, contractName, contractMethods, gas,
 	DEFAULT_NEW_ACCOUNT_AMOUNT, 
 	DEFAULT_NEW_CONTRACT_AMOUNT,
 } = getConfig('testnet');
@@ -165,6 +165,7 @@ const loadCredentials = (accountId) => {
 module.exports = { 
 	TEST_HOST,
 	near,
+	gas,
 	connection,
 	credentials,
 	keyStore,
