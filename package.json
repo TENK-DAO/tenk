@@ -7,7 +7,8 @@
     "patch:config": "node ./utils/patch-config.js",
     "dev:deploy": "yarn build:contract && rm -rf neardev && (near dev-deploy || exit 0) && yarn patch:config",
     "test:deploy": "yarn dev:deploy && mocha",
-    "test": "mocha"
+    "test": "mocha",
+    "test:unit": "(cd contract; cargo test)"
   },
   "dependencies": {
     "mocha": "^9.0.1"
