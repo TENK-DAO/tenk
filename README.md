@@ -8,9 +8,9 @@ The main idea of this contract is creating a set of items upfront, for example 1
 Each item is placed in a folder named for its index in the list of items.  This folder contains a file named `media` of the item and a file `info.json` containing the information about the item. All folders are placed into one folder and added to IPFS.  This hash is used as the uri for the contract and all minted token's ids are indexes into this folder.
 
 For example,
-- [QmPphE8ZeR9E7yxFNFTXEfKVe1Up4P1cQrkcXQzmEM8RJe](https://ipfs.io/ipfs/QmPphE8ZeR9E7yxFNFTXEfKVe1Up4P1cQrkcXQzmEM8RJe)
-- [QmPphE8ZeR9E7yxFNFTXEfKVe1Up4P1cQrkcXQzmEM8RJe/0](https://ipfs.io/ipfs/QmPphE8ZeR9E7yxFNFTXEfKVe1Up4P1cQrkcXQzmEM8RJe/0)
-- [QmPphE8ZeR9E7yxFNFTXEfKVe1Up4P1cQrkcXQzmEM8RJe/0/media](https://ipfs.io/ipfs/QmPphE8ZeR9E7yxFNFTXEfKVe1Up4P1cQrkcXQzmEM8RJe/0/media)
+- [QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD](https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD)
+- [QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD/4242](https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD/4242)
+- [QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD/4242/media](https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD/4242/media)
 
 
 ## Linkdrop proxy
