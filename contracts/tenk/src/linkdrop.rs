@@ -151,7 +151,7 @@ impl Contract {
         match action {
             Action::Deposit(_) => promise,
             Action::DepositCallBack(_, receiver_id, gas) => promise.then(
-                linkdrop_callback::link_callback(new_account_id, &receiver_id, 7350000000000000000000, gas),
+                linkdrop_callback::link_callback(new_account_id, &receiver_id, 10000000000000000000000, gas),
             ),
         }
     }

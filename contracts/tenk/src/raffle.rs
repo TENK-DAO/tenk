@@ -44,7 +44,7 @@ impl Raffle {
     where
         S: IntoStorageKey,
     {
-        Self {
+        return Self {
             len,
             prefix: prefix.into_storage_key(),
             el: PhantomData,

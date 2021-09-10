@@ -850,6 +850,11 @@ base-x@^3.0.2:
   dependencies:
     safe-buffer "^5.0.1"
 
+base64url@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/base64url/-/base64url-3.0.1.tgz#6399d572e2bc3f90a9a8b22d5dbb0a32d33f788d"
+  integrity sha512-ir1UPr3dkwexU7FdV8qBBbNDRUhMmIekYMFZfi+C/sLNnRESKPl23nB9b2pltqfOQNnGzsDdId90AEtG5tCx4A==
+
 binary-install@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/binary-install/-/binary-install-0.1.1.tgz#c1b22f174581764e5c52cd16664cf1d287e38bd4"
@@ -944,6 +949,11 @@ callsites@^3.0.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/callsites/-/callsites-3.1.0.tgz#b3630abd8943432f54b3f0519238e33cd7df2f73"
   integrity sha512-P8BjAsXvZS+VIDUI11hHCQEv74YT67YUi5JJFNWIqL235sBmjX4+qx9Muvls5ivyNENctx46xQLQ3aTuE7ssaQ==
+
+callsites@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/callsites/-/callsites-4.0.0.tgz#8014cea4fedfe681a30e2f7d2d557dd95808a92a"
+  integrity sha512-y3jRROutgpKdz5vzEhWM34TidDU8vkJppF8dszITeb1PQmSqV3DTxyV8G/lyO/DNvtE1YTedehmw9MPZsCBHxQ==
 
 camelcase@^5.3.1:
   version "5.3.1"
@@ -2458,27 +2468,39 @@ near-api-js@near/near-api-js#spike/sandbox-runner-tweaks:
     text-encoding-utf-8 "^1.0.2"
     tweetnacl "^1.0.1"
 
-near-runner@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/near-runner/-/near-runner-0.4.0.tgz#86827892342651cbbcc3617e80c7f7ec0f0f4db4"
-  integrity sha512-/mPg1oOC7mBhLmgDs8IFkHmjH891QYETNwQTjjsq9JqRWcd+IQBUU/ZIxQ9h2rnTQD/gFhFa66ocVCDNtcMLdA==
+near-runner@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/near-runner/-/near-runner-0.6.0.tgz#c026119709f6b5cecfad5193e8f3138239b8bdf5"
+  integrity sha512-0DqqTWQ7AjrnR4nHj64s1HvgrjnA99NieDB6a5TXRR9fDLxF/XVDjByM4BUtPnCK8Yq6W9LmtMyn6Xj9tmqu3Q==
   dependencies:
+    base64url "^3.0.1"
     bn.js "^5.2.0"
+    borsh "^0.5.0"
+    callsites "^4.0.0"
     fs-extra "^10.0.0"
+    js-sha256 "^0.9.0"
     near-api-js near/near-api-js#spike/sandbox-runner-tweaks
-    near-sandbox "^0.0.5"
+    near-sandbox "^0.0.6"
+    near-units "^0.1.9"
     node-port-check "^2.0.1"
     promisify-child-process "^4.1.1"
     pure-uuid "^1.6.2"
     rimraf "^3.0.2"
     temp-dir "^2.0.0"
 
-near-sandbox@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/near-sandbox/-/near-sandbox-0.0.5.tgz#72b53907408f9bb72fc2d766465b4964fca18b2b"
-  integrity sha512-za74tz1yyIz3EjWYT5z5gYX3jTN0NxN1W8rB2lbRHQfNXPTIUNtipQSkyzAo6cNsrJsxmT1x1cypblnTITcVcQ==
+near-sandbox@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/near-sandbox/-/near-sandbox-0.0.6.tgz#d09bdf4bf30cecab1ab4281381903bd6aaabae98"
+  integrity sha512-6PyyuwJbT34EDV/6HY7AoGoDIY8J9/cIlvbf4SoLqCpJVo5N+eVgktKg917AABehXghHMNrFGkZEw4KaDgF+jQ==
   dependencies:
     binary-install "^0.1.1"
+
+near-units@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/near-units/-/near-units-0.1.9.tgz#4bf07da0b046e08e0b8785ad8e32d4df3a944b93"
+  integrity sha512-xiuBjpNsi+ywiu7P6iWRZdgFm7iCr/cfWlVO6+e5uaAqH4mE1rrurElyrL91llNDSnMwogd9XmlZOw5KbbHNsA==
+  dependencies:
+    bn.js "^5.2.0"
 
 node-fetch@^2.6.1:
   version "2.6.1"
