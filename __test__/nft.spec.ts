@@ -137,7 +137,7 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
       console.log(res);
   });
 
-  test.concurrent("mint six", async () => {
+  runner.test("mint six", async () => {
     await expect(async () => {
       await runner.run(async ({ root, tenk }) => {
         let num = 24;
@@ -163,7 +163,7 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
     }).rejects.toThrow();
   });
 
-  runner.test("Use `create_account_and_claim` to create a new account", async ({ root, tenk, network }) => {
+  runner.test("Owner uses `create_account_and_claim` to create a new account", async ({ root, tenk, network }) => {
       // Create temporary keys for access key on linkdrop
       const senderKey = createKeyPair();
       const public_key = senderKey.getPublicKey().toString();
@@ -177,6 +177,63 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
         },
         {
           attachedDeposit: NEAR.parse("3 N"),
+          gas: tGas("100"),
+        }
+      );
+      // Create a random subaccount
+      const new_account_id = `${randomAccountId()}.${network.accountId}`;
+      const actualKey = createKeyPair();
+      const new_public_key = actualKey.getPublicKey().toString();
+
+      let res = await tenk.call(
+        tenk,
+        "create_account_and_claim",
+        {
+          new_account_id,
+          new_public_key,
+        },
+        {
+          signWithKey: senderKey,
+          gas: tGas("200"),
+        }
+      );
+      console.log(JSON.stringify(res, null, 4));
+
+      let new_account = root.getFullAccount(new_account_id);
+      if (Runner.networkIsTestnet()) {
+        console.log(
+          `http://explorer.testnet.near.org/accounts/${new_account.accountId}`
+        );
+      }
+      console.log(
+        `new account created: ${new_account.accountId} with balance ${
+          (await new_account.balance()).available
+        } yoctoNear`
+      );
+      res = await tenk.view("nft_tokens_for_owner", {
+        account_id: new_account.accountId,
+        from_index: null,
+        limit: null,
+      });
+      console.log(JSON.stringify(res, null, 4));
+    });
+
+    runner.test("Use `create_account_and_claim` to create a new account", async ({ root, tenk, network }) => {
+      // Create temporary keys for access key on linkdrop
+      const senderKey = createKeyPair();
+      const public_key = senderKey.getPublicKey().toString();
+      const alice = await root.createAccount("alice");
+      const KEY_ALLOWANCE = NEAR.parse('1 N');
+
+      // This adds the key as a function access key on `create_account_and_claim`
+      await alice.call(
+        tenk,
+        "create_linkdrop",
+        {
+          public_key,
+        },
+        {
+          attachedDeposit: KEY_ALLOWANCE.add(await costOf(tenk, 1)),
           gas: tGas("100"),
         }
       );

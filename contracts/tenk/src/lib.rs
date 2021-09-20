@@ -128,12 +128,6 @@ impl Contract {
             percent_off,
         }
     }
-    fn assert_deposit(&self, num: u32) {
-        assert!(
-            env::attached_deposit() >= self.total_cost(num).0,
-            "Not enough attached deposit to buy"
-        );
-    }
 
     #[payable]
     pub fn nft_mint(
@@ -147,6 +141,7 @@ impl Contract {
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_can_mint(1);
+        assert!(env::attached_deposit() > self.base_cost + self.token_storage_cost().0);
         self.pending_tokens += 1;
         let current_account_id = env::current_account_id();
         ext_self::send_with_callback(
@@ -173,16 +168,6 @@ impl Contract {
             .collect::<Vec<Token>>()
     }
 
-    #[payable]
-    #[private]
-    pub fn link_callback(&mut self, account_id: AccountId) -> Token {
-        if is_promise_success() {
-            self.pending_tokens -= 1;
-            self.internal_mint(account_id)
-        } else {
-            env::panic(b"Promise before Linkdrop callback failed");
-        }
-    }
 
     pub fn total_cost(&self, num: u32) -> U128 {
         (num as Balance * self.cost_per_token(num).0).into()
@@ -196,11 +181,31 @@ impl Contract {
     pub fn token_storage_cost(&self) -> U128 {
         (env::storage_byte_cost() * self.tokens.extra_storage_in_bytes_per_token as Balance).into()
     }
+    pub fn discount(&self, num: u32) -> U128 {
+        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR).into()
+    }
+
+    // Contract private methods
+
+    #[payable]
+    #[private]
+    pub fn link_callback(&mut self, account_id: AccountId) -> Token {
+        if is_promise_success() {
+            self.pending_tokens -= 1;
+            self.internal_mint(account_id)
+        } else {
+            env::panic(b"Promise before Linkdrop callback failed");
+        }
+    }
+
 
     // Private methods
 
-    pub fn discount(&self, num: u32) -> U128 {
-        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR).into()
+    fn assert_deposit(&self, num: u32) {
+        assert!(
+            env::attached_deposit() >= self.total_cost(num).0,
+            "Not enough attached deposit to buy"
+        );
     }
 
     fn assert_can_mint(&self, num: u32) {
@@ -353,7 +358,7 @@ fn refund_deposit(storage_used: u64) {
 }
 
 const fn to_near(num: u32) -> Balance {
-  (num as Balance * 10u128.pow(24)) as Balance
+    (num as Balance * 10u128.pow(24)) as Balance
 }
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
@@ -378,10 +383,28 @@ mod tests {
             None,
             None,
         );
-        assert_eq!(contract.cost_per_token(1).0, TEN + contract.token_storage_cost().0);
-        assert_eq!(contract.cost_per_token(2).0, TEN + contract.token_storage_cost().0 - contract.discount(2).0);
-        println!("{}, {}, {}", contract.discount(1).0, contract.discount(2).0, contract.discount(10).0);
-        println!("{}", (contract.base_cost - contract.discount(10).0).max(contract.min_cost));
-        println!("{}, {}", contract.cost_per_token(24).0, contract.cost_per_token(10).0);
+        assert_eq!(
+            contract.cost_per_token(1).0,
+            TEN + contract.token_storage_cost().0
+        );
+        assert_eq!(
+            contract.cost_per_token(2).0,
+            TEN + contract.token_storage_cost().0 - contract.discount(2).0
+        );
+        println!(
+            "{}, {}, {}",
+            contract.discount(1).0,
+            contract.discount(2).0,
+            contract.discount(10).0
+        );
+        println!(
+            "{}",
+            (contract.base_cost - contract.discount(10).0).max(contract.min_cost)
+        );
+        println!(
+            "{}, {}",
+            contract.cost_per_token(24).0,
+            contract.cost_per_token(10).0
+        );
     }
 }

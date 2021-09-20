@@ -15,7 +15,7 @@ use crate::*;
 
 
 /// 0.2 N
-pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = 3_000_000_000_000_000_000_000_000;
+pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = 1_000_000_000_000_000_000_000_000;
 /// can take 0.5 of access key since gas required is 6.6 times what was actually used
 const NEW_ACCOUNT_BASIC_AMOUNT: u128 = 100_000_000_000_000_000_000_000;
 const ON_CREATE_ACCOUNT_GAS: Gas = Gas(40_000_000_000_000);
