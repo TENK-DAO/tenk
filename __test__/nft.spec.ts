@@ -1,13 +1,13 @@
 import {
   Runner,
-  toYocto,
   createKeyPair,
   BN,
   tGas,
   NearAccount,
   Account,
-} from "near-runner";
+} from "near-runner-jest";
 import { NEAR, Gas } from "near-units";
+
 class ActualTestnet extends Account {
   constructor(private name: string) {
     super(null as any, null as any);
@@ -52,6 +52,15 @@ async function costOf(tenk: NearAccount, num: number): Promise<NEAR> {
   return NEAR.from(await tenk.view("cost_per_token", { num }));
 }
 
+async function discount(tenk: NearAccount, num: number): Promise<NEAR> {
+  return NEAR.from(await tenk.view("discount", { num }));
+}
+
+async function tokenStorageCost(tenk: NearAccount): Promise<NEAR> {
+  return NEAR.from(await tenk.view("token_storage_cost"));
+}
+
+
 // async function deployContract(account?: Account): Promise<Account> {
 // return
 // }
@@ -60,8 +69,7 @@ const base_cost = NEAR.parse("10 N");
 const min_cost = NEAR.parse("1 N");
 
 describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
-  jest.setTimeout(2_147_483_647);
-  const runner = Runner.create(async ({ root, runtime }) => {
+  const runner = Runner.create(async ({ root }) => {
     const network: NearAccount = Runner.networkIsTestnet()
       ? // Just need accountId "testnet"
         new ActualTestnet("testnet")
@@ -70,38 +78,40 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
           "sandbox",
           `${__dirname}/../target/wasm32-unknown-unknown/release/sandbox_linkdrop.wasm`
         );
-
+    const owner_id = root;
+    const linkdrop_contract = network.accountId;
     const tenk = await root.createAndDeploy(
       "tenk",
       `${__dirname}/../target/wasm32-unknown-unknown/release/tenk.wasm`,
       {
         method: "new_default_meta",
         args: {
-          owner_id: root.accountId,
+          owner_id,
           name: "meerkats",
           symbol: "N/A",
           uri: "QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
-          linkdrop_contract: network.accountId,
+          linkdrop_contract,
           size: 10000,
           base_cost,
           min_cost,
         },
-        gas: tGas("20"),
+        gas: Gas.parse("20 TGas"),
       }
     );
     return { tenk, network };
   });
 
-  test("can get cost per token", async () => {
-    await runner.run(async ({ tenk }) => {
+  runner.test("can get cost per token", async ({ tenk }) => {
       const cost = await costOf(tenk, 1);
-      expect(cost.toBigInt()).toBe(base_cost.toBigInt());
-      expect(cost.gt(await costOf(tenk, 24))).toBeTruthy();
-    });
+      console.log(cost.toHuman())
+      // const delta = await discount(tenk, 24);
+      // console.log(delta.toHuman())
+      console.log((await tokenStorageCost(tenk)).toHuman())
+      expect(cost.toBigInt()).toBe(base_cost.add(await tokenStorageCost(tenk)).toBigInt());
+      expect(cost.toBigInt()).toBeGreaterThan((await costOf(tenk, 24)).toBigInt());
   });
 
-  test("mint one", async () => {
-    await runner.run(async ({ root, tenk }) => {
+  runner.test("mint one", async ({ root, tenk }) => {
       const res = await root.call(
         tenk,
         "nft_mint_one",
@@ -112,11 +122,9 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
         }
       );
       console.log(res);
-    });
   });
 
-  test("mint five", async () => {
-    await runner.run(async ({ root, tenk }) => {
+  runner.test("mint five",async ({ root, tenk }) => {
       const res = await root.call(
         tenk,
         "nft_mint_many",
@@ -127,10 +135,9 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
         }
       );
       console.log(res);
-    });
   });
 
-  test("mint six", async () => {
+  test.concurrent("mint six", async () => {
     await expect(async () => {
       await runner.run(async ({ root, tenk }) => {
         let num = 24;
@@ -141,7 +148,7 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
               "nft_mint_many",
               { num },
               {
-                attachedDeposit: costOfMinting(num),
+                attachedDeposit: await costOf(tenk, num),
                 gas: tGas("300"),
               }
             );
@@ -156,8 +163,7 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
     }).rejects.toThrow();
   });
 
-  test("Use `create_account_and_claim` to create a new account", async () => {
-    await runner.run(async ({ root, tenk, network }) => {
+  runner.test("Use `create_account_and_claim` to create a new account", async ({ root, tenk, network }) => {
       // Create temporary keys for access key on linkdrop
       const senderKey = createKeyPair();
       const public_key = senderKey.getPublicKey().toString();
@@ -211,5 +217,4 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
       });
       console.log(JSON.stringify(res, null, 4));
     });
-  });
 });

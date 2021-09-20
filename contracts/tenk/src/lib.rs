@@ -5,6 +5,7 @@ use near_contract_standards::non_fungible_token::NonFungibleToken;
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap, UnorderedSet};
+use near_sdk::json_types::Base64VecU8;
 use near_sdk::{
     env, ext_contract, near_bindgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
     Promise, PromiseOrValue, PromiseResult, PublicKey,
@@ -31,109 +32,113 @@ pub struct Contract {
     pub accounts: LookupMap<PublicKey, Action>,
     pub base_cost: Balance,
     pub min_cost: Balance,
+    pub percent_off: u8,
 }
+const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
+const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(20_000_000_000_000);
 
-// const BASE_COST: Balance = to_yocto("10");
-const SUPPLY_FATOR_NUMERATOR: Balance  = 110_000_000_000_000_000_000_000;
-const SUPPLY_FATOR_DENOMENTOR: Balance = 100_000_000_000_000_000_000_000;
-
-
 #[ext_contract(ext_self)]
 trait Linkdrop {
-  fn send_with_callback(
-    &mut self,
-    public_key: PublicKey,
-    contract_id: AccountId,
-    gas_required: Gas,
-  ) -> Promise;
+    fn send_with_callback(
+        &mut self,
+        public_key: PublicKey,
+        contract_id: AccountId,
+        gas_required: Gas,
+    ) -> Promise;
 }
-
-const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E";
 
 #[derive(BorshSerialize, BorshStorageKey)]
 enum StorageKey {
-  NonFungibleToken,
-  Metadata,
-  TokenMetadata,
-  Enumeration,
-  Approval,
-  Ids,
-  LinkdropKeys,
-  TokensPerOwner { account_hash: Vec<u8> },
+    NonFungibleToken,
+    Metadata,
+    TokenMetadata,
+    Enumeration,
+    Approval,
+    Ids,
+    LinkdropKeys,
+    TokensPerOwner { account_hash: Vec<u8> },
 }
 
 #[near_bindgen]
 impl Contract {
-  #[init]
-  pub fn new_default_meta(
-    owner_id: AccountId,
-    name: String,
-    symbol: String,
-    uri: String,
-    linkdrop_contract: String,
-    size: u32,
-    base_cost: U128,
-    min_cost: U128,
-  ) -> Self {
-    Self::new(
-      owner_id,
-      NFTContractMetadata {
-        spec: NFT_METADATA_SPEC.to_string(),
-        name,
-        symbol,
-        icon: Some(DATA_IMAGE_SVG_NEAR_ICON.to_string()),
-        base_uri: Some(uri),
-        reference: None,
-        reference_hash: None,
-      },
-      linkdrop_contract,
-      size,
-      base_cost,
-      min_cost
-    )
-  }
-  
-  #[init]
-  pub fn new(
-    owner_id: AccountId,
-    metadata: NFTContractMetadata,
-    network_id: String,
-    size: u32,
-    base_cost: U128,
-    min_cost: U128,
-  ) -> Self {
-    assert!(!env::state_exists(), "Already initialized");
-    metadata.assert_valid();
-    Self {
-      tokens: NonFungibleToken::new(
-        StorageKey::NonFungibleToken,
-        owner_id,
-        Some(StorageKey::TokenMetadata),
-        Some(StorageKey::Enumeration),
-        Some(StorageKey::Approval),
-      ),
-      metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
-      raffle: Raffle::new(StorageKey::Ids, size as u64),
-      pending_tokens: 0,
-      linkdrop_contract: network_id,
-      accounts: LookupMap::new(StorageKey::LinkdropKeys),
-      base_cost: base_cost.0,
-      min_cost: min_cost.0,
+    #[init]
+    pub fn new_default_meta(
+        owner_id: AccountId,
+        name: String,
+        symbol: String,
+        uri: String,
+        linkdrop_contract: String,
+        size: u32,
+        base_cost: U128,
+        min_cost: U128,
+        percent_off: Option<u8>,
+        icon: Option<String>,
+        spec: Option<String>,
+        reference: Option<String>,
+        reference_hash: Option<Base64VecU8>,
+    ) -> Self {
+        Self::new(
+            owner_id,
+            NFTContractMetadata {
+                spec: spec.unwrap_or(NFT_METADATA_SPEC.to_string()),
+                name,
+                symbol,
+                icon,
+                base_uri: Some(uri),
+                reference,
+                reference_hash,
+            },
+            linkdrop_contract,
+            size,
+            base_cost,
+            min_cost,
+            percent_off.unwrap_or(DEFAULT_SUPPLY_FATOR_NUMERATOR),
+        )
     }
-  }
-  fn assert_deposit(&self, num: u32) {
-      assert!(
-          env::attached_deposit() >= self.total_cost(num),
-          "Not enough attached deposit to buy"
-      );
-  }
-  
-  #[payable]
-  pub fn nft_mint(
-    &mut self,
-    _token_id: TokenId,
+
+    #[init]
+    pub fn new(
+        owner_id: AccountId,
+        metadata: NFTContractMetadata,
+        network_id: String,
+        size: u32,
+        base_cost: U128,
+        min_cost: U128,
+        percent_off: u8,
+    ) -> Self {
+        assert!(!env::state_exists(), "Already initialized");
+        metadata.assert_valid();
+        Self {
+            tokens: NonFungibleToken::new(
+                StorageKey::NonFungibleToken,
+                owner_id,
+                Some(StorageKey::TokenMetadata),
+                Some(StorageKey::Enumeration),
+                Some(StorageKey::Approval),
+            ),
+            metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
+            raffle: Raffle::new(StorageKey::Ids, size as u64),
+            pending_tokens: 0,
+            linkdrop_contract: network_id,
+            accounts: LookupMap::new(StorageKey::LinkdropKeys),
+            base_cost: base_cost.0,
+            min_cost: min_cost.0,
+            percent_off,
+        }
+    }
+    fn assert_deposit(&self, num: u32) {
+        assert!(
+            env::attached_deposit() >= self.total_cost(num).0,
+            "Not enough attached deposit to buy"
+        );
+    }
+
+    #[payable]
+    pub fn nft_mint(
+        &mut self,
+        _token_id: TokenId,
         _token_owner_id: AccountId,
         _token_metadata: TokenMetadata,
     ) -> Token {
@@ -179,16 +184,24 @@ impl Contract {
         }
     }
 
-    pub fn total_cost(&self, num: u32) -> Balance {
-        num as Balance * self.cost_per_token(num).0
+    pub fn total_cost(&self, num: u32) -> U128 {
+        (num as Balance * self.cost_per_token(num).0).into()
     }
 
     pub fn cost_per_token(&self, num: u32) -> U128 {
-      (self.base_cost - (num - 1) as Balance * SUPPLY_FATOR_NUMERATOR / SUPPLY_FATOR_DENOMENTOR)
-          .max(self.min_cost).into()
-  }
+        let base_cost = (self.base_cost - self.discount(num).0).max(self.min_cost);
+        (base_cost + self.token_storage_cost().0).into()
+    }
+
+    pub fn token_storage_cost(&self) -> U128 {
+        (env::storage_byte_cost() * self.tokens.extra_storage_in_bytes_per_token as Balance).into()
+    }
 
     // Private methods
+
+    pub fn discount(&self, num: u32) -> U128 {
+        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR).into()
+    }
 
     fn assert_can_mint(&self, num: u32) {
         // Check quantity
@@ -336,5 +349,39 @@ fn refund_deposit(storage_used: u64) {
     let refund = attached_deposit - required_cost;
     if refund > 1 {
         Promise::new(env::predecessor_account_id()).transfer(refund);
+    }
+}
+
+const fn to_near(num: u32) -> Balance {
+  (num as Balance * 10u128.pow(24)) as Balance
+}
+#[cfg(not(target_arch = "wasm32"))]
+#[cfg(test)]
+mod tests {
+    use super::*;
+    const TEN: u128 = to_near(10);
+    const ONE: u128 = to_near(1);
+    #[test]
+    fn check_price() {
+        let contract: Contract = Contract::new_default_meta(
+            AccountId::new_unchecked("root".to_string()),
+            "name".to_string(),
+            "sym".to_string(),
+            "https://".to_string(),
+            "testnet".to_string(),
+            10_000,
+            TEN.into(),
+            ONE.into(),
+            None,
+            None,
+            None,
+            None,
+            None,
+        );
+        assert_eq!(contract.cost_per_token(1).0, TEN + contract.token_storage_cost().0);
+        assert_eq!(contract.cost_per_token(2).0, TEN + contract.token_storage_cost().0 - contract.discount(2).0);
+        println!("{}, {}, {}", contract.discount(1).0, contract.discount(2).0, contract.discount(10).0);
+        println!("{}", (contract.base_cost - contract.discount(10).0).max(contract.min_cost));
+        println!("{}, {}", contract.cost_per_token(24).0, contract.cost_per_token(10).0);
     }
 }
