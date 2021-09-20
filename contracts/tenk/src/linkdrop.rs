@@ -22,7 +22,7 @@ const ON_CREATE_ACCOUNT_GAS: Gas = Gas(40_000_000_000_000);
 const NO_DEPOSIT: Balance = 0;
 
 /// Gas attached to the callback from account creation.
-pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(20_000_000_000_000);
+pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_linkdrop)]
 trait ExtLinkdrop {

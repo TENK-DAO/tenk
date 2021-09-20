@@ -37,7 +37,8 @@ pub struct Contract {
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
-const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(20_000_000_000_000);
+const GAS_REQUIRED_FOR_LINKDROP: Gas      = Gas(12_000_000_000_000);
+const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
 trait Linkdrop {
@@ -150,7 +151,7 @@ impl Contract {
             GAS_REQUIRED_FOR_LINKDROP,
             &current_account_id,
             env::attached_deposit(),
-            GAS_REQUIRED_FOR_LINKDROP * 2,
+            GAS_REQUIRED_FOR_LINKDROP_CALL,
         )
     }
 
