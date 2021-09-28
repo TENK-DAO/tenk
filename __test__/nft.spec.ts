@@ -18,7 +18,6 @@ class ActualTestnet extends Account {
   }
 }
 
-const ONE_NFT_STORAGE_COST = "7020000000000000000000";
 const ONE_NFT_STORAGE_COST_BN: NEAR = Runner.networkIsTestnet()
   ? NEAR.parse("7.18 mN")
   : NEAR.parse("7.56 mN");
@@ -91,7 +90,7 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
           symbol: "N/A",
           uri: "QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
           linkdrop_contract,
-          size: 10000,
+          size: 10_000,
           base_cost,
           min_cost,
         },
@@ -109,6 +108,7 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
       console.log((await tokenStorageCost(tenk)).toHuman())
       expect(cost.toBigInt()).toBe(base_cost.add(await tokenStorageCost(tenk)).toBigInt());
       expect(cost.toBigInt()).toBeGreaterThan((await costOf(tenk, 24)).toBigInt());
+      console.log(NEAR.from(await tenk.view("token_storage_cost")).toHuman())
   });
 
   runner.test("mint one", async ({ root, tenk }) => {
@@ -122,6 +122,12 @@ describe(`Running on ${Runner.getNetworkFromEnv()}`, () => {
         }
       );
       console.log(res);
+      const tokens = await tenk.view("nft_tokens_for_owner", {
+        account_id: root,
+        from_index: null,
+        limit: null,
+      });
+      console.log(JSON.stringify(tokens, null, 4));
   });
 
   runner.test("mint five",async ({ root, tenk }) => {

@@ -281,15 +281,15 @@ impl Contract {
     }
 
     fn create_metadata(&mut self, token_id: u64) -> TokenMetadata {
-        let media = Some(format!("{}/{}/media", self.base_url(), token_id));
-        let reference = Some(format!("{}/{}/info.json", self.base_url(), token_id));
+        let media = Some(format!("{}/media", token_id));
+        let reference = Some(format!("{}/info.json", token_id));
         TokenMetadata {
-            title: None,          // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
+            title: Some(token_id.to_string()),          // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             description: None,    // free-form description
             media, // URL to associated media, preferably to decentralized, content-addressed storage
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
-            issued_at: None, // ISO 8601 datetime when token was issued or minted
+            issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
             expires_at: None, // ISO 8601 datetime when token expires
             starts_at: None, // ISO 8601 datetime when token starts being valid
             updated_at: None, // ISO 8601 datetime when token was last updated
@@ -297,13 +297,6 @@ impl Contract {
             reference,   // URL to an off-chain JSON file with more info.
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
         }
-    }
-
-    fn base_url(&self) -> String {
-        format!(
-            "https://ipfs.io/ipfs/{}",
-            self.metadata.get().unwrap().base_uri.unwrap()
-        )
     }
 }
 
@@ -319,15 +312,18 @@ impl NonFungibleTokenMetadataProvider for Contract {
 }
 
 fn is_promise_success() -> bool {
-    assert_eq!(
-        env::promise_results_count(),
-        1,
+  let count = env::promise_results_count();
+    assert!(
+        count > 1,
         "Contract expected a result on the callback"
     );
-    match env::promise_result(0) {
-        PromiseResult::Successful(_) => true,
-        _ => false,
+    for i in 0..count {
+      match env::promise_result(i) {
+          PromiseResult::Successful(_) => (),
+          _ => return false,
+      }
     }
+    true
 }
 
 fn _to_yocto(value: &str) -> u128 {

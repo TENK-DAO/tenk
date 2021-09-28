@@ -10,7 +10,7 @@ const keyStore = new nearAPI.keyStores.UnencryptedFileSystemKeyStore(
 const network = "testnet";
 
 const runner = Runner.create(
-  { network, rootAccount: "tenk.testnet", homeDir: os.homedir(), keyStore },
+  { network, rootAccount: "contract.tenk.testnet", homeDir: os.homedir(), keyStore },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
     if (rootBalance.lt(NEAR.parse("350 N"))) {

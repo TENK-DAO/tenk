@@ -23,6 +23,7 @@ const NO_DEPOSIT: Balance = 0;
 
 /// Gas attached to the callback from account creation.
 pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(5_000_000_000_000);
+const ON_CLAIM_CALLBACK_DEPOSIT: Balance = 10_000_000_000_000_000_000_000;
 
 #[ext_contract(ext_linkdrop)]
 trait ExtLinkdrop {
@@ -57,12 +58,6 @@ fn is_promise_success() -> bool {
 
 #[near_bindgen]
 impl Contract {
-    // #[init]
-    // pub fn new(linkdrop_contract: AccountId) -> Self {
-    //     Self {
-            
-    //     }
-    // }
     /// Allows given public key to claim sent balance.
     /// Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
     #[payable]
@@ -111,7 +106,7 @@ impl Contract {
                     .then(linkdrop_callback::link_callback(
                         account_id,
                         &receiver_id,
-                        0,
+                        10_000_000_000_000_000_000_000,
                         gas,
                     ))
             }
@@ -151,7 +146,7 @@ impl Contract {
         match action {
             Action::Deposit(_) => promise,
             Action::DepositCallBack(_, receiver_id, gas) => promise.then(
-                linkdrop_callback::link_callback(new_account_id, &receiver_id, 10000000000000000000000, gas),
+                linkdrop_callback::link_callback(new_account_id, &receiver_id, ON_CLAIM_CALLBACK_DEPOSIT, gas),
             ),
         }
     }
