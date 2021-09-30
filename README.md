@@ -1,6 +1,6 @@
 # Tenk NFT
 
-The main idea of this contract is creating a set of items upfront, for example 10,000 hence tenk.  Then each time a token is minted it is randomly chosen from the remaning tokens. This contract also introduces the idea of using a linkdrop proxy to allow the owner or a customer to "pre-mint" an item.
+The main idea of this contract is creating a set of items upfront, for example 10,000, hence tenk.  Then each time a token is minted it is randomly chosen from the remaning tokens. This contract also introduces the idea of using a linkdrop proxy to allow the owner or a customer to "pre-mint" an item.
 
 
 ## Details
