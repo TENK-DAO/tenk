@@ -1,7 +1,7 @@
 use near_sdk::json_types::U128;
 use near_sdk::{
-    env, ext_contract, near_bindgen, AccountId, Balance, Gas,
-    Promise, PromiseResult, PublicKey,
+    env, ext_contract, near_bindgen, require, AccountId, Balance, Gas, Promise, PromiseResult,
+    PublicKey,
 };
 
 use crate::*;
@@ -13,9 +13,8 @@ use crate::*;
 //     pub accounts: LookupMap<PublicKey, Action>,
 // }
 
-
-/// 0.2 N
-pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = 1_000_000_000_000_000_000_000_000;
+/// 1.0 N
+pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = 2_000_000_000_000_000_000_000_000;
 /// can take 0.5 of access key since gas required is 6.6 times what was actually used
 const NEW_ACCOUNT_BASIC_AMOUNT: u128 = 100_000_000_000_000_000_000_000;
 const ON_CREATE_ACCOUNT_GAS: Gas = Gas(40_000_000_000_000);
@@ -85,9 +84,8 @@ impl Contract {
 
     /// Claim tokens for specific account that are attached to the public key this tx is signed with.
     pub fn claim(&mut self, account_id: AccountId) -> Promise {
-        assert_eq!(
-            env::predecessor_account_id(),
-            env::current_account_id(),
+        require!(
+            env::predecessor_account_id() == env::current_account_id(),
             "Claim only can come from this account"
         );
         let action = self
@@ -105,7 +103,7 @@ impl Contract {
                     .and(Promise::new(account_id.clone()).transfer(amount))
                     .then(linkdrop_callback::link_callback(
                         account_id,
-                        &receiver_id,
+                        receiver_id,
                         10_000_000_000_000_000_000_000,
                         gas,
                     ))
@@ -138,16 +136,21 @@ impl Contract {
             .create_account(new_account_id.clone(), new_public_key, amount)
             .then(ext_linkdrop::on_create_and_claim(
                 action.clone(),
-                &env::current_account_id(),
+                env::current_account_id(),
                 NO_DEPOSIT,
                 ON_CREATE_ACCOUNT_CALLBACK_GAS,
             ));
 
         match action {
             Action::Deposit(_) => promise,
-            Action::DepositCallBack(_, receiver_id, gas) => promise.then(
-                linkdrop_callback::link_callback(new_account_id, &receiver_id, ON_CLAIM_CALLBACK_DEPOSIT, gas),
-            ),
+            Action::DepositCallBack(_, receiver_id, gas) => {
+                promise.then(linkdrop_callback::link_callback(
+                    new_account_id,
+                    receiver_id,
+                    ON_CLAIM_CALLBACK_DEPOSIT,
+                    gas,
+                ))
+            }
         }
     }
 
@@ -191,7 +194,7 @@ impl Contract {
         ext_linkdrop::create_account(
             new_account_id,
             new_public_key,
-            &self.linkdrop_contract,
+            self.linkdrop_contract.parse().unwrap(),
             amount,
             ON_CREATE_ACCOUNT_GAS,
         )
@@ -203,7 +206,7 @@ impl Contract {
             key,
             ACCESS_KEY_ALLOWANCE,
             env::current_account_id(),
-            b"claim,create_account_and_claim".to_vec(),
+            "claim,create_account_and_claim".into(),
         )
     }
 

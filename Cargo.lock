@@ -119,6 +119,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "contract-utils"
+version = "0.1.0"
+dependencies = [
+ "near-sdk",
+]
+
+[[package]]
 name = "convert_case"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -270,9 +277,9 @@ checksum = "8452105ba047068f40ff7093dd1d9da90898e63dd61736462e9cdda6a90ad3c3"
 
 [[package]]
 name = "near-contract-standards"
-version = "4.0.0-pre.1"
+version = "4.0.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2b8a3ebf34da13a00a03ebb5c7b789787080e517c7b1689cd831ac119ac8f529"
+checksum = "b0bedf701e9a9b3a2df683cb5b7360d95492e70239a380e1e604745d2290e65f"
 dependencies = [
  "near-sdk",
 ]
@@ -334,15 +341,16 @@ dependencies = [
 
 [[package]]
 name = "near-sdk"
-version = "4.0.0-pre.1"
+version = "4.0.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce0d4d45e3cb86eb0aa25cbfe95a6f339d4c14509bc26cb259bcfa1031fff174"
+checksum = "ab7fc853396919d12055cc4051c303758a75ebca74223f5c9e0907a549452cc3"
 dependencies = [
  "base64",
  "borsh",
  "bs58",
  "near-primitives-core",
  "near-sdk-macros",
+ "near-sys",
  "near-vm-logic",
  "serde",
  "serde_json",
@@ -351,15 +359,21 @@ dependencies = [
 
 [[package]]
 name = "near-sdk-macros"
-version = "4.0.0-pre.1"
+version = "4.0.0-pre.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "111ec624bb89a182c8302fde73862b5d0d88b15a87e3822e05bfa2edc08309fb"
+checksum = "44fcbacb1d2fedcb2e4aa05094d31ccbfa831c868ca1242d1345b3e45c6b8a6c"
 dependencies = [
  "Inflector",
  "proc-macro2",
  "quote",
  "syn",
 ]
+
+[[package]]
+name = "near-sys"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f6a7aa3f46fac44416d8a93d14f30a562c4d730a1c6bf14bffafab5f475c244a"
 
 [[package]]
 name = "near-vm-errors"
@@ -586,6 +600,7 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 name = "sandbox-linkdrop"
 version = "0.1.0"
 dependencies = [
+ "contract-utils",
  "near-contract-standards",
  "near-sdk",
  "serde",
@@ -681,6 +696,7 @@ dependencies = [
 name = "tenk"
 version = "0.1.0"
 dependencies = [
+ "contract-utils",
  "near-contract-standards",
  "near-sdk",
  "quickcheck",
@@ -711,9 +727,9 @@ dependencies = [
 
 [[package]]
 name = "trybuild"
-version = "1.0.43"
+version = "1.0.45"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c02c413315329fc96167f922b46fd0caa3a43f4697b7a7896b183c7142635832"
+checksum = "5bdaf2a1d317f3d58b44b31c7f6436b9b9acafe7bddfeace50897c2b804d7792"
 dependencies = [
  "glob",
  "lazy_static",

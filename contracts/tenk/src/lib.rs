@@ -7,9 +7,11 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::collections::{LazyOption, LookupMap, UnorderedSet};
 use near_sdk::json_types::Base64VecU8;
 use near_sdk::{
-    env, ext_contract, near_bindgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
-    Promise, PromiseOrValue, PromiseResult, PublicKey,
+    env, ext_contract, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
+    PanicOnDefault, Promise, PromiseOrValue, PublicKey,
 };
+
+use contract_utils::is_promise_success;
 
 mod raffle;
 use raffle::Raffle;
@@ -37,7 +39,7 @@ pub struct Contract {
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
-const GAS_REQUIRED_FOR_LINKDROP: Gas      = Gas(12_000_000_000_000);
+const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(12_000_000_000_000);
 const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
@@ -109,7 +111,7 @@ impl Contract {
         min_cost: U128,
         percent_off: u8,
     ) -> Self {
-        assert!(!env::state_exists(), "Already initialized");
+        require!(!env::state_exists(), "Already initialized");
         metadata.assert_valid();
         Self {
             tokens: NonFungibleToken::new(
@@ -142,14 +144,14 @@ impl Contract {
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_can_mint(1);
-        assert!(env::attached_deposit() > self.base_cost + self.token_storage_cost().0);
+        require!(env::attached_deposit() > self.base_cost + self.token_storage_cost().0);
         self.pending_tokens += 1;
         let current_account_id = env::current_account_id();
         ext_self::send_with_callback(
             public_key,
             current_account_id.clone(),
             GAS_REQUIRED_FOR_LINKDROP,
-            &current_account_id,
+            current_account_id.clone(),
             env::attached_deposit(),
             GAS_REQUIRED_FOR_LINKDROP_CALL,
         )
@@ -169,7 +171,6 @@ impl Contract {
             .collect::<Vec<Token>>()
     }
 
-
     pub fn total_cost(&self, num: u32) -> U128 {
         (num as Balance * self.cost_per_token(num).0).into()
     }
@@ -183,7 +184,9 @@ impl Contract {
         (env::storage_byte_cost() * self.tokens.extra_storage_in_bytes_per_token as Balance).into()
     }
     pub fn discount(&self, num: u32) -> U128 {
-        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR).into()
+        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR)
+            .min(self.base_cost)
+            .into()
     }
 
     // Contract private methods
@@ -191,19 +194,21 @@ impl Contract {
     #[payable]
     #[private]
     pub fn link_callback(&mut self, account_id: AccountId) -> Token {
-        if is_promise_success() {
+        if is_promise_success(None) {
             self.pending_tokens -= 1;
             self.internal_mint(account_id)
         } else {
-            env::panic(b"Promise before Linkdrop callback failed");
+            env::panic_str(&"Promise before Linkdrop callback failed");
         }
     }
 
-
+    pub fn tokens_left(&self) -> u32 {
+      self.raffle.len() as u32
+    }
     // Private methods
 
     fn assert_deposit(&self, num: u32) {
-        assert!(
+        require!(
             env::attached_deposit() >= self.total_cost(num).0,
             "Not enough attached deposit to buy"
         );
@@ -211,7 +216,7 @@ impl Contract {
 
     fn assert_can_mint(&self, num: u32) {
         // Check quantity
-        assert!(
+        require!(
             self.raffle.len() as u32 >= self.pending_tokens + num,
             "No NFTs left to mint"
         );
@@ -284,15 +289,15 @@ impl Contract {
         let media = Some(format!("{}/media", token_id));
         let reference = Some(format!("{}/info.json", token_id));
         TokenMetadata {
-            title: Some(token_id.to_string()),          // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
-            description: None,    // free-form description
+            title: Some(token_id.to_string()), // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
+            description: None,                 // free-form description
             media, // URL to associated media, preferably to decentralized, content-addressed storage
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
             issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
-            expires_at: None, // ISO 8601 datetime when token expires
-            starts_at: None, // ISO 8601 datetime when token starts being valid
-            updated_at: None, // ISO 8601 datetime when token was last updated
+            expires_at: None,     // ISO 8601 datetime when token expires
+            starts_at: None,      // ISO 8601 datetime when token starts being valid
+            updated_at: None,     // ISO 8601 datetime when token was last updated
             extra: None, // anything extra the NFT wants to store on-chain. Can be stringified JSON.
             reference,   // URL to an off-chain JSON file with more info.
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
@@ -311,20 +316,7 @@ impl NonFungibleTokenMetadataProvider for Contract {
     }
 }
 
-fn is_promise_success() -> bool {
-  let count = env::promise_results_count();
-    assert!(
-        count > 1,
-        "Contract expected a result on the callback"
-    );
-    for i in 0..count {
-      match env::promise_result(i) {
-          PromiseResult::Successful(_) => (),
-          _ => return false,
-      }
-    }
-    true
-}
+
 
 fn _to_yocto(value: &str) -> u128 {
     let vals: Vec<_> = value.split('.').collect();
@@ -342,10 +334,9 @@ fn refund_deposit(storage_used: u64) {
     let required_cost = env::storage_byte_cost() * Balance::from(storage_used);
     let attached_deposit = env::attached_deposit();
 
-    assert!(
+    require!(
         required_cost <= attached_deposit,
-        "Must attach {} yoctoNEAR to cover storage",
-        required_cost,
+        format!("Must attach {} yoctoNEAR to cover storage", required_cost)
     );
 
     let refund = attached_deposit - required_cost;

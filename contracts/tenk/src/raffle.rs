@@ -6,11 +6,11 @@ use std::marker::PhantomData;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, IntoStorageKey};
 
-const ERR_INCONSISTENT_STATE: &[u8] = b"The collection is an inconsistent state. Did previous smart contract execution terminate unexpectedly?";
-const ERR_INDEX_OUT_OF_BOUNDS: &[u8] = b"Index out of bounds";
+const ERR_INCONSISTENT_STATE: &str = "The collection is an inconsistent state. Did previous smart contract execution terminate unexpectedly?";
+const ERR_INDEX_OUT_OF_BOUNDS: &str = "Index out of bounds";
 
 fn expect_consistent_state<T>(val: Option<T>) -> T {
-    val.unwrap_or_else(|| env::panic(ERR_INCONSISTENT_STATE))
+    val.unwrap_or_else(|| env::panic_str(ERR_INCONSISTENT_STATE))
 }
 
 pub(crate) fn append_slice(id: &[u8], extra: &[u8]) -> Vec<u8> {
@@ -60,7 +60,7 @@ impl Raffle {
     /// Panics if `index` is out of bounds.
     fn swap_remove_raw(&mut self, index: u64) -> Vec<u8> {
         if index >= self.len {
-            env::panic(ERR_INDEX_OUT_OF_BOUNDS)
+            env::panic_str(ERR_INDEX_OUT_OF_BOUNDS)
         } else if index + 1 == self.len {
             expect_consistent_state(self.pop_raw())
         } else {

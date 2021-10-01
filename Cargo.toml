@@ -6,8 +6,7 @@
 
 [workspace]
 members = [
-  "contracts/tenk",
-  "contracts/sandbox-linkdrop"
+  "contracts/*"
 ]
 
 [profile.release]
