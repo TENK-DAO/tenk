@@ -69,11 +69,11 @@ This project also aims to highlight the newest way to test smart contracts on ne
 ```json
     {
         "token_id": "2446",
-        "owner_id": "1632171510973-9818.sandbox.test.near",
+        "owner_id": "test.near",
         "metadata": {
             "title": null,
             "description": null,
-            "media": "https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD/2446/media",
+            "media": "2446/media",
             "media_hash": null,
             "copies": null,
             "issued_at": null,
@@ -81,7 +81,7 @@ This project also aims to highlight the newest way to test smart contracts on ne
             "starts_at": null,
             "updated_at": null,
             "extra": null,
-            "reference": "https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD/2446/info.json",
+            "reference": "2446/info.json",
             "reference_hash": null
         },
         "approved_account_ids": {}

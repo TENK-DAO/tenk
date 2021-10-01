@@ -10,7 +10,7 @@ const keyStore = new nearAPI.keyStores.UnencryptedFileSystemKeyStore(
 const network = "testnet";
 
 const runner = Runner.create(
-  { network, rootAccount: "tenk.testnet", homeDir: os.homedir(), keyStore },
+  { network, rootAccount: "test.tenk.testnet", homeDir: os.homedir(), keyStore },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
     if (rootBalance.lt(NEAR.parse("350 N"))) {
@@ -24,7 +24,7 @@ const runner = Runner.create(
         .deployContractFile(CONTRACT_PATH);
       tx.functionCall(
         "new_default_meta",
-        DEFAULT_INIT_ARGS(root.accountId, network),
+        DEFAULT_INIT_ARGS(root.accountId, network, NEAR.from(0), NEAR.from(0)),
         {
           gas: Gas.parse("20 TGas"),
         }

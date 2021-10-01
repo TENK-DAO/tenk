@@ -10,8 +10,8 @@ export function DEFAULT_INIT_ARGS(owner_id: string, linkdrop_contract: string, b
   return {
     owner_id,
     name: "meerkats",
-    symbol: "N/A",
-    uri: "QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
+    symbol: "MK",
+    uri: "https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
     linkdrop_contract,
     size: 10000,
     base_cost,
