@@ -6,8 +6,20 @@ jobs:
       matrix:
         platform: [ubuntu-latest, macos-latest]
         node-version: ['14', '16']
+        toolchain: [stable]
     runs-on: ${{ matrix.platform }}
     steps:
+      - uses: actions/checkout@v2
+      - name: "${{ matrix.toolchain }} with rustfmt, and wasm32"
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.toolchain }}
+          target: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v1
+      - name: Add wasm32 target
+        run: rustup target add wasm32-unknown-unknown
+      - name: install node
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
