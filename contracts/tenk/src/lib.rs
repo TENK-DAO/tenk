@@ -217,7 +217,7 @@ impl Contract {
     fn assert_can_mint(&self, num: u32) {
         // Check quantity
         require!(
-            self.raffle.len() as u32 >= self.pending_tokens + num,
+            self.tokens_left() as u32 >= self.pending_tokens + num,
             "No NFTs left to mint"
         );
         // Owner can mint for free
