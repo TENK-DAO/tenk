@@ -10,6 +10,7 @@ use near_sdk::{
     env, ext_contract, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
     PanicOnDefault, Promise, PromiseOrValue, PublicKey,
 };
+use near_units::parse_gas;
 
 use contract_utils::is_promise_success;
 
@@ -39,7 +40,7 @@ pub struct Contract {
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
-const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(12_000_000_000_000);
+const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("12 Tgas") as u64);
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
@@ -143,18 +144,23 @@ impl Contract {
     }
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
-      self.assert_can_mint(1);
-      let total_cost = self.cost_of_linkdrop().0;
-      require!(
-          total_cost <= env::attached_deposit(),
-          format!("attached deposit must be at least {}", total_cost)
-      );
-      self.pending_tokens += 1;
-      self.send_with_callback(
-        public_key,
-        env::current_account_id(),
-        GAS_REQUIRED_FOR_LINKDROP,
-      ).then(ext_self::on_send_with_callback(env::current_account_id(), 0, GAS_REQUIRED_FOR_LINKDROP))
+        self.assert_can_mint(1);
+        let total_cost = self.cost_of_linkdrop().0;
+        require!(
+            total_cost <= env::attached_deposit(),
+            format!("attached deposit must be at least {}", total_cost)
+        );
+        self.pending_tokens += 1;
+        self.send_with_callback(
+            public_key,
+            env::current_account_id(),
+            GAS_REQUIRED_FOR_LINKDROP,
+        )
+        .then(ext_self::on_send_with_callback(
+            env::current_account_id(),
+            0,
+            GAS_REQUIRED_FOR_LINKDROP,
+        ))
     }
 
     // #[payable]
@@ -222,10 +228,10 @@ impl Contract {
 
     #[private]
     pub fn on_send_with_callback(&mut self) {
-      if !is_promise_success(None) {
-        self.pending_tokens -= 1;
-        env::panic_str(&"Promise before Linkdrop creation failed");
-      }
+        if !is_promise_success(None) {
+            self.pending_tokens -= 1;
+            env::panic_str(&"Promise before Linkdrop creation failed");
+        }
     }
 
     #[payable]
@@ -299,8 +305,6 @@ impl NonFungibleTokenMetadataProvider for Contract {
         self.metadata.get().unwrap()
     }
 }
-
-
 
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance
