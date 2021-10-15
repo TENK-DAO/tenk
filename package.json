@@ -15,6 +15,7 @@
     "acquit-markdown": "^0.1.0",
     "eslint": "^7.29.0",
     "near-units": "^0.1.9",
-    "near-workspaces-ava": "^1.0.0"
+    "near-workspaces-ava": "^1.0.0",
+    "nft.storage": "^3.3.0"
   }
 }
