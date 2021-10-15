@@ -22,6 +22,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "arrayvec"
+version = "0.4.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cd9fd44efafa8690358b7408d253adf110036b88f55672a933f01d616ad9b1b9"
+dependencies = [
+ "nodrop",
+]
+
+[[package]]
 name = "autocfg"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -277,9 +286,9 @@ checksum = "8452105ba047068f40ff7093dd1d9da90898e63dd61736462e9cdda6a90ad3c3"
 
 [[package]]
 name = "near-contract-standards"
-version = "4.0.0-pre.2"
+version = "4.0.0-pre.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b0bedf701e9a9b3a2df683cb5b7360d95492e70239a380e1e604745d2290e65f"
+checksum = "4bb12d6de0319d09ab4d30be1079842ee3e50851c83592dd643c0db00d4af26a"
 dependencies = [
  "near-sdk",
 ]
@@ -341,9 +350,9 @@ dependencies = [
 
 [[package]]
 name = "near-sdk"
-version = "4.0.0-pre.2"
+version = "4.0.0-pre.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab7fc853396919d12055cc4051c303758a75ebca74223f5c9e0907a549452cc3"
+checksum = "4462f3d77afe033d65de0d1fdd46c5e8ba97a0ab1ee75a4982a7e6a70d91b7fc"
 dependencies = [
  "base64",
  "borsh",
@@ -359,9 +368,9 @@ dependencies = [
 
 [[package]]
 name = "near-sdk-macros"
-version = "4.0.0-pre.2"
+version = "4.0.0-pre.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44fcbacb1d2fedcb2e4aa05094d31ccbfa831c868ca1242d1345b3e45c6b8a6c"
+checksum = "437af7dd53942ef328166fc6f9f828685692ec766101de1a5dbcc84a9f863af8"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -374,6 +383,38 @@ name = "near-sys"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f6a7aa3f46fac44416d8a93d14f30a562c4d730a1c6bf14bffafab5f475c244a"
+
+[[package]]
+name = "near-units"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97a2b77f295d398589eeee51ad0887905ef1734fb12b45cb6d77bd7e401988b9"
+dependencies = [
+ "near-units-core",
+ "near-units-macro",
+]
+
+[[package]]
+name = "near-units-core"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89aa2a7985de87a08ca35f28abd8d00f0f901e704257e6e029aadef981386bc6"
+dependencies = [
+ "num-format",
+ "regex",
+]
+
+[[package]]
+name = "near-units-macro"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89ab45d066220846f9bd5c21e9ab88c47c892edd36f962ada78bf8308523171a"
+dependencies = [
+ "near-units-core",
+ "proc-macro2",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "near-vm-errors"
@@ -406,6 +447,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "nodrop"
+version = "0.1.14"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72ef4a56884ca558e5ddb05a1d1e7e1bfd9a68d9ed024c21704cc98872dae1bb"
+
+[[package]]
 name = "num-bigint"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -414,6 +461,16 @@ dependencies = [
  "autocfg",
  "num-integer",
  "num-traits",
+]
+
+[[package]]
+name = "num-format"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bafe4179722c2894288ee77a9f044f02811c86af699344c498b0840c698a2465"
+dependencies = [
+ "arrayvec",
+ "itoa",
 ]
 
 [[package]]
@@ -699,6 +756,7 @@ dependencies = [
  "contract-utils",
  "near-contract-standards",
  "near-sdk",
+ "near-units",
  "quickcheck",
  "rand",
  "rand_xorshift",
