@@ -1,16 +1,11 @@
-import { Runner } from "near-runner";
+import { Workspace } from "near-workspaces";
 import { NEAR, Gas } from "near-units";
-import * as nearAPI from "near-api-js";
-import * as os from "os";
 import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "./utils";
 
-const keyStore = new nearAPI.keyStores.UnencryptedFileSystemKeyStore(
-  os.homedir() + "/.near-credentials"
-);
 const network = "testnet";
 
-const runner = Runner.create(
-  { network, rootAccount: "test.tenk.testnet", homeDir: os.homedir(), keyStore },
+Workspace.open(
+  { network, rootAccount: "test.tenk.testnet" },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
     if (rootBalance.lt(NEAR.parse("350 N"))) {
@@ -30,12 +25,5 @@ const runner = Runner.create(
         }
       ).signAndSend();
     }
-
-    return {};
   }
 );
-//@ts-expect-error is private
-runner.ready.then(() => {
-  // @ts-expect-error is private
-  runner.runtime.run(async ({ root }) => {});
-});

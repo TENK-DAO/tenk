@@ -13,8 +13,8 @@ use crate::*;
 //     pub accounts: LookupMap<PublicKey, Action>,
 // }
 
-/// 1.0 N
-pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = 2_000_000_000_000_000_000_000_000;
+/// 300 mN
+pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = 690_000_000_000_000_000_000_000;
 /// can take 0.5 of access key since gas required is 6.6 times what was actually used
 const NEW_ACCOUNT_BASIC_AMOUNT: u128 = 100_000_000_000_000_000_000_000;
 const ON_CREATE_ACCOUNT_GAS: Gas = Gas(40_000_000_000_000);
