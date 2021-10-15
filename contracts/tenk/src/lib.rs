@@ -4,7 +4,7 @@ use near_contract_standards::non_fungible_token::metadata::{
 use near_contract_standards::non_fungible_token::NonFungibleToken;
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LazyOption, LookupMap, UnorderedSet};
+use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::Base64VecU8;
 use near_sdk::{
     env, ext_contract, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
@@ -40,7 +40,7 @@ const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(12_000_000_000_000);
-const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
+// const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
 trait Linkdrop {
@@ -50,6 +50,8 @@ trait Linkdrop {
         contract_id: AccountId,
         gas_required: Gas,
     ) -> Promise;
+
+    fn on_send_with_callback(&mut self) -> Promise;
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -61,7 +63,6 @@ enum StorageKey {
     Approval,
     Ids,
     LinkdropKeys,
-    TokensPerOwner { account_hash: Vec<u8> },
 }
 
 #[near_bindgen]
@@ -111,7 +112,6 @@ impl Contract {
         min_cost: U128,
         percent_off: u8,
     ) -> Self {
-        require!(!env::state_exists(), "Already initialized");
         metadata.assert_valid();
         Self {
             tokens: NonFungibleToken::new(
@@ -143,19 +143,41 @@ impl Contract {
     }
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
-        self.assert_can_mint(1);
-        require!(env::attached_deposit() > self.base_cost + self.token_storage_cost().0);
-        self.pending_tokens += 1;
-        let current_account_id = env::current_account_id();
-        ext_self::send_with_callback(
-            public_key,
-            current_account_id.clone(),
-            GAS_REQUIRED_FOR_LINKDROP,
-            current_account_id.clone(),
-            env::attached_deposit(),
-            GAS_REQUIRED_FOR_LINKDROP_CALL,
-        )
+      self.assert_can_mint(1);
+      let total_cost = self.cost_of_linkdrop().0;
+      require!(
+          total_cost <= env::attached_deposit(),
+          format!("attached deposit must be at least {}", total_cost)
+      );
+      self.pending_tokens += 1;
+      self.send_with_callback(
+        public_key,
+        env::current_account_id(),
+        GAS_REQUIRED_FOR_LINKDROP,
+      ).then(ext_self::on_send_with_callback(env::current_account_id(), 0, GAS_REQUIRED_FOR_LINKDROP))
     }
+
+    // #[payable]
+    // pub fn create_linkdrops(&mut self, public_keys: Vec<PublicKey>) -> Promise {
+    //     let num_of_links = public_keys.len() as u32;
+    //     require!(num_of_links > 0, format!("Must include at least one public key, got {:#?}", public_keys));
+    //     require!(num_of_links <= 10, "Can create at most 10 keys");
+    //     self.pending_tokens += num_of_links;
+    //     let current_account_id = env::current_account_id();
+    //     let mut promises: Promise = self.send_with_callback(
+    //         public_keys[0].clone(),
+    //         current_account_id.clone(),
+    //         GAS_REQUIRED_FOR_LINKDROP,
+    //     );
+    //     for key in 1..num_of_links {
+    //         promises = promises.then(self.send_with_callback(
+    //             public_keys[key as usize].clone(),
+    //             current_account_id.clone(),
+    //             GAS_REQUIRED_FOR_LINKDROP,
+    //         ))
+    //     }
+    //     promises
+    // }
 
     #[payable]
     pub fn nft_mint_one(&mut self) -> Token {
@@ -169,6 +191,10 @@ impl Contract {
         (0..num)
             .map(|_| self.internal_mint(env::signer_account_id()))
             .collect::<Vec<Token>>()
+    }
+
+    pub fn cost_of_linkdrop(&self) -> U128 {
+        (ACCESS_KEY_ALLOWANCE + self.total_cost(1).0).into()
     }
 
     pub fn total_cost(&self, num: u32) -> U128 {
@@ -188,8 +214,19 @@ impl Contract {
             .min(self.base_cost)
             .into()
     }
+    pub fn tokens_left(&self) -> u32 {
+        self.raffle.len() as u32
+    }
 
     // Contract private methods
+
+    #[private]
+    pub fn on_send_with_callback(&mut self) {
+      if !is_promise_success(None) {
+        self.pending_tokens -= 1;
+        env::panic_str(&"Promise before Linkdrop creation failed");
+      }
+    }
 
     #[payable]
     #[private]
@@ -202,11 +239,7 @@ impl Contract {
         }
     }
 
-    pub fn tokens_left(&self) -> u32 {
-      self.raffle.len() as u32
-    }
     // Private methods
-
     fn assert_deposit(&self, num: u32) {
         require!(
             env::attached_deposit() >= self.total_cost(num).0,
@@ -232,57 +265,8 @@ impl Contract {
         let id = self.raffle.draw();
         let token_metadata = Some(self.create_metadata(id));
         let token_id = id.to_string();
-        // TODO: figure out how to use internals
-        // self.tokens.mint(token_id, token_owner_id, token_metadata);
-        let initial_storage_usage = env::storage_usage();
-        // assert_eq!(env::predecessor_account_id(), self.owner_id, "Unauthorized");
-        // if self.tokens.token_metadata_by_id.is_some() && token_metadata.is_none() {
-        //     env::panic(b"Must provide metadata");
-        // }
-        // if self.tokens.owner_by_id.get(&token_id).is_some() {
-        //     env::panic(b"token_id must be unique");
-        // }
-
-        let owner_id: AccountId = token_owner_id;
-
-        // Core behavior: every token must have an owner
-        self.tokens.owner_by_id.insert(&token_id, &owner_id);
-
-        // Metadata extension: Save metadata, keep variable around to return later.
-        // Note that check above already panicked if metadata extension in use but no metadata
-        // provided to call.
         self.tokens
-            .token_metadata_by_id
-            .as_mut()
-            .and_then(|by_id| by_id.insert(&token_id, &token_metadata.as_ref().unwrap()));
-
-        // Enumeration extension: Record tokens_per_owner for use with enumeration view methods.
-        if let Some(tokens_per_owner) = &mut self.tokens.tokens_per_owner {
-            let mut token_ids = tokens_per_owner.get(&owner_id).unwrap_or_else(|| {
-                UnorderedSet::new(StorageKey::TokensPerOwner {
-                    account_hash: env::sha256(owner_id.as_bytes()),
-                })
-            });
-            token_ids.insert(&token_id);
-            tokens_per_owner.insert(&owner_id, &token_ids);
-        }
-
-        // Approval Management extension: return empty HashMap as part of Token
-        let approved_account_ids = if self.tokens.approvals_by_id.is_some() {
-            Some(HashMap::new())
-        } else {
-            None
-        };
-
-        // Return any extra attached deposit not used for storage
-        refund_deposit(env::storage_usage() - initial_storage_usage);
-
-        Token {
-            token_id,
-            owner_id,
-            metadata: token_metadata,
-            approved_account_ids,
-        }
+            .internal_mint(token_id, token_owner_id, token_metadata)
     }
 
     fn create_metadata(&mut self, token_id: u64) -> TokenMetadata {
@@ -317,33 +301,6 @@ impl NonFungibleTokenMetadataProvider for Contract {
 }
 
 
-
-fn _to_yocto(value: &str) -> u128 {
-    let vals: Vec<_> = value.split('.').collect();
-    let part1 = vals[0].parse::<u128>().unwrap() * 10u128.pow(24);
-    if vals.len() > 1 {
-        let power = vals[1].len() as u32;
-        let part2 = vals[1].parse::<u128>().unwrap() * 10u128.pow(24 - power);
-        part1 + part2
-    } else {
-        part1
-    }
-}
-
-fn refund_deposit(storage_used: u64) {
-    let required_cost = env::storage_byte_cost() * Balance::from(storage_used);
-    let attached_deposit = env::attached_deposit();
-
-    require!(
-        required_cost <= attached_deposit,
-        format!("Must attach {} yoctoNEAR to cover storage", required_cost)
-    );
-
-    let refund = attached_deposit - required_cost;
-    if refund > 1 {
-        Promise::new(env::predecessor_account_id()).transfer(refund);
-    }
-}
 
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance
