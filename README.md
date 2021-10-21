@@ -33,35 +33,38 @@ This project also aims to highlight the newest way to test smart contracts on ne
     // Creates a linkdrop for specified key.  After user claims the link a NFT will minted.
     // Requires more than total_cost(1) + '1 N'
     // The later part is to cover the access key allowance, which will come down eventually.
-    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {}
+    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise;
     // args = {"public_key": publicKey.toString() }
 
     // Requires more than total_cost(1) + '1 N'
-    pub fn nft_mint_one(&mut self) -> Token {}
+    pub fn nft_mint_one(&mut self) -> Token ;
     // args = {}
 
     // Requires more than total_cost(num) + '1 N'
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
-        self.assert_can_mint(num);
-        (0..num)
-            .map(|_| self.internal_mint(env::signer_account_id()))
-            .collect::<Vec<Token>>()
-    }
+    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token>;
+
     // args = {num: 10}  JS number type
 
    // View Methods
 
-    pub fn total_cost(&self, num: u32) -> U128 ;
+    pub fn total_cost(&self, num: u32) -> U128;
     // args = {num: 10}  JS number type --> string of bigint
 
     pub fn cost_per_token(&self, num: u32) -> U128;
     // args = {num: 10} JS number type --> string of bigint
 
+    // cost in NEAR to store one NFT
     pub fn token_storage_cost(&self) -> U128;
     // --> string of bigint
 
     pub fn discount(&self, num: u32) -> U128;
-        // args = {num: 10} JS number type --> string of bigint
+   // args = {num: 10} JS number type --> string of bigint
+
+    pub fn cost_of_linkdrop(&self) -> U128;
+    // --> string of bigint
+
+    pub fn tokens_left(&self) -> u32;
+    //  --> JS number type
 ```
 
 ## Example Token
