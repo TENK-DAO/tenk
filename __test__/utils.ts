@@ -9,11 +9,11 @@ export const DEFAULT_MIN_COST= NEAR.parse("1 N");
 export function DEFAULT_INIT_ARGS(owner_id: string, linkdrop_contract: string, base_cost = DEFAULT_BASE_COST, min_cost = DEFAULT_MIN_COST) {
   return {
     owner_id,
-    name: "meerkats",
-    symbol: "MK",
-    uri: "https://ipfs.io/ipfs/QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
+    name: "minimo",
+    symbol: "MIMO",
+    uri: "https://ipfs.io/ipfs/bafybeifxzm547rdsckq2crw4dipjvsw4togrnhwzb7gy7ae4anqqgjt264",
     linkdrop_contract,
-    size: 10000,
+    size: 100,
     base_cost,
     min_cost,
   };

@@ -5,13 +5,13 @@ import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "./utils";
 const network = "testnet";
 
 Workspace.open(
-  { network, rootAccount: "test.tenk.testnet" },
+  { network, rootAccount: "minimo.tenk.testnet" },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
-    if (rootBalance.lt(NEAR.parse("350 N"))) {
-      // @ts-expect-error is private
-      await root.manager.addFundsFromNetwork();
-    }
+    // if (rootBalance.lt(NEAR.parse("350 N"))) {
+    //   // @ts-expect-error is private
+    //   await root.manager.addFundsFromNetwork();
+    // }
     const accountView = await root.accountView();
     if (accountView.code_hash == "11111111111111111111111111111111") {
       const tx = await root
