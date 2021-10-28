@@ -195,7 +195,7 @@ impl Contract {
         ext_linkdrop::create_account(
             new_account_id,
             new_public_key,
-            self.linkdrop_contract.parse().unwrap(),
+            Contract::linkdrop_contract(),
             amount,
             ON_CREATE_ACCOUNT_GAS,
         )
@@ -217,6 +217,14 @@ impl Contract {
 
     fn get_action(&self, key: &PublicKey) -> Action {
         self.accounts.get(key).unwrap_or_default().update_balance()
+    }
+
+    fn linkdrop_contract() -> AccountId {
+      AccountId::new_unchecked((if cfg! (feature = "mainnet") {
+        "mainnet"
+      } else {
+        "testnet"
+      }).to_string())
     }
 
     fn delete_current_key(&mut self) -> Promise {

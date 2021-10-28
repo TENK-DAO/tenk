@@ -20,7 +20,7 @@ class ActualTestnet extends Account {
 }
 // const KEY_ALLOWANCE = NEAR.parse("0.69 N");
 const ONE_NFT_STORAGE_COST_BN: NEAR = Workspace.networkIsTestnet()
-  ? NEAR.parse("7.18 mN")
+  ? NEAR.parse("320 μN")
   : NEAR.parse("7.56 mN");
 const MINT_ONE_GAS = Gas.parse("300 TGas");
 
@@ -72,22 +72,21 @@ async function tokenStorageCost(tenk: NearAccount): Promise<NEAR> {
 // return
 // }
 
-const base_cost = NEAR.parse("1 N");
-const min_cost = NEAR.parse(".1 N");
+const base_cost = NEAR.parse("0 N");
+const min_cost = NEAR.parse("0 N");
 
 const runner = Workspace.init(
-  { initialBalance: NEAR.parse("30 N").toString() },
+  { initialBalance: NEAR.parse("15 N").toString() },
   async ({ root }) => {
     const network: NearAccount = Workspace.networkIsTestnet()
       ? // Just need accountId "testnet"
         new ActualTestnet("testnet")
       : // Otherwise use fake linkdrop acconut on sandbox
         await root.createAndDeploy(
-          "sandbox",
+          "testnet",
           `${__dirname}/../target/wasm32-unknown-unknown/release/sandbox_linkdrop.wasm`
         );
     const owner_id = root;
-    const linkdrop_contract = network.accountId;
     const tenk = await root.createAndDeploy(
       "tenk",
       `${__dirname}/../target/wasm32-unknown-unknown/release/tenk.wasm`,
@@ -98,7 +97,6 @@ const runner = Workspace.init(
           name: "meerkats",
           symbol: "N/A",
           uri: "QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
-          linkdrop_contract,
           size: 10_000,
           base_cost,
           min_cost,
@@ -135,21 +133,28 @@ async function nftTokensForOwner(root, tenk, from_index = null, limit = null) {
   });
 }
 
-async function assertXTokens(t, root, tenk, num) {
+async function assertXTokens(t, root: NearAccount, tenk, num, ) {
   const method = num == 1 ? "nft_mint_one" : "nft_mint_many";
-  const args = num == 1 ? {} : { num };
-  const res = await root.call(tenk, method, args, {
-    attachedDeposit: await totalCost(tenk, num),
+  let args = num == 1 ? {} : { num };
+  let balance = await tenk.availableBalance();
+  let storage = (await tenk.accountView()).storage_usage;
+  const res = await root.call_raw(tenk, method, args, {
+    attachedDeposit: (await totalCost(tenk, num)),
     gas: MINT_ONE_GAS,
   });
-  t.log(res);
+  // t.log(res);
+  t.log(balance.sub(await tenk.availableBalance()).toString());
+  t.log((await tenk.accountView()).storage_usage - storage);
   t.is(num, (await nftTokensForOwner(root, tenk)).length);
+  
 }
 
 [
   ["one", 1],
+  ["two", 2],
   ["five", 5],
   ["ten", 10],
+  ["forty", 30],
 ].forEach(async ([num, x]) => {
   runner.test("mint " + num, async (t, { root, tenk }) => {
     await assertXTokens(t, root, tenk, x);
