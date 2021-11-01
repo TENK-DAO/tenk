@@ -40,7 +40,7 @@ pub struct Contract {
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
-const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("12 Tgas") as u64);
+const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("60 Tgas") as u64);
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
