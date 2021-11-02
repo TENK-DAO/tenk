@@ -43,7 +43,7 @@ pub struct Contract {
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
-const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("60 Tgas") as u64);
+const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("70 Tgas") as u64);
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
@@ -286,8 +286,8 @@ impl Contract {
     }
 
     fn create_metadata(&mut self, token_id: u64) -> TokenMetadata {
-        let media = Some(format!("{}/media", token_id));
-        let reference = Some(format!("{}/info.json", token_id));
+        let media = Some(format!("{}.png", token_id));
+        let reference = Some(format!("{}.json", token_id));
         TokenMetadata {
             title: Some(token_id.to_string()), // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             description: None,                 // free-form description

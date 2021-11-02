@@ -1,76 +1,20 @@
 import {
   Workspace,
   createKeyPair,
-  BN,
   tGas,
   NearAccount,
-  Account,
   KeyPair,
+  randomAccountId,
 } from "near-workspaces-ava";
 import { NEAR, Gas } from "near-units";
-
-class ActualTestnet extends Account {
-  constructor(private name: string) {
-    super(null as any, null as any);
-  }
-
-  get accountId(): string {
-    return this.name;
-  }
-}
-// const KEY_ALLOWANCE = NEAR.parse("0.69 N");
-const ONE_NFT_STORAGE_COST_BN: NEAR = Workspace.networkIsTestnet()
-  ? NEAR.parse("320 μN")
-  : NEAR.parse("7.56 mN");
-const MINT_ONE_GAS = Gas.parse("300 TGas");
-
-function costOfMinting(num: number): string {
-  return ONE_NFT_STORAGE_COST_BN.mul(new BN(num)).toString();
-}
-
-/* Contract API for reference
-impl Linkdrop {
-  pub fn create_account(new_account_id: &str, new_public_key: &str){}
-  pub fn get_key_balance(public_key: &str){}
-  pub fn send(public_key: &str){}
-  pub fn create_account_and_claim(new_account_id: &str, new_public_key: &str){}
-  pub fn on_account_created(predecessor_account_id: &str, amount: &str){}
-  pub fn on_account_created_and_claimed(amount: &str){}
-  pub fn claim(account_id: &str){}
-}
-*/
-
-function randomAccountId(): string {
-  let accountId;
-  // create random number with at least 7 digits
-  const randomNumber = Math.floor(Math.random() * (9999 - 1000) + 1000);
-  accountId = `d${Date.now() % 100000}${randomNumber}`;
-  return accountId;
-}
-
-async function costPerToken(tenk: NearAccount, num: number): Promise<NEAR> {
-  return NEAR.from(await tenk.view("cost_per_token", { num }));
-}
-
-async function totalCost(tenk: NearAccount, num: number): Promise<NEAR> {
-  return NEAR.from(await tenk.view("total_cost", { num }));
-}
-
-async function linkdropCost(tenk: NearAccount): Promise<NEAR> {
-  return NEAR.from(await tenk.view("cost_of_linkdrop"));
-}
-
-async function discount(tenk: NearAccount, num: number): Promise<NEAR> {
-  return NEAR.from(await tenk.view("discount", { num }));
-}
-
-async function tokenStorageCost(tenk: NearAccount): Promise<NEAR> {
-  return NEAR.from(await tenk.view("token_storage_cost"));
-}
-
-// async function deployContract(account?: Account): Promise<Account> {
-// return
-// }
+import {
+  costPerToken,
+  tokenStorageCost,
+  totalCost,
+  linkdropCost,
+  ActualTestnet,
+  MINT_ONE_GAS,
+} from "./utils";
 
 const base_cost = NEAR.parse("0 N");
 const min_cost = NEAR.parse("0 N");
@@ -82,10 +26,10 @@ const runner = Workspace.init(
       ? // Just need accountId "testnet"
         new ActualTestnet("testnet")
       : // Otherwise use fake linkdrop acconut on sandbox
-        await root.createAndDeploy(
-          "testnet",
-          `${__dirname}/../target/wasm32-unknown-unknown/release/sandbox_linkdrop.wasm`
-        );
+        await root.createAccountFrom({
+          testnetContract: "testnet",
+          withData: false,
+        });
     const owner_id = root;
     const tenk = await root.createAndDeploy(
       "tenk",
@@ -118,7 +62,9 @@ runner.test("can get cost per token", async (t, { tenk }) => {
     cost.toBigInt(),
     base_cost.add(await tokenStorageCost(tenk)).toBigInt()
   );
-  t.true(cost.gt(await costPerToken(tenk, 24)));
+  if (cost.toBigInt() > 0) {
+    t.assert(cost.gt(await costPerToken(tenk, 24)));
+  }
   t.log(
     "One token costs " +
       NEAR.from(await tenk.view("token_storage_cost")).toHuman()
@@ -133,20 +79,19 @@ async function nftTokensForOwner(root, tenk, from_index = null, limit = null) {
   });
 }
 
-async function assertXTokens(t, root: NearAccount, tenk, num, ) {
+async function assertXTokens(t, root: NearAccount, tenk, num) {
   const method = num == 1 ? "nft_mint_one" : "nft_mint_many";
   let args = num == 1 ? {} : { num };
   let balance = await tenk.availableBalance();
   let storage = (await tenk.accountView()).storage_usage;
   const res = await root.call_raw(tenk, method, args, {
-    attachedDeposit: (await totalCost(tenk, num)),
+    attachedDeposit: await totalCost(tenk, num),
     gas: MINT_ONE_GAS,
   });
   // t.log(res);
   t.log(balance.sub(await tenk.availableBalance()).toString());
   t.log((await tenk.accountView()).storage_usage - storage);
   t.is(num, (await nftTokensForOwner(root, tenk)).length);
-  
 }
 
 [
@@ -186,9 +131,12 @@ runner.test(
     t.log((await tenk.accountView()).storage_usage - contractStorage);
 
     // Create a random subaccount
-    const new_account_id = `${randomAccountId()}.${network.accountId}`;
+    const new_account_id = `${randomAccountId("d", 10, 10)}.${
+      network.accountId
+    }`;
     const actualKey = createKeyPair();
     const new_public_key = actualKey.getPublicKey().toString();
+    t.log(new_account_id);
 
     await tenk.call_raw(
       tenk,
@@ -204,18 +152,21 @@ runner.test(
     );
 
     let new_account = root.getFullAccount(new_account_id);
-    if (Workspace.networkIsTestnet()) {
-      t.log(
-        `http://explorer.testnet.near.org/accounts/${new_account.accountId}`
-      );
-    }
+    new_account.setKey(actualKey);
     t.log(
       `new account created: ${new_account.accountId} with balance ${
         (await new_account.balance()).available
       } yoctoNear`
     );
-
     t.is(1, (await nftTokensForOwner(new_account, tenk)).length);
+    if (Workspace.networkIsTestnet()) {
+      t.log(
+        `http://explorer.testnet.near.org/accounts/${new_account.accountId}`
+      );
+      // Must delete since created account via linkdrop
+      await new_account.delete(root.accountId);
+    }
+
   }
 );
 
