@@ -35,7 +35,6 @@ trait ExtLinkdrop {
 #[ext_contract]
 trait LinkdropCallback {
     fn link_callback(&mut self, account_id: AccountId) -> Promise;
-
 }
 
 fn assert_allowance() {
@@ -85,21 +84,19 @@ impl Contract {
                 self.delete_current_key();
                 Promise::new(account_id).transfer(amount)
             }
-            Action::DepositCallBack(amount, receiver_id, gas) => {
-                linkdrop_callback::link_callback(
-                        account_id.clone(),
-                        receiver_id,
-                        amount - ON_CLAIM_CALLBACK_DEPOSIT,
-                        gas,
-                    )
-                    .then(ext_linkdrop::on_claim(
-                      account_id,
-                      amount - ON_CLAIM_CALLBACK_DEPOSIT,
-                        env::current_account_id(),
-                        0,
-                        Gas(parse_gas!("10 Tgas") as u64),
-                    ))
-            }
+            Action::DepositCallBack(amount, receiver_id, gas) => linkdrop_callback::link_callback(
+                account_id.clone(),
+                receiver_id,
+                amount - ON_CLAIM_CALLBACK_DEPOSIT,
+                gas,
+            )
+            .then(ext_linkdrop::on_claim(
+                account_id,
+                amount - ON_CLAIM_CALLBACK_DEPOSIT,
+                env::current_account_id(),
+                0,
+                Gas(parse_gas!("10 Tgas") as u64),
+            )),
         }
     }
 
@@ -108,7 +105,7 @@ impl Contract {
             self.delete_current_key();
             Promise::new(account_id).transfer(amount)
         } else {
-          panic!("Linkdrop callback failed to be claimed!")
+            panic!("Linkdrop callback failed to be claimed!")
         }
     }
 
@@ -220,14 +217,17 @@ impl Contract {
     }
 
     fn linkdrop_contract() -> AccountId {
-      AccountId::new_unchecked((if cfg! (feature = "mainnet") {
-        "mainnet"
-      } else {
-        "testnet"
-      }).to_string())
+        AccountId::new_unchecked(
+            (if cfg!(feature = "mainnet") {
+                "mainnet"
+            } else {
+                "testnet"
+            })
+            .to_string(),
+        )
     }
 
     fn delete_current_key(&mut self) -> Promise {
-      Promise::new(env::current_account_id()).delete_key(env::signer_account_pk())
+        Promise::new(env::current_account_id()).delete_key(env::signer_account_pk())
     }
 }

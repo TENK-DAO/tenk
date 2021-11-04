@@ -1,7 +1,7 @@
+use contract_utils::is_promise_success;
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::json_types::U128;
-use near_sdk::{AccountId, Gas, Promise, PublicKey, env, ext_contract, near_bindgen};
-use contract_utils::is_promise_success;
+use near_sdk::{env, ext_contract, near_bindgen, AccountId, Gas, Promise, PublicKey};
 
 /// Gas attached to the callback from account creation.
 pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(20_000_000_000_000);
