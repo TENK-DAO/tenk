@@ -8,5 +8,5 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-near-sdk = "4.0.0-pre.4"
+near-sdk = { git = "https://github.com/willemneal/near-sdk-rs", branch = "feat/nft_refund_option"}
 contract-utils =  { path = "../contract-utils" }
