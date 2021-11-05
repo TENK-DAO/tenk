@@ -382,14 +382,13 @@ mod tests {
 
     #[test]
     fn generate_log() {
-        let contract = new_contract();
         let owner_id = "bob";
         let token_ids = (vec!["0", "3", "10"])
             .iter()
             .map(|s| s.to_string())
             .collect();
 
-        let data = contract.generate_log(owner_id, token_ids);
+        let data = super::generate_log(owner_id, token_ids);
         println!("{}", data);
         let v: Value = serde_json::from_str(&data).unwrap();
         let data = v.get("data").unwrap().as_array().unwrap()[0]
