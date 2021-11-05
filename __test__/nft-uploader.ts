@@ -31,7 +31,7 @@ async function main() {
   const client = new NFTStorage({ token: API_TOKEN });
   const initialFiles = await parseFiles();
   const numOfFiles = initialFiles.length;
-  for (let i = numOfFiles; i < 100; i++) {
+  for (let i = numOfFiles; i < 10_000; i++) {
     const idx = i % 10;
     const [media, info] = initialFiles[idx];
     const newFile = [
