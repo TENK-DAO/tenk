@@ -147,7 +147,7 @@ runner.test(
       },
       {
         signWithKey: senderKey,
-        gas: tGas("200"),
+        gas: tGas("100"),
       }
     );
 
