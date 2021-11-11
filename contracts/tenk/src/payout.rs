@@ -10,17 +10,14 @@ use near_sdk::{assert_one_yocto, near_bindgen, AccountId};
 /// maximum length specified by the financial contract obtaining this
 /// payout data. Any mapping of length 10 or less MUST be accepted by
 /// financial contracts, so 10 is a safe upper limit.
-#[derive(Serialize, Deserialize, Default)]
-#[serde(crate = "near_sdk::serde")]
-pub struct Payout {
-    pub payout: HashMap<AccountId, U128>,
-}
+
+pub type Payout = HashMap<AccountId, U128>;
 
 pub trait Payouts {
     /// Given a `token_id` and NEAR-denominated balance, return the `Payout`.
     /// struct for the given token. Panic if the length of the payout exceeds
     /// `max_len_payout.`
-    fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: u32) -> Payout;
+    fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: Option<u32>) -> Payout;
     /// Given a `token_id` and NEAR-denominated balance, transfer the token
     /// and return the `Payout` struct for the given token. Panic if the
     /// length of the payout exceeds `max_len_payout.`
@@ -31,17 +28,17 @@ pub trait Payouts {
         approval_id: Option<u64>,
         memo: Option<String>,
         balance: U128,
-        max_len_payout: u32,
+        max_len_payout: Option<u32>,
     ) -> Payout;
 }
 
 #[near_bindgen]
 impl Payouts for Contract {
     #[allow(unused_variables)]
-    fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: u32) -> Payout {
-        self.royalties
-            .get()
-            .map_or(Payout::default(), |r| r.create_payout(balance.0))
+    fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: Option<u32>) -> Payout {
+        self.royalties.get().map_or(Payout::default(), |r| {
+            r.create_payout(balance.0, &self.tokens.owner_id)
+        })
     }
 
     #[payable]
@@ -52,10 +49,10 @@ impl Payouts for Contract {
         approval_id: Option<u64>,
         memo: Option<String>,
         balance: U128,
-        max_len_payout: u32,
+        max_len_payout: Option<u32>,
     ) -> Payout {
         assert_one_yocto();
-        let payout = self.nft_payout(String::from(&token_id), balance, max_len_payout);
+        let payout = self.nft_payout(token_id.clone(), balance, max_len_payout);
         self.nft_transfer(receiver_id, token_id, approval_id, memo);
         payout
     }
@@ -90,19 +87,22 @@ impl Royalties {
             "total percent of each royalty split  must be less than 100"
         )
     }
-    fn create_payout(&self, balance: Balance) -> Payout {
+    fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {
         let royalty_payment = apply_percent(self.percent, balance);
-        let payout = self
+        let mut payout: Payout = self
             .accounts
             .iter()
             .map(|(account, percent)| {
-                return (
+                (
                     account.clone(),
                     apply_percent(*percent, royalty_payment).into(),
-                );
+                )
             })
             .collect();
-        Payout { payout }
+        let rest = balance - royalty_payment;
+        let owner_payout: u128 = payout.get(owner_id).map_or(0, |x| x.0) + rest;
+        payout.insert(owner_id.clone(), owner_payout.into());
+        payout
     }
 }
 

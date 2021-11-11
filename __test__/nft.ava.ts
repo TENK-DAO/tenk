@@ -15,9 +15,12 @@ import {
   ActualTestnet,
   MINT_ONE_GAS,
 } from "./utils";
+import { nftTokensForOwner, deployEmpty } from "./util";
 
-const base_cost = NEAR.parse("0 N");
-const min_cost = NEAR.parse("0 N");
+const base_cost = NEAR.parse("1 N");
+const min_cost = NEAR.parse("0.01 N");
+
+
 
 const runner = Workspace.init(
   { initialBalance: NEAR.parse("15 N").toString() },
@@ -71,13 +74,7 @@ runner.test("can get cost per token", async (t, { tenk }) => {
   );
 });
 
-async function nftTokensForOwner(root, tenk, from_index = null, limit = null) {
-  return tenk.view("nft_tokens_for_owner", {
-    account_id: root,
-    from_index,
-    limit,
-  });
-}
+
 
 async function assertXTokens(t, root: NearAccount, tenk, num) {
   const method = num == 1 ? "nft_mint_one" : "nft_mint_many";
@@ -92,6 +89,9 @@ async function assertXTokens(t, root: NearAccount, tenk, num) {
   t.log(balance.sub(await tenk.availableBalance()).toString());
   t.log((await tenk.accountView()).storage_usage - storage);
   t.is(num, (await nftTokensForOwner(root, tenk)).length);
+  if (num == 30 && Workspace.networkIsTestnet()) {
+    await deployEmpty(tenk);
+  }
 }
 
 [
@@ -99,7 +99,7 @@ async function assertXTokens(t, root: NearAccount, tenk, num) {
   ["two", 2],
   ["five", 5],
   ["ten", 10],
-  ["forty", 30],
+  // ["thirty", 30],
 ].forEach(async ([num, x]) => {
   runner.test("mint " + num, async (t, { root, tenk }) => {
     await assertXTokens(t, root, tenk, x);
@@ -165,8 +165,8 @@ runner.test(
       );
       // Must delete since created account via linkdrop
       await new_account.delete(root.accountId);
+      await deployEmpty(tenk);
     }
-
   }
 );
 
@@ -212,45 +212,9 @@ runner.test(
       limit: null,
     });
     t.assert(tokens.length > 0, "should contain at least one token");
+
+    if (Workspace.networkIsTestnet()) {
+      await deployEmpty(tenk);
+    }
   }
 );
-
-// runner.test("create linkdrops", async (t, { root, tenk, network }) => {
-//   // Create temporary keys for access key on linkdrop
-//   const senderKeys = Array.from({length: 11}, createKeyPair);
-//   const public_keys = senderKeys.map((key) => key.getPublicKey().toString());
-//   const alice = await root.createAccount("alice");
-
-//   // This adds the key as a function access key on `create_account_and_claim`
-//   await root.call(
-//     tenk,
-//     "create_linkdrops",
-//     {
-//       public_keys: public_keys.slice(0,9)
-//     },
-//     {
-//       attachedDeposit: KEY_ALLOWANCE.add(await costOf(tenk, 1)),
-//       gas: tGas("100"),
-//     }
-//   );
-
-//   t.log(senderKeys[9]);
-//   // await claim(tenk, alice, senderKeys[9]);
-//   await claim(tenk, alice, senderKeys[0]);
-//   await claim(tenk, alice, senderKeys[1]);
-//   await claim(tenk, alice, senderKeys[2]);
-//   await claim(tenk, alice, senderKeys[3]);
-//   await claim(tenk, alice, senderKeys[4]);
-//   await claim(tenk, alice, senderKeys[5]);
-//   await claim(tenk, alice, senderKeys[6]);
-//   await claim(tenk, alice, senderKeys[7]);
-//   await claim(tenk, alice, senderKeys[8]);
-
-//   const tokens: any[] = await tenk.view("nft_tokens_for_owner", {
-//     account_id: alice,
-//     from_index: null,
-//     limit: null,
-//   });
-//   t.is(tokens.length, 9)
-
-// });
