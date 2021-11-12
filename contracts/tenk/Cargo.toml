@@ -8,8 +8,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-near-sdk = "4.0.0-pre.3"
-near-contract-standards = "4.0.0-pre.4"
+near-sdk = { git = "https://github.com/willemneal/near-sdk-rs", branch = "feat/nft_refund_option"}
+near-contract-standards = { git = "https://github.com/willemneal/near-sdk-rs", branch = "feat/nft_refund_option"}
 serde = "1.0.0"
 contract-utils =  { path = "../contract-utils" }
 near-units = { version = "0.2.0" }
@@ -17,3 +17,8 @@ near-units = { version = "0.2.0" }
 [dev-dependencies]
 rand = "0.7.2"
 rand_xorshift = "0.2.0"
+serde_json = "1.0.0"
+
+[features]
+default = []
+mainnet = []

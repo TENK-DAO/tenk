@@ -23,5 +23,7 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+      - name: link with workspaces
+        run: git clone -d release https://github.com/willemneal/workspaces-js && (cd workspaces-js && yarn && cd packages/ava && yarn link) && yarn link near-workspaces-ava
       - name: Run tests
         run: yarn && yarn test:ci

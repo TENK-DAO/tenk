@@ -19,7 +19,7 @@ Workspace.open(
         .deployContractFile(CONTRACT_PATH);
       tx.functionCall(
         "new_default_meta",
-        DEFAULT_INIT_ARGS(root.accountId, network, NEAR.from(0), NEAR.from(0)),
+        DEFAULT_INIT_ARGS(root.accountId, NEAR.from(0), NEAR.from(0)),
         {
           gas: Gas.parse("20 TGas"),
         }

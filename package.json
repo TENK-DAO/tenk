@@ -6,7 +6,7 @@
     "pretest": "yarn build",
     "build": "cargo build --target wasm32-unknown-unknown --release",
     "test": "near-workspaces-ava",
-    "test:testnet": "NEAR_RUNNER_NETWORK=testnet yarn test",
+    "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
     "test:unit": "cargo test",
     "test:ci": "yarn test:unit && yarn test"
   },
