@@ -48,7 +48,7 @@ impl Raffle {
             len,
             prefix: prefix.into_storage_key(),
             el: PhantomData,
-        }
+        };
     }
 
     fn index_to_lookup_key(&self, index: u64) -> Vec<u8> {

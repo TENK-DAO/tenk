@@ -1,8 +1,8 @@
 use near_sdk::json_types::U128;
 use near_sdk::{
-    env, ext_contract, near_bindgen, require, AccountId, Balance, Gas, Promise, PromiseResult,
-    PublicKey,
+    env, ext_contract, near_bindgen, require, AccountId, Balance, Gas, Promise, PublicKey,
 };
+use near_units::{parse_gas, parse_near};
 
 use crate::*;
 
@@ -22,13 +22,14 @@ const NO_DEPOSIT: Balance = 0;
 
 /// Gas attached to the callback from account creation.
 pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(5_000_000_000_000);
-const ON_CLAIM_CALLBACK_DEPOSIT: Balance = 10_000_000_000_000_000_000_000;
+const ON_CLAIM_CALLBACK_DEPOSIT: Balance = parse_near!("10 mN");
 
 #[ext_contract(ext_linkdrop)]
 trait ExtLinkdrop {
     fn create_account(&mut self, new_account_id: AccountId, new_public_key: PublicKey) -> Promise;
 
     fn on_create_and_claim(&mut self, action: Action) -> bool;
+    fn on_claim(&mut self, account_id: AccountId, amount: Balance);
 }
 
 #[ext_contract]
@@ -41,18 +42,6 @@ fn assert_allowance() {
         env::attached_deposit() >= ACCESS_KEY_ALLOWANCE,
         "Attached deposit must be greater than or equal to ACCESS_KEY_ALLOWANCE"
     );
-}
-
-fn is_promise_success() -> bool {
-    assert_eq!(
-        env::promise_results_count(),
-        1,
-        "Contract expected a result on the callback"
-    );
-    match env::promise_result(0) {
-        PromiseResult::Successful(_) => true,
-        _ => false,
-    }
 }
 
 #[near_bindgen]
@@ -88,26 +77,35 @@ impl Contract {
             env::predecessor_account_id() == env::current_account_id(),
             "Claim only can come from this account"
         );
-        let action = self
-            .accounts
-            .remove(&env::signer_account_pk())
-            .expect("Unexpected public key");
+        let pk = env::signer_account_pk();
+        let action = self.accounts.remove(&pk).expect("Unexpected public key");
         match action {
             Action::Deposit(amount) => {
-                Promise::new(env::current_account_id()).delete_key(env::signer_account_pk());
+                self.delete_current_key();
                 Promise::new(account_id).transfer(amount)
             }
-            Action::DepositCallBack(amount, receiver_id, gas) => {
-                Promise::new(env::current_account_id())
-                    .delete_key(env::signer_account_pk())
-                    .and(Promise::new(account_id.clone()).transfer(amount))
-                    .then(linkdrop_callback::link_callback(
-                        account_id,
-                        receiver_id,
-                        10_000_000_000_000_000_000_000,
-                        gas,
-                    ))
-            }
+            Action::DepositCallBack(amount, receiver_id, gas) => linkdrop_callback::link_callback(
+                account_id.clone(),
+                receiver_id,
+                amount - ON_CLAIM_CALLBACK_DEPOSIT,
+                gas,
+            )
+            .then(ext_linkdrop::on_claim(
+                account_id,
+                amount - ON_CLAIM_CALLBACK_DEPOSIT,
+                env::current_account_id(),
+                0,
+                Gas(parse_gas!("10 Tgas") as u64),
+            )),
+        }
+    }
+
+    pub fn on_claim(&mut self, account_id: AccountId, amount: Balance) -> Promise {
+        if is_promise_success(None) {
+            self.delete_current_key();
+            Promise::new(account_id).transfer(amount)
+        } else {
+            panic!("Linkdrop callback failed to be claimed!")
         }
     }
 
@@ -174,7 +172,7 @@ impl Contract {
             env::current_account_id(),
             "Callback can only be called from the contract"
         );
-        let creation_succeeded = is_promise_success();
+        let creation_succeeded = is_promise_success(None);
         if creation_succeeded {
             Promise::new(env::current_account_id()).delete_key(env::signer_account_pk());
         } else {
@@ -194,7 +192,7 @@ impl Contract {
         ext_linkdrop::create_account(
             new_account_id,
             new_public_key,
-            self.linkdrop_contract.parse().unwrap(),
+            Contract::linkdrop_contract(),
             amount,
             ON_CREATE_ACCOUNT_GAS,
         )
@@ -202,6 +200,10 @@ impl Contract {
 
     fn add_action(&mut self, key: PublicKey, value: Action) -> Promise {
         self.accounts.insert(&key, &value);
+        self.add_key(key)
+    }
+
+    fn add_key(&self, key: PublicKey) -> Promise {
         Promise::new(env::current_account_id()).add_access_key(
             key,
             ACCESS_KEY_ALLOWANCE,
@@ -212,5 +214,20 @@ impl Contract {
 
     fn get_action(&self, key: &PublicKey) -> Action {
         self.accounts.get(key).unwrap_or_default().update_balance()
+    }
+
+    fn linkdrop_contract() -> AccountId {
+        AccountId::new_unchecked(
+            (if cfg!(feature = "mainnet") {
+                "mainnet"
+            } else {
+                "testnet"
+            })
+            .to_string(),
+        )
+    }
+
+    fn delete_current_key(&mut self) -> Promise {
+        Promise::new(env::current_account_id()).delete_key(env::signer_account_pk())
     }
 }
