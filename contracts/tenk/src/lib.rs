@@ -1,39 +1,40 @@
 use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC,
 };
-use near_contract_standards::non_fungible_token::{refund_deposit, NonFungibleToken};
-use near_contract_standards::non_fungible_token::{Token, TokenId};
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LazyOption, LookupMap};
-use near_sdk::json_types::Base64VecU8;
+use near_contract_standards::non_fungible_token::{
+    refund_deposit_to_account, NonFungibleToken, Token, TokenId,
+};
 use near_sdk::{
-    env, ext_contract, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas,
-    PanicOnDefault, Promise, PromiseOrValue, PublicKey,
+    borsh::{self, BorshDeserialize, BorshSerialize},
+    collections::{LazyOption, LookupSet},
+    env, ext_contract,
+    json_types::Base64VecU8,
+    near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
+    PromiseOrValue, PublicKey,
 };
 use near_units::parse_gas;
 
-use contract_utils::is_promise_success;
-
-mod raffle;
-use raffle::Raffle;
-mod action;
-use action::Action;
-
+mod events;
 pub mod linkdrop;
-use linkdrop::*;
 pub mod payout;
+mod raffle;
+mod util;
+
+use util::is_promise_success;
+use raffle::Raffle;
+
 use payout::*;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
 pub struct Contract {
-    tokens: NonFungibleToken,
+    pub(crate) tokens: NonFungibleToken,
     metadata: LazyOption<NFTContractMetadata>,
     // Vector of available NFTs
     raffle: Raffle,
     pending_tokens: u32,
     // Linkdrop fields will be removed once proxy contract is deployed
-    pub accounts: LookupMap<PublicKey, Action>,
+    pub accounts: LookupSet<PublicKey>,
     pub base_cost: Balance,
     pub min_cost: Balance,
     pub percent_off: u8,
@@ -56,6 +57,8 @@ trait Linkdrop {
     ) -> Promise;
 
     fn on_send_with_callback(&mut self) -> Promise;
+
+    fn link_callback(&mut self, account_id: AccountId) -> Token;
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -66,8 +69,8 @@ enum StorageKey {
     Enumeration,
     Approval,
     Ids,
-    LinkdropKeys,
     Royalties,
+    LinkdropKeys,
 }
 
 #[near_bindgen]
@@ -130,7 +133,7 @@ impl Contract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             raffle: Raffle::new(StorageKey::Ids, size as u64),
             pending_tokens: 0,
-            accounts: LookupMap::new(StorageKey::LinkdropKeys),
+            accounts: LookupSet::new(StorageKey::LinkdropKeys),
             base_cost: base_cost.0,
             min_cost: min_cost.0,
             percent_off,
@@ -156,12 +159,7 @@ impl Contract {
             format!("attached deposit must be at least {}", total_cost)
         );
         self.pending_tokens += 1;
-        self.send_with_callback(
-            public_key,
-            env::current_account_id(),
-            GAS_REQUIRED_FOR_LINKDROP,
-        )
-        .then(ext_self::on_send_with_callback(
+        self.send(public_key).then(ext_self::on_send_with_callback(
             env::current_account_id(),
             0,
             GAS_REQUIRED_FOR_LINKDROP,
@@ -203,11 +201,11 @@ impl Contract {
 
         // Mint tokens
         let tokens: Vec<Token> = (0..num)
-            .map(|_| self.internal_mint(owner_id.clone()))
+            .map(|_| self.internal_mint(owner_id.clone(), None))
             .collect();
 
         // Keep enough funds to cover storage and send rest to contract owner
-        refund_deposit(
+        refund_deposit_to_account(
             env::storage_usage() - initial_storage_usage,
             self.tokens.owner_id.clone(),
         );
@@ -221,7 +219,7 @@ impl Contract {
     }
 
     pub fn cost_of_linkdrop(&self) -> U128 {
-        (ACCESS_KEY_ALLOWANCE + self.total_cost(1).0).into()
+        (crate::linkdrop::full_link_price() + self.total_cost(1).0).into()
     }
 
     pub fn total_cost(&self, num: u32) -> U128 {
@@ -260,7 +258,7 @@ impl Contract {
     pub fn link_callback(&mut self, account_id: AccountId) -> Token {
         if is_promise_success(None) {
             self.pending_tokens -= 1;
-            let token = self.internal_mint(account_id.clone());
+            let token = self.internal_mint(account_id.clone(), Some(self.tokens.owner_id.clone()));
             log_mint(account_id.as_str(), vec![token.token_id.clone()]);
             token
         } else {
@@ -289,13 +287,12 @@ impl Contract {
         self.assert_deposit(num);
     }
 
-    fn internal_mint(&mut self, token_owner_id: AccountId) -> Token {
+    fn internal_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
         let id = self.raffle.draw();
         let token_metadata = Some(self.create_metadata(id));
         let token_id = id.to_string();
-        let refund = None;
         self.tokens
-            .internal_mint(token_id, token_owner_id, token_metadata, refund)
+            .internal_mint_with_refund(token_id, token_owner_id, token_metadata, refund)
     }
 
     fn create_metadata(&mut self, token_id: u64) -> TokenMetadata {
@@ -317,12 +314,6 @@ impl Contract {
         }
     }
 
-    // #[cfg(test)]
-    // pub fn deleteToken(&mut self, token_ids: Vec<TokenId>) {
-    //   token_ids.into_iter().for_each(|id|self.tokens.tokens_per_owner.;
-
-    // }
-
     pub fn nft_metadata(&self) -> NFTContractMetadata {
         self.metadata.get().unwrap()
     }
@@ -334,17 +325,7 @@ impl Contract {
     // }
 }
 fn log_mint(owner_id: &str, token_ids: Vec<String>) {
-    near_sdk::env::log_str(&format!("EVENT_JSON:{}", generate_log(owner_id, token_ids)))
-}
-
-fn generate_log(owner_id: &str, token_ids: Vec<String>) -> String {
-    let token_strs: Vec<String> = token_ids.iter().map(|id| format!("\"{}\"", id)).collect();
-
-    format!(
-        r#"{{"standard":"nep171","version":"1.0.0","event":"nft_mint","data":[{{"owner_id":"{}","token_ids":[{}]}}]}}"#,
-        owner_id,
-        token_strs.join(",")
-    )
+    events::NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
@@ -358,7 +339,6 @@ const fn to_near(num: u32) -> Balance {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde_json::Value;
     const TEN: u128 = to_near(10);
     const ONE: u128 = to_near(1);
 
@@ -380,22 +360,6 @@ mod tests {
         )
     }
 
-    #[test]
-    fn generate_log() {
-        let owner_id = "bob";
-        let token_ids = (vec!["0", "3", "10"])
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
-
-        let data = super::generate_log(owner_id, token_ids);
-        println!("{}", data);
-        let v: Value = serde_json::from_str(&data).unwrap();
-        let data = v.get("data").unwrap().as_array().unwrap()[0]
-            .as_object()
-            .unwrap();
-        assert_eq!(data.get("owner_id").unwrap().as_str().unwrap(), owner_id);
-    }
     #[test]
     fn check_price() {
         let contract = new_contract();

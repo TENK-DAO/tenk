@@ -13,11 +13,3 @@ pub fn is_promise_success(num_of_promises: Option<u64>) -> bool {
     }
     true
 }
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
