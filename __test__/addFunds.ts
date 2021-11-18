@@ -1,6 +1,4 @@
-import { Workspace } from "near-workspaces";
-import { NEAR, Gas } from "near-units";
-import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "./utils";
+import { Workspace, NEAR } from "near-willem-workspaces";
 
 const network = "testnet";
 

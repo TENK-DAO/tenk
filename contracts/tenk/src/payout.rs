@@ -1,7 +1,11 @@
 use crate::*;
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::json_types::U128;
-use near_sdk::{assert_one_yocto, near_bindgen, AccountId};
+use near_sdk::{
+    assert_one_yocto,
+    borsh::{self, BorshDeserialize, BorshSerialize},
+    json_types::U128,
+    near_bindgen, AccountId,
+    serde::{Deserialize,Serialize}
+};
 /// Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 
 /// A mapping of NEAR accounts to the amount each should be paid out, in
@@ -52,24 +56,12 @@ impl Payouts for Contract {
     ) -> Payout {
         assert_one_yocto();
         let payout = self.nft_payout(token_id.clone(), balance, max_len_payout);
-        let owner_id = self
-            .tokens
-            .owner_by_id
-            .get(&token_id)
-            .unwrap_or_else(|| env::panic_str("Token not found"));
-        self.nft_transfer(receiver_id, token_id, approval_id.clone(), memo.clone());
-        crate::events::NearEvent::log_nft_transfer(
-            owner_id.to_string(),
-            receiver_id.to_string(),
-            vec![token_id],
-            memo,
-            approval_id.map(|id| id.to_string()),
-        );
+        self.nft_transfer(receiver_id.clone(), token_id.clone(), approval_id.clone(), memo.clone());
         payout
     }
 }
 
-#[derive(BorshSerialize, BorshDeserialize, Default)]
+#[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 pub struct Royalties {
     pub accounts: HashMap<AccountId, u8>,
     pub percent: u8,

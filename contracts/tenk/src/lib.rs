@@ -2,7 +2,7 @@ use near_contract_standards::non_fungible_token::metadata::{
     NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC,
 };
 use near_contract_standards::non_fungible_token::{
-    refund_deposit_to_account, NonFungibleToken, Token, TokenId,
+    refund_deposit_to_account, NonFungibleToken, Token, TokenId, NearEvent
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -14,7 +14,6 @@ use near_sdk::{
 };
 use near_units::parse_gas;
 
-mod events;
 pub mod linkdrop;
 pub mod payout;
 mod raffle;
@@ -325,7 +324,7 @@ impl Contract {
     // }
 }
 fn log_mint(owner_id: &str, token_ids: Vec<String>) {
-    events::NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
+    NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);

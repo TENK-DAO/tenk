@@ -22,11 +22,11 @@ trait ExtLinkdrop {
 }
 
 fn get_deposit() -> u128 {
-    parse_near!("0.1 N") + parse_near!("1.8 mN")
+    parse_near!("0.1 N")
 }
 
 pub fn full_link_price() -> u128 {
-    ACCESS_KEY_ALLOWANCE + get_deposit()
+    ACCESS_KEY_ALLOWANCE + get_deposit() + parse_near!("100 mN")
 }
 
 #[near_bindgen]
@@ -43,7 +43,7 @@ impl Contract {
                 .then(ext_self::link_callback(
                     account_id,
                     env::current_account_id(),
-                    self.cost_of_linkdrop().0 - get_deposit(),
+                    self.total_cost(1).0,
                     GAS_REQUIRED_FOR_LINKDROP,
                 ))
                 .then(ext_linkdrop::on_create_and_claim(
@@ -66,7 +66,7 @@ impl Contract {
                 .then(ext_self::link_callback(
                     new_account_id,
                     env::current_account_id(),
-                    self.cost_of_linkdrop().0 - get_deposit(),
+                    self.total_cost(1).0,
                     GAS_REQUIRED_FOR_LINKDROP,
                 ))
                 .then(ext_linkdrop::on_create_and_claim(
@@ -130,7 +130,9 @@ impl Contract {
     }
     fn delete_current_access_key(&mut self) -> Promise {
         let key = env::signer_account_pk();
-        self.accounts.remove(&key);
+        if !self.accounts.remove(&key) {
+          env::panic_str("Can't use a full access key.");
+        }
         Promise::new(env::current_account_id()).delete_key(key)
     }
 }

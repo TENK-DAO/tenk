@@ -1,6 +1,6 @@
-import { Workspace, NearAccount } from "near-workspaces-ava";
+import { Workspace, NearAccount } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
-import { ActualTestnet } from "./utils";
+import { ActualTestnet } from "./util";
 
 const base_cost = NEAR.parse("0 N");
 const min_cost = NEAR.parse("0 N");
