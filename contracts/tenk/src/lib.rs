@@ -239,7 +239,7 @@ impl Contract {
             .into()
     }
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32
+        self.raffle.len() as u32 - self.pending_tokens
     }
 
     // Contract private methods
@@ -276,7 +276,7 @@ impl Contract {
     fn assert_can_mint(&self, num: u32) {
         // Check quantity
         require!(
-            self.tokens_left() as u32 >= self.pending_tokens + num,
+            self.tokens_left() as u32 >= num,
             "No NFTs left to mint"
         );
         // Owner can mint for free
