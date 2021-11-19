@@ -83,6 +83,10 @@ impl Contract {
         get_deposit().into()
     }
 
+    pub fn check_key(&self, public_key: PublicKey) -> bool {
+      self.accounts.contains(&public_key)
+    }
+
     #[private]
     pub fn on_create_and_claim(&mut self) {
         if !is_promise_success(None) {
