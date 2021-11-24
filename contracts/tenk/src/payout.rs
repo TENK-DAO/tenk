@@ -3,8 +3,9 @@ use near_sdk::{
     assert_one_yocto,
     borsh::{self, BorshDeserialize, BorshSerialize},
     json_types::U128,
-    near_bindgen, AccountId,
-    serde::{Deserialize,Serialize}
+    near_bindgen,
+    serde::{Deserialize, Serialize},
+    AccountId,
 };
 /// Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 
@@ -56,7 +57,12 @@ impl Payouts for Contract {
     ) -> Payout {
         assert_one_yocto();
         let payout = self.nft_payout(token_id.clone(), balance, max_len_payout);
-        self.nft_transfer(receiver_id.clone(), token_id.clone(), approval_id.clone(), memo.clone());
+        self.nft_transfer(
+            receiver_id.clone(),
+            token_id.clone(),
+            approval_id.clone(),
+            memo.clone(),
+        );
         payout
     }
 }

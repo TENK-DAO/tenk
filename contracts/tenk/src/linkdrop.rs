@@ -1,8 +1,6 @@
 use crate::*;
 use near_sdk::{
-    env, ext_contract,
-    json_types::U128,
-    near_bindgen, AccountId, Balance, Gas, Promise, PublicKey,
+    env, ext_contract, json_types::U128, near_bindgen, AccountId, Balance, Gas, Promise, PublicKey,
 };
 use near_units::parse_near;
 
@@ -84,7 +82,7 @@ impl Contract {
     }
 
     pub fn check_key(&self, public_key: PublicKey) -> bool {
-      self.accounts.contains(&public_key)
+        self.accounts.contains(&public_key)
     }
 
     #[private]
@@ -93,6 +91,17 @@ impl Contract {
             self.send(env::signer_account_pk());
             env::panic_str("Failed to claim link");
         }
+    }
+
+    pub fn get_linkdrop_contract(&self) -> AccountId {
+        AccountId::new_unchecked(
+            (if cfg!(feature = "mainnet") {
+                "near"
+            } else {
+                "testnet"
+            })
+            .to_string(),
+        )
     }
 }
 
@@ -122,20 +131,11 @@ impl Contract {
             "claim,create_account_and_claim".to_string(),
         )
     }
-    fn get_linkdrop_contract(&self) -> AccountId {
-        AccountId::new_unchecked(
-            (if cfg!(feature = "mainnet") {
-                "near"
-            } else {
-                "testnet"
-            })
-            .to_string(),
-        )
-    }
+
     fn delete_current_access_key(&mut self) -> Promise {
         let key = env::signer_account_pk();
         if !self.accounts.remove(&key) {
-          env::panic_str("Can't use a full access key.");
+            env::panic_str("Can't use a full access key.");
         }
         Promise::new(env::current_account_id()).delete_key(key)
     }

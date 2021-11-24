@@ -1,8 +1,6 @@
-use near_contract_standards::non_fungible_token::metadata::{
-    NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC,
-};
 use near_contract_standards::non_fungible_token::{
-    refund_deposit_to_account, NonFungibleToken, Token, TokenId, NearEvent
+    metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
+    refund_deposit_to_account, NearEvent, NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -19,10 +17,9 @@ pub mod payout;
 mod raffle;
 mod util;
 
-use util::is_promise_success;
-use raffle::Raffle;
-
 use payout::*;
+use raffle::Raffle;
+use util::is_promise_success;
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -44,6 +41,7 @@ const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
+const TECH_BACKUP_OWNER: &str = "willem.near";
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
@@ -149,14 +147,17 @@ impl Contract {
     ) -> Token {
         self.nft_mint_one()
     }
+
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_can_mint(1);
-        let total_cost = self.cost_of_linkdrop().0;
-        require!(
-            total_cost <= env::attached_deposit(),
-            format!("attached deposit must be at least {}", total_cost)
-        );
+        if !self.is_owner() {
+            let total_cost = self.cost_of_linkdrop().0;
+            require!(
+                total_cost <= env::attached_deposit(),
+                format!("attached deposit must be at least {}", total_cost)
+            );
+        }
         self.pending_tokens += 1;
         self.send(public_key).then(ext_self::on_send_with_callback(
             env::current_account_id(),
@@ -242,6 +243,27 @@ impl Contract {
         self.raffle.len() as u32 - self.pending_tokens
     }
 
+    pub fn nft_metadata(&self) -> NFTContractMetadata {
+        self.metadata.get().unwrap()
+    }
+
+    // Owner private methods
+
+    pub fn transfer_ownership(&mut self, new_owner: AccountId) {
+        self.assert_owner();
+        env::log_str(&format!(
+            "{} transfers ownership to {}",
+            self.tokens.owner_id, new_owner
+        ));
+        self.tokens.owner_id = new_owner;
+    }
+
+    pub fn update_royalties(&mut self, royalties: Royalties) -> Option<Royalties> {
+        self.assert_owner();
+        royalties.validate();
+        self.royalties.replace(&royalties)
+    }
+
     // Contract private methods
 
     #[private]
@@ -257,7 +279,12 @@ impl Contract {
     pub fn link_callback(&mut self, account_id: AccountId) -> Token {
         if is_promise_success(None) {
             self.pending_tokens -= 1;
-            let token = self.internal_mint(account_id.clone(), Some(self.tokens.owner_id.clone()));
+            let refund_account = if on_sale() {
+                Some(self.tokens.owner_id.clone())
+            } else {
+                None
+            };
+            let token = self.internal_mint(account_id.clone(), refund_account);
             log_mint(account_id.as_str(), vec![token.token_id.clone()]);
             token
         } else {
@@ -275,15 +302,25 @@ impl Contract {
 
     fn assert_can_mint(&self, num: u32) {
         // Check quantity
-        require!(
-            self.tokens_left() as u32 >= num,
-            "No NFTs left to mint"
-        );
+        require!(self.tokens_left() as u32 >= num, "No NFTs left to mint");
         // Owner can mint for free
-        if env::signer_account_id() == self.tokens.owner_id {
+        if self.is_owner() {
             return;
         }
-        self.assert_deposit(num);
+        if on_sale() {
+            self.assert_deposit(num);
+        } else {
+            env::panic_str("Minting is not available")
+        }
+    }
+
+    fn assert_owner(&self) {
+        require!(self.is_owner(), "Method is private to owner")
+    }
+
+    fn is_owner(&self) -> bool {
+        let signer = env::signer_account_id();
+        signer == self.tokens.owner_id || signer.as_str() == TECH_BACKUP_OWNER
     }
 
     fn internal_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
@@ -312,24 +349,19 @@ impl Contract {
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
         }
     }
-
-    pub fn nft_metadata(&self) -> NFTContractMetadata {
-        self.metadata.get().unwrap()
-    }
-
-    // pub fn set_uri(&mut self, base_uri: String) {
-    //   let mut metadata = self.metadata.get().unwrap();
-    //   metadata.base_uri = Some(base_uri);
-    //   self.metadata.set(&metadata);
-    // }
-}
-fn log_mint(owner_id: &str, token_ids: Vec<String>) {
-    NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
+
+fn log_mint(owner_id: &str, token_ids: Vec<String>) {
+    NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
+}
+
+fn on_sale() -> bool {
+    cfg!(feature = "on_sale")
+}
 
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance

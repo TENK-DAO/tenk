@@ -71,7 +71,7 @@ impl Raffle {
             if env::storage_write(&lookup_key, &raw_last_value) {
                 expect_consistent_state(env::storage_get_evicted())
             } else {
-                // no value was at location it's index is the value
+                // no value was at location its index is the value
                 index.to_le_bytes().to_vec()
             }
         }
