@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "pretest": "yarn build",
-    "build": "cargo build --target wasm32-unknown-unknown --release",
+    "pretest": "yarn build && eslint . --ext .ts",
+    "build": "cargo build --target wasm32-unknown-unknown --release --features on_sale",
     "build:mainnet": "cargo build --target wasm32-unknown-unknown --release --features mainnet",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",

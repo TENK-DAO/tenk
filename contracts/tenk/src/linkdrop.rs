@@ -11,7 +11,7 @@ const ON_CREATE_ACCOUNT_GAS: Gas = Gas(30_000_000_000_000);
 const NO_DEPOSIT: Balance = 0;
 
 /// Gas attached to the callback from account creation.
-pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(30_000_000_000_000);
+pub const ON_CREATE_ACCOUNT_CALLBACK_GAS: Gas = Gas(10_000_000_000_000);
 
 #[ext_contract(ext_linkdrop)]
 trait ExtLinkdrop {
@@ -35,21 +35,20 @@ impl Contract {
     /// Claim tokens for specific account that are attached to the public key this tx is signed with.
     #[private]
     pub fn claim(&mut self, account_id: AccountId) -> Promise {
-        self.delete_current_access_key().then(
-            Promise::new(account_id.clone())
-                .transfer(get_deposit())
-                .then(ext_self::link_callback(
-                    account_id,
-                    env::current_account_id(),
-                    self.total_cost(1).0,
-                    GAS_REQUIRED_FOR_LINKDROP,
-                ))
-                .then(ext_linkdrop::on_create_and_claim(
-                    env::current_account_id(),
-                    NO_DEPOSIT,
-                    ON_CREATE_ACCOUNT_CALLBACK_GAS,
-                )),
-        )
+        // require!(false, "Cannot claim at this time try again later");
+        self.delete_current_access_key()
+            .then(Promise::new(account_id.clone()).transfer(get_deposit()))
+            .then(ext_self::link_callback(
+                account_id,
+                env::current_account_id(),
+                self.total_cost(1).0,
+                GAS_REQUIRED_FOR_LINKDROP,
+            ))
+            .then(ext_linkdrop::on_create_and_claim(
+                env::current_account_id(),
+                NO_DEPOSIT,
+                ON_CREATE_ACCOUNT_CALLBACK_GAS,
+            ))
     }
 
     /// Create new account and and claim tokens to it.
@@ -59,20 +58,20 @@ impl Contract {
         new_account_id: AccountId,
         new_public_key: PublicKey,
     ) -> Promise {
-        self.delete_current_access_key().then(
-            self.create_account(new_account_id.clone(), new_public_key)
-                .then(ext_self::link_callback(
-                    new_account_id,
-                    env::current_account_id(),
-                    self.total_cost(1).0,
-                    GAS_REQUIRED_FOR_LINKDROP,
-                ))
-                .then(ext_linkdrop::on_create_and_claim(
-                    env::current_account_id(),
-                    NO_DEPOSIT,
-                    ON_CREATE_ACCOUNT_CALLBACK_GAS,
-                )),
-        )
+        // require!(false, "Cannot claim at this time try again later");
+        self.delete_current_access_key()
+            .and(self.create_account(new_account_id.clone(), new_public_key))
+            .then(ext_self::link_callback(
+                new_account_id,
+                env::current_account_id(),
+                self.total_cost(1).0,
+                GAS_REQUIRED_FOR_LINKDROP,
+            ))
+            .then(ext_linkdrop::on_create_and_claim(
+                env::current_account_id(),
+                NO_DEPOSIT,
+                ON_CREATE_ACCOUNT_CALLBACK_GAS,
+            ))
     }
 
     /// Returns the balance associated with given key.
@@ -88,8 +87,7 @@ impl Contract {
     #[private]
     pub fn on_create_and_claim(&mut self) {
         if !is_promise_success(None) {
-            self.send(env::signer_account_pk());
-            env::panic_str("Failed to claim link");
+          self.send(env::signer_account_pk());
         }
     }
 

@@ -40,8 +40,9 @@ pub trait Payouts {
 impl Payouts for Contract {
     #[allow(unused_variables)]
     fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: Option<u32>) -> Payout {
+        let owner_id = self.tokens.owner_by_id.get(&token_id).expect("No such token_id");
         self.royalties.get().map_or(Payout::default(), |r| {
-            r.create_payout(balance.0, &self.tokens.owner_id)
+            r.create_payout(balance.0, &owner_id)
         })
     }
 

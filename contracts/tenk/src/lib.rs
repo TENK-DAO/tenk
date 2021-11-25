@@ -40,7 +40,8 @@ pub struct Contract {
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
-const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
+const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
+const GAS_REQUIRED_TO_CREATE_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
 const TECH_BACKUP_OWNER: &str = "willem.near";
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
@@ -151,18 +152,19 @@ impl Contract {
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_can_mint(1);
+        let deposit = env::attached_deposit();
         if !self.is_owner() {
             let total_cost = self.cost_of_linkdrop().0;
             require!(
-                total_cost <= env::attached_deposit(),
+                total_cost <= deposit,
                 format!("attached deposit must be at least {}", total_cost)
             );
         }
         self.pending_tokens += 1;
         self.send(public_key).then(ext_self::on_send_with_callback(
             env::current_account_id(),
-            0,
-            GAS_REQUIRED_FOR_LINKDROP,
+            deposit,
+            GAS_REQUIRED_TO_CREATE_LINKDROP,
         ))
     }
 
@@ -267,10 +269,14 @@ impl Contract {
     // Contract private methods
 
     #[private]
+    #[payable]
     pub fn on_send_with_callback(&mut self) {
         if !is_promise_success(None) {
             self.pending_tokens -= 1;
-            env::panic_str(&"Promise before Linkdrop creation failed");
+            let amount = env::attached_deposit();
+            if amount > 0 {
+              Promise::new(env::signer_account_id()).transfer(amount);
+            }
         }
     }
 
