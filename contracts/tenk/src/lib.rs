@@ -19,7 +19,7 @@ mod util;
 
 use payout::*;
 use raffle::Raffle;
-use util::is_promise_success;
+use util::{get_random_number, is_promise_success};
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -203,7 +203,7 @@ impl Contract {
 
         // Mint tokens
         let tokens: Vec<Token> = (0..num)
-            .map(|_| self.internal_mint(owner_id.clone(), None))
+            .map(|_| self.draw_and_mint(owner_id.clone(), None))
             .collect();
 
         // Keep enough funds to cover storage and send rest to contract owner
@@ -249,6 +249,48 @@ impl Contract {
         self.metadata.get().unwrap()
     }
 
+    fn get_winner(&self, current_id: u32, max: u32, past_winners: &mut Vec<u32>) -> AccountId {
+        let mut index = get_random_number(current_id) % max;
+        while past_winners.contains(&index) {
+            index = (index + 1) % max
+        }
+        let token = self.nft_token_minted(index);
+        env::log_str(&format!(
+            "Winning Token: {}, Owner: {}",
+            token.token_id, token.owner_id
+        ));
+        past_winners.push(index);
+        token.owner_id.clone()
+    }
+
+    fn nft_token_minted(&self, index: u32) -> Token {
+        let from_index = Some(U128::from(index as u128));
+        let tokens = self.nft_tokens(from_index, Some(1));
+        require!(tokens.len() == 1, format!("{}", tokens.len()));
+        tokens[0].clone()
+        // token
+    }
+    pub fn transfer_one(
+        &mut self,
+        total_supply: u32,
+        new_token_id: u32,
+        past_winners: Vec<u32>,
+    ) -> Vec<u32> {
+        self.assert_owner();
+        require!(
+            !self
+                .tokens
+                .owner_by_id
+                .contains_key(&new_token_id.to_string()),
+            "already claimed"
+        );
+        let mut past_winners = past_winners;
+        let owner_id = self.get_winner(new_token_id, total_supply, &mut past_winners);
+        self.internal_mint(new_token_id.to_string(), owner_id.clone(), None);
+        NearEvent::log_nft_mint(owner_id.to_string(), vec![new_token_id.to_string()], None);
+        past_winners
+    }
+
     // Owner private methods
 
     pub fn transfer_ownership(&mut self, new_owner: AccountId) {
@@ -266,6 +308,13 @@ impl Contract {
         self.royalties.replace(&royalties)
     }
 
+    pub fn update_uri(&mut self, uri: String) {
+        self.assert_owner();
+        let mut data = self.metadata.get().unwrap();
+        data.base_uri = Some(uri);
+        self.metadata.set(&data);
+    }
+
     // Contract private methods
 
     #[private]
@@ -275,7 +324,7 @@ impl Contract {
             self.pending_tokens -= 1;
             let amount = env::attached_deposit();
             if amount > 0 {
-              Promise::new(env::signer_account_id()).transfer(amount);
+                Promise::new(env::signer_account_id()).transfer(amount);
             }
         }
     }
@@ -290,7 +339,7 @@ impl Contract {
             } else {
                 None
             };
-            let token = self.internal_mint(account_id.clone(), refund_account);
+            let token = self.draw_and_mint(account_id.clone(), refund_account);
             log_mint(account_id.as_str(), vec![token.token_id.clone()]);
             token
         } else {
@@ -329,20 +378,29 @@ impl Contract {
         signer == self.tokens.owner_id || signer.as_str() == TECH_BACKUP_OWNER
     }
 
-    fn internal_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
+    fn draw_and_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
         let id = self.raffle.draw();
-        let token_metadata = Some(self.create_metadata(id));
-        let token_id = id.to_string();
-        self.tokens
-            .internal_mint_with_refund(token_id, token_owner_id, token_metadata, refund)
+        self.internal_mint(id.to_string(), token_owner_id, refund)
     }
 
-    fn create_metadata(&mut self, token_id: u64) -> TokenMetadata {
+    fn internal_mint(
+        &mut self,
+        token_id: String,
+        token_owner_id: AccountId,
+        refund_id: Option<AccountId>,
+    ) -> Token {
+        let token_metadata = Some(self.create_metadata(&token_id));
+        self.tokens
+            .internal_mint_with_refund(token_id, token_owner_id, token_metadata, refund_id)
+    }
+
+    fn create_metadata(&mut self, token_id: &String) -> TokenMetadata {
         let media = Some(format!("{}.png", token_id));
         let reference = Some(format!("{}.json", token_id));
+        let title = Some(format!("{}", token_id));
         TokenMetadata {
-            title: Some(token_id.to_string()), // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
-            description: None,                 // free-form description
+            title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
+            description: None, // free-form description
             media, // URL to associated media, preferably to decentralized, content-addressed storage
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
