@@ -249,8 +249,8 @@ impl Contract {
         self.metadata.get().unwrap()
     }
 
-    fn get_winner(&self, current_id: u32, max: u32, past_winners: &mut Vec<u32>) -> AccountId {
-        let mut index = get_random_number(current_id) % max;
+    fn get_winner(&self, max: u32, past_winners: &mut Vec<u32>) -> AccountId {
+        let mut index = get_random_number(0) % max;
         while past_winners.contains(&index) {
             index = (index + 1) % max
         }
@@ -285,7 +285,7 @@ impl Contract {
             "already claimed"
         );
         let mut past_winners = past_winners;
-        let owner_id = self.get_winner(new_token_id, total_supply, &mut past_winners);
+        let owner_id = self.get_winner( total_supply, &mut past_winners);
         self.internal_mint(new_token_id.to_string(), owner_id.clone(), None);
         NearEvent::log_nft_mint(owner_id.to_string(), vec![new_token_id.to_string()], None);
         past_winners
