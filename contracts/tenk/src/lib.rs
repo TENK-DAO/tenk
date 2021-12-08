@@ -262,12 +262,11 @@ impl Contract {
         );
     }
 
-    fn get_winner(&self, starting_token: u32) -> (TokenId, AccountId) {
+    fn get_winner(&self) -> (TokenId, AccountId) {
         let mut lazy_raffle = raffle_collection::get_raffle_collection(StorageKey::AirdropLazyKey);
         let mut raffle = lazy_raffle.get().expect("Airdrop raffle doesn't exist");
-
-        let new_token_id = (starting_token + raffle.num_winners()).to_string();
         let index = raffle.draw().expect("No more tokens left");
+        env::log_str(&format!("Winning index {}", index));
         let (token_id, owner_id) = self.nft_token_minted(index);
         env::log_str(&format!(
             "Winning Token: {}, Owner: {}",
@@ -275,7 +274,7 @@ impl Contract {
         ));
         lazy_raffle.set(&raffle);
 
-        (new_token_id, owner_id)
+        (token_id, owner_id)
     }
 
     pub fn get_winners(&self, index: Option<u32>, limit: Option<u32>) -> Vec<u32> {
@@ -293,9 +292,14 @@ impl Contract {
         (token.token_id.clone(), token.owner_id.clone())
         // token
     }
-    pub fn transfer_one(&mut self, starting_token: u32) -> Token {
+    pub fn draw_airdrop_winner(&mut self) -> (TokenId, AccountId) {
         self.assert_owner();
-        let (token_id, owner_id) = self.get_winner(starting_token);
+        self.get_winner()
+    }
+
+    pub fn mint_airdrop_token(&mut self, owner_id: AccountId, token_id: u32) -> Token {
+        self.assert_owner();
+        let token_id = token_id.to_string();
         let token = self.internal_mint(token_id.to_string(), owner_id.clone(), None);
         NearEvent::log_nft_mint(owner_id.to_string(), vec![token_id], None);
         token
