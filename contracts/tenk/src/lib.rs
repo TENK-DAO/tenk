@@ -262,19 +262,12 @@ impl Contract {
         );
     }
 
-    fn get_winner(&self) -> (TokenId, AccountId) {
+    fn get_winner(&self) -> u32 {
         let mut lazy_raffle = raffle_collection::get_raffle_collection(StorageKey::AirdropLazyKey);
         let mut raffle = lazy_raffle.get().expect("Airdrop raffle doesn't exist");
         let index = raffle.draw().expect("No more tokens left");
-        env::log_str(&format!("Winning index {}", index));
-        let (token_id, owner_id) = self.nft_token_minted(index);
-        env::log_str(&format!(
-            "Winning Token: {}, Owner: {}",
-            &token_id, &owner_id
-        ));
         lazy_raffle.set(&raffle);
-
-        (token_id, owner_id)
+        index
     }
 
     pub fn get_winners(&self, index: Option<u32>, limit: Option<u32>) -> Vec<u32> {
@@ -283,16 +276,17 @@ impl Contract {
             .expect("Not initialized")
             .get_winners(index, limit)
     }
-
-    fn nft_token_minted(&self, index: u32) -> (TokenId, AccountId) {
-        let from_index = Some(U128::from(index as u128));
-        let tokens = self.nft_tokens(from_index, Some(1));
-        require!(tokens.len() == 1, format!("{}", tokens.len()));
-        let token = &tokens[0];
-        (token.token_id.clone(), token.owner_id.clone())
-        // token
-    }
-    pub fn draw_airdrop_winner(&mut self) -> (TokenId, AccountId) {
+  
+    // This was the big offender.  It is too expensive on mainnet to use this to find the owner of the token.
+    // fn nft_token_minted(&self, index: u32) -> (TokenId, AccountId) {
+    //     let from_index = Some(U128::from(index as u128));
+    //     let tokens = self.nft_tokens(from_index, Some(1));
+    //     require!(tokens.len() == 1, format!("{}", tokens.len()));
+    //     let token = &tokens[0];
+    //     (token.token_id.clone(), token.owner_id.clone())
+    //     // token
+    // }
+    pub fn draw_airdrop_winner(&mut self) -> u32 {
         self.assert_owner();
         self.get_winner()
     }
