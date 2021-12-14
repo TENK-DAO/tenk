@@ -145,6 +145,6 @@ mod tests {
         let val = vec.draw();
         assert!(val.is_none());
         println!("{}", near_sdk::env::storage_usage());
-        assert!(vec.is_empty())
+        assert_eq!(vec.num_winners(), 99);
     }
 }
