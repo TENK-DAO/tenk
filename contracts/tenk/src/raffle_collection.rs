@@ -1,13 +1,16 @@
-//! A vector implemented on a trie. Unlike standard vector does not support insertion and removal
-//! of an element results in the last element being placed in the empty position.
+#[warn(dead_code)]
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LazyOption, Vector, LookupMap};
+use near_sdk::collections::{LazyOption, LookupMap, Vector};
 use near_sdk::{env, require, IntoStorageKey};
 
-const ERR_INDEX_OUT_OF_BOUNDS: &str = "Index out of bounds";
+use crate::raffle::ERR_INDEX_OUT_OF_BOUNDS;
 
-/// An iterable implementation of vector that stores its content on the trie.
-/// Uses the following map: index -> element.
+/// A Lookup map is used to draw random indexes, which are then placed
+/// into a vector.  If no value is stored at an index, this index hasn't been
+/// chosen before and the value returned is the index. However, if a value is
+/// stored there it is returned.  Once index is drawn the last index's value
+/// is replaces it.  This means you only pay for the slots used, lazily filling
+/// the data structure.
 #[derive(BorshSerialize, BorshDeserialize)]
 pub struct RaffleCollection {
     inner_map: LookupMap<u32, u32>,
@@ -39,7 +42,7 @@ impl RaffleCollection {
             inner_map: LookupMap::new(inner_map_key),
             winners: Vector::new(winners_key),
             len,
-            max_winners
+            max_winners,
         }
     }
 
@@ -76,7 +79,7 @@ impl RaffleCollection {
     pub fn draw(&mut self) -> Option<u32> {
         require!(!self.is_empty(), "Nothing left to draw");
         if self.num_winners() == self.max_winners {
-          return None;
+            return None;
         }
         let res = self.draw_raw();
         Some(res)
@@ -96,32 +99,6 @@ impl RaffleCollection {
     pub fn num_winners(&self) -> u32 {
         self.winners.len() as u32
     }
-}
-
-pub fn get_raffle_collection<S>(prefix: S) -> LazyOption<RaffleCollection>
-where
-    S: IntoStorageKey,
-{
-    LazyOption::new(prefix, None)
-}
-
-pub fn initialize_raffle_collection<S>(prefix: S, raffle_prefix: S, length: u32, max_winners: u32)
-where
-    S: IntoStorageKey,
-{
-    let storage_usage = env::storage_usage();
-    env::log_str(&format!(
-        "used {} storage",
-        env::storage_usage() - storage_usage
-    ));
-    let mut raffle = get_raffle_collection(prefix);
-    require!(raffle.get().is_none(), "Raffle is already initialized");
-    let inner_raffle = RaffleCollection::new(raffle_prefix, length, max_winners);
-    raffle.set(&inner_raffle);
-    env::log_str(&format!(
-        "used {} storage",
-        env::storage_usage() - storage_usage
-    ));
 }
 
 #[cfg(not(target_arch = "wasm32"))]

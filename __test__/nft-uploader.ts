@@ -9,7 +9,7 @@ declare interface File {
 }
 
 function here(s = ""): string {
-  return path.join(__dirname, "test_files", s);
+  return path.join(__dirname, "tenK_initial_100", s);
 }
 
 async function parseFiles(): Promise<typeof File[][]> {

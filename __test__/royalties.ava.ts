@@ -1,6 +1,6 @@
 import { Workspace, NearAccount } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
-import { ActualTestnet } from "./util";
+import { ActualTestnet, mint } from "./util";
 
 const base_cost = NEAR.parse("0 N");
 const min_cost = NEAR.parse("0 N");
@@ -70,8 +70,9 @@ const runner = Workspace.init(
 
 runner.test("Get Payout", async (t, { root, tenk}) => {
   const balance = NEAR.parse("500 N");
+  const token_id = await mint(tenk, root);
   const payouts = await tenk.view("nft_payout", {
-    token_id: "0",
+    token_id,
     balance,
     max_len_payout: 10,
   });
@@ -82,4 +83,6 @@ runner.test("Get Payout", async (t, { root, tenk}) => {
   payout[root.accountId] = balance.mul(NEAR.from(4)).div(NEAR.from(5)).add(NEAR.from(payout[root.accountId])).toString();
   t.log(payout, payouts);
   t.deepEqual(payouts, payout);
+
+  
 });

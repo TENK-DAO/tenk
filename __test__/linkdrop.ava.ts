@@ -1,4 +1,4 @@
-import { Workspace, tGas, NearAccount } from "near-willem-workspaces-ava";
+import { Workspace, NearAccount, randomAccountId } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
 import {
   ActualTestnet,
@@ -12,6 +12,7 @@ import {
   zeroDelta,
   hasDelta,
   getDelta,
+  create_account_and_claim,
 } from "./util";
 
 const base_cost = NEAR.parse("1 N");
@@ -78,6 +79,86 @@ runner.test(
   }
 );
 
+runner.test(
+  "Use `claim` to send to existing account without enough gas",
+  async (t, { root, tenk }) => {
+    const alice = await root.createAccount("alice");
+    let senderKey;
+    // Create temporary keys for access key on linkdrop
+    const [delta, _] = await getDelta(t, tenk, async () => {
+      senderKey = await createLinkdrop(t, tenk, root);
+      await claim_raw(tenk, alice, senderKey, Gas.parse("50 Tgas"));
+      t.assert(
+        await checkKey(senderKey.getPublicKey(), tenk),
+        "key should still exist"
+      );
+    });
+    await delta.isGreaterOrEqual(NEAR.from(0));
+    
+    const tokens = await getTokens(tenk, alice);
+    t.assert(tokens.length == 0, "should contain only one token");
+    t.log(
+      `Balance to contract ${
+        tenk.accountId
+      } after linkdrop is claimed ${await delta.toHuman()}`
+    );
+
+    
+
+    // await deployEmpty(tenk);
+  }
+);
+
+runner.test(
+  "claim_account_and_claim to create an claim account",
+  async (t, { root, tenk }) => {
+    const senderKey = await createLinkdrop(t, tenk, root);
+
+    // Create a random subaccount
+    const new_account_id = `${randomAccountId("d", 10, 10)}.testnet`;
+  
+    // Claim account
+    const new_account = await create_account_and_claim(
+      t,
+      tenk,
+      new_account_id,
+      senderKey,
+    );
+
+    t.assert(!(await checkKey(senderKey.getPublicKey(), tenk)));
+    const tokens = await getTokens(tenk, new_account);
+    t.assert(tokens.length == 1, "should contain only one token");
+
+    await new_account.delete(root.accountId);
+  }
+);
+
+runner.test(
+  "claim_account_and_claim to create an claim account with not enough gas",
+  async (t, { root, tenk }) => {
+    const senderKey = await createLinkdrop(t, tenk, root);
+
+    // Create a random subaccount
+    const new_account_id = `${randomAccountId("d", 10, 10)}.testnet`;
+  
+    // Claim account
+    const new_account = await create_account_and_claim(
+      t,
+      tenk,
+      new_account_id,
+      senderKey,
+      Gas.parse("50 Tgas"),
+      false,
+    );
+
+    t.assert(await checkKey(senderKey.getPublicKey(), tenk));
+    const tokens = await getTokens(tenk, new_account);
+    t.assert(tokens.length == 0, "should contain only one token");
+
+    // await new_account.delete(root.accountId);
+  }
+);
+
 // TODO: there is a race condition on the key store.  Either need multiple keys per account,
 // runner.test(
 //   "Use `claim` to send to existing account back-to-back",
@@ -121,7 +202,7 @@ runner.test(
   }
 );
 
-const GAS_COST_ON_FAILURE = NEAR.parse("560 μN").neg();
+const GAS_COST_ON_FAILURE = NEAR.parse("570 μN").neg();
 
 runner.test("Call `claim` with invalid key", async (t, { root, tenk }) => {
   // Create temporary keys for access key on linkdrop
@@ -139,51 +220,43 @@ runner.test("Call `claim` with invalid key", async (t, { root, tenk }) => {
   // t.assert(res.failed, `${root.accountId} claiming from ${tenk.accountId}`);
 });
 
-runner.test(
-  "Spam `claim` to send to non-existent account",
-  async (t, { root, tenk }) => {
-    // Create temporary keys for access key on linkdrop
-    const senderKey = await createLinkdrop(t, tenk, root);
-    // Bad account invalid accountid
-    const alice = await root.getFullAccount("alice--");
-    const delta = await BalanceDelta.create(tenk, t);
+// runner.test(
+//   "Spam `claim` to send to non-existent account",
+//   async (t, { root, tenk }) => {
+//     // Create temporary keys for access key on linkdrop
+//     const senderKey = await createLinkdrop(t, tenk, root);
+//     // Bad account invalid accountid
+//     const alice = await root.getFullAccount("alice--");
+//     const delta = await BalanceDelta.create(tenk, t);
 
-    await repeat(5, () => claim_raw(tenk, alice, senderKey));
-    debugger;
-    t.log(`Delta ${await delta.toHuman()}`);
-    t.assert(
-      await checkKey(senderKey.getPublicKey(), tenk),
-      "key should still exist"
-    );
-  }
-);
+//     await repeat(5, () => claim_raw(tenk, alice, senderKey));
+//     debugger;
+//     t.log(`Delta ${await delta.toHuman()}`);
+//     t.assert(
+//       await checkKey(senderKey.getPublicKey(), tenk),
+//       "key should still exist"
+//     );
+//   }
+// );
 
 runner.test(
   "Use `create_account_and_claim` with existent account",
   async (t, { root, tenk }) => {
+    t.log(root);
     // Create temporary keys for access key on linkdrop
     const senderKey = await createLinkdrop(t, tenk, root);
     // Bad account invalid accountid
     const alice = root;
-    const [delta, res] = await getDelta(t, tenk, async () =>
-      tenk.call_raw(
-        tenk,
-        "create_account_and_claim",
-        {
-          new_account_id: alice,
-          new_public_key: senderKey.getPublicKey().toString(),
-        },
-        {
-          signWithKey: senderKey,
-          gas: tGas("200"),
-        }
-      )
+    const [delta, res] = await getDelta(t, tenk, () =>
+      create_account_and_claim(t, tenk, alice, senderKey)
     );
     await delta.isLessOrEqual(NEAR.parse("1.02 N"));
-    t.assert(res.succeeded);
+    const tokens = await getTokens(tenk, root);
+    t.log(tokens);
+
     ///  Currentyl failed linkdrop claims cause the contract to lose funds to gas.
-    t.assert(
-      !(await checkKey(senderKey.getPublicKey(), tenk)),
+    t.false(
+      await checkKey(senderKey.getPublicKey(), tenk),
       "key should not exist"
     );
 
@@ -194,3 +267,21 @@ runner.test(
 function paidFailureGas<T>(t, tenk, fn: () => Promise<T>): Promise<T> {
   return hasDelta<T>(t, tenk, GAS_COST_ON_FAILURE, false, fn);
 }
+
+// Only relevant when not using feature "for_sale"
+// runner.test("Owner can create links for free", async (t, { root, tenk }) => {
+//   const tenkDelta = await BalanceDelta.create(tenk, t);
+//   t.log(tenk.accountId);
+//   const [delta, res] = await getDelta(t, root, () =>
+//     createLinkdrop(t, tenk, root, NEAR.from(0))
+//   );
+//   t.log(await tenkDelta.toHuman());
+//   await delta.isGreater(NEAR.parse("1.3 mN").neg());
+//   ///  Currentyl failed linkdrop claims cause the contract to lose funds to gas.
+//   // t.assert(
+//   //   !(await checkKey(senderKey.getPublicKey(), tenk)),
+//   //   "key should not exist"
+//   // );
+
+//   // await deployEmpty(tenk);
+// });

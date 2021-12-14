@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "license": "MIT",
   "scripts": {
-    "pretest": "yarn build && eslint . --ext .ts",
+    "pretest": "yarn build && yarn lint",
     "build": "cargo build --target wasm32-unknown-unknown --release --features on_sale",
-    "build:mainnet": "cargo build --target wasm32-unknown-unknown --release --features mainnet",
+    "build:mainnet": "yarn build --features mainnet",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
     "test:unit": "cargo test",
-    "test:ci": "yarn test:unit && yarn test"
+    "test:ci": "yarn test:unit && yarn test",
+    "lint": "yarn eslint . --ext .ts"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.4.0",

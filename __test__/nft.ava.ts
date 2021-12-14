@@ -1,22 +1,16 @@
 import {
   Workspace,
-  createKeyPair,
-  tGas,
   NearAccount,
-  KeyPair,
-  randomAccountId,
 } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
 import {
   costPerToken,
   tokenStorageCost,
   totalCost,
-  linkdropCost,
   ActualTestnet,
   MINT_ONE_GAS,
   nftTokensForOwner,
   deployEmpty,
-  createLinkAndNewAccount,
 } from "./util";
 
 const base_cost = NEAR.parse("1 N");
@@ -103,4 +97,3 @@ async function assertXTokens(t, root: NearAccount, tenk, num) {
     await assertXTokens(t, root, tenk, x);
   });
 });
-

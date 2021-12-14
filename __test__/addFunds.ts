@@ -3,7 +3,7 @@ import { Workspace, NEAR } from "near-willem-workspaces";
 const network = "testnet";
 
 Workspace.open(
-  { network, rootAccount: "minimofan0.testnet" },
+  { network, rootAccount: "testnetv0.testnet" },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
     if (rootBalance.lt(NEAR.parse("350 N"))) {

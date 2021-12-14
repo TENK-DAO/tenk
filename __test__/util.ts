@@ -1,3 +1,4 @@
+import { join } from "path";
 import { Gas, NEAR } from "near-units";
 import {
   Account,
@@ -10,7 +11,13 @@ import {
   PublicKey,
   AccountManager,
 } from "near-willem-workspaces";
-import * as ava from "near-willem-workspaces-ava";
+import { ONE_NEAR } from "near-willem-workspaces-ava";
+
+const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
+
+export function binPath(name: string): string {
+  return join(__dirname, "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
+}
 
 // This will allow the contract account to be deleted since the size is reduced
 export async function deployEmpty(account: NearAccount): Promise<void> {
@@ -20,6 +27,26 @@ export async function deployEmpty(account: NearAccount): Promise<void> {
   const empty = account.getFullAccount("empty.tn");
   const bytes = await empty.viewCode();
   await account.createTransaction(account).deployContract(bytes).signAndSend();
+}
+
+export function deploy(
+  owner: NearAccount,
+  name = "tenk",
+  args = {}
+): Promise<NearAccount> {
+  return owner.createAndDeploy(name, binPath(name), {
+    method: "new_default_meta",
+    args: {
+      owner_id: owner,
+      name: "TENK NFT",
+      symbol: "TENK",
+      uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+      size: 100,
+      base_cost: NEAR.parse("1 N"),
+      min_cost: NEAR.parse("1 N"),
+      ...args,
+    },
+  });
 }
 
 export async function nftTokensForOwner(
@@ -37,7 +64,7 @@ export async function nftTokensForOwner(
 
 // export const ONE_NEAR = NEAR.parse("1 N")
 
-export const CONTRACT_PATH = `${__dirname}/../target/wasm32-unknown-unknown/release/tenk.wasm`;
+export const CONTRACT_PATH = binPath("tenk");
 
 export const DEFAULT_BASE_COST = NEAR.parse("10 N");
 export const DEFAULT_MIN_COST = NEAR.parse("1 N");
@@ -94,7 +121,9 @@ export class ActualTestnet extends Account {
 const ONE_NFT_STORAGE_COST_BN: NEAR = Workspace.networkIsTestnet()
   ? NEAR.parse("320 μN")
   : NEAR.parse("7.56 mN");
+
 export const MINT_ONE_GAS = Gas.parse("300 TGas");
+
 function costOfMinting(num: number): string {
   return ONE_NFT_STORAGE_COST_BN.mul(new BN(num)).toString();
 }
@@ -116,7 +145,8 @@ export async function checkKey(
 export async function createLinkdrop(
   t,
   contract: NearAccount,
-  root: NearAccount
+  root: NearAccount,
+  attachedDeposit?: NEAR
 ): Promise<KeyPair> {
   // Create temporary keys for access key on linkdrop
   const senderKey = createKeyPair();
@@ -131,8 +161,8 @@ export async function createLinkdrop(
       public_key,
     },
     {
-      attachedDeposit: await linkdropCost(contract),
-      gas: Gas.parse("100 Tgas"),
+      attachedDeposit: attachedDeposit ?? (await linkdropCost(contract)),
+      gas: Gas.parse("40 Tgas"),
     }
   );
   t.assert(await checkKey(senderKey.getPublicKey(), contract));
@@ -152,7 +182,7 @@ export function claim(
     },
     {
       signWithKey,
-      gas: Gas.parse("200 Tgas"),
+      gas: Gas.parse("100 Tgas"),
     }
   );
 }
@@ -160,7 +190,8 @@ export function claim(
 export function claim_raw(
   tenk: NearAccount,
   account_id: NearAccount,
-  signWithKey: KeyPair
+  signWithKey: KeyPair,
+  gas = Gas.parse("100 Tgas")
 ) {
   return tenk.call_raw(
     tenk,
@@ -170,7 +201,7 @@ export function claim_raw(
     },
     {
       signWithKey,
-      gas: Gas.parse("200 Tgas"),
+      gas,
     }
   );
 }
@@ -179,7 +210,9 @@ export async function create_account_and_claim(
   t,
   contract: NearAccount,
   new_account_id,
-  senderKey
+  signWithKey,
+  gas = Gas.parse("100 Tgas"),
+  testAccount = true,
 ): Promise<NearAccount> {
   const actualKey = createKeyPair();
   const new_public_key = actualKey.getPublicKey().toString();
@@ -191,23 +224,27 @@ export async function create_account_and_claim(
       new_public_key,
     },
     {
-      signWithKey: senderKey,
-      gas: Gas.parse("300 Tgas"),
+      signWithKey,
+      gas
     }
   );
 
-  t.log(res);
+
+  t.log(gas.toHuman(), JSON.stringify(res, null, 2));
 
   let new_account = contract.getFullAccount(new_account_id);
-  t.assert(await new_account.exists());
-  await new_account.setKey(actualKey);
+  if (testAccount) {
+    t.assert(await new_account.exists(), `account ${new_account_id} does not exist`);
+    await new_account.setKey(actualKey);
+  }
   return new_account;
 }
 
 export async function createLinkAndNewAccount(
   t,
   contract: NearAccount,
-  root: NearAccount
+  root: NearAccount,
+  gas
 ): Promise<NearAccount> {
   const senderKey = await createLinkdrop(t, contract, root);
 
@@ -219,7 +256,8 @@ export async function createLinkAndNewAccount(
     t,
     contract,
     new_account_id,
-    senderKey
+    senderKey,
+    gas,
   );
 
   // Add roots key to ensure it can be deleted later
@@ -244,7 +282,7 @@ export class Delta {
 
   toHuman(): string {
     if (this.isZero()) {
-      return `0 N`
+      return `0 N`;
     }
     const absAmount = this.amount.abs();
     return `${this.amount.isNeg() ? "-" : ""}${absAmount.toHuman()}`;
@@ -348,7 +386,7 @@ export async function applyDelta<T>(
   account: NearAccount,
   txns: () => Promise<T>,
   deltaFn: DeltaFn,
-  by?: NEAR,
+  by?: NEAR
 ): Promise<T> {
   const deltaBalance = await BalanceDelta.create(account, t);
   const res = await txns();
@@ -390,12 +428,28 @@ export function repeat<T>(
   iterations: number,
   fn: (i: number) => Promise<T>
 ): Promise<T[]> {
-  return Promise.all(Array(iterations).map(fn));
+  return Promise.all(Array.from({ length: iterations }).map(fn));
 }
 
-
-export async function getDelta<T>(t, account: NearAccount, txns: () => Promise<T>): Promise<[BalanceDelta, T]> {
+export async function getDelta<T>(
+  t,
+  account: NearAccount,
+  txns: () => Promise<T>
+): Promise<[BalanceDelta, T]> {
   const delta = await BalanceDelta.create(account, t);
-  
-  return [delta, await txns()]
+  return [delta, await txns()];
 }
+
+export async function mint(tenk: NearAccount, root: NearAccount): Promise<string> {
+  return (await root.call<any>(
+    tenk,
+    "nft_mint_one",
+    {},
+    {
+      attachedDeposit: ONE_NEAR,
+    }
+  )
+  ).token_id
+}
+
+

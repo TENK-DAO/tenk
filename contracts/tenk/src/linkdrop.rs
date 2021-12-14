@@ -87,7 +87,7 @@ impl Contract {
     #[private]
     pub fn on_create_and_claim(&mut self) {
         if !is_promise_success(None) {
-          self.send(env::signer_account_pk());
+            self.send(env::signer_account_pk());
         }
     }
 

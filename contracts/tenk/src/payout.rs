@@ -7,6 +7,9 @@ use near_sdk::{
     serde::{Deserialize, Serialize},
     AccountId,
 };
+
+use std::collections::HashMap;
+
 /// Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 
 /// A mapping of NEAR accounts to the amount each should be paid out, in
@@ -15,6 +18,7 @@ use near_sdk::{
 /// payout data. Any mapping of length 10 or less MUST be accepted by
 /// financial contracts, so 10 is a safe upper limit.
 
+/// This currently deviates from the standard but is in the process of updating to use this type
 pub type Payout = HashMap<AccountId, U128>;
 
 pub trait Payouts {
@@ -40,10 +44,14 @@ pub trait Payouts {
 impl Payouts for Contract {
     #[allow(unused_variables)]
     fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: Option<u32>) -> Payout {
-        let owner_id = self.tokens.owner_by_id.get(&token_id).expect("No such token_id");
-        self.royalties.get().map_or(Payout::default(), |r| {
-            r.create_payout(balance.0, &owner_id)
-        })
+        let owner_id = self
+            .tokens
+            .owner_by_id
+            .get(&token_id)
+            .expect("No such token_id");
+        self.royalties
+            .get()
+            .map_or(Payout::default(), |r| r.create_payout(balance.0, &owner_id))
     }
 
     #[payable]

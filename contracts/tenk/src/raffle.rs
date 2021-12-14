@@ -1,5 +1,3 @@
-//! A vector implemented on a trie. Unlike standard vector does not support insertion and removal
-//! of an element results in the last element being placed in the empty position.
 use core::convert::TryInto;
 use std::marker::PhantomData;
 
@@ -7,7 +5,7 @@ use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, IntoStorageKey};
 
 const ERR_INCONSISTENT_STATE: &str = "The collection is an inconsistent state. Did previous smart contract execution terminate unexpectedly?";
-const ERR_INDEX_OUT_OF_BOUNDS: &str = "Index out of bounds";
+pub const ERR_INDEX_OUT_OF_BOUNDS: &str = "Index out of bounds";
 
 fn expect_consistent_state<T>(val: Option<T>) -> T {
     val.unwrap_or_else(|| env::panic_str(ERR_INCONSISTENT_STATE))
@@ -17,8 +15,7 @@ pub(crate) fn append_slice(id: &[u8], extra: &[u8]) -> Vec<u8> {
     [id, extra].concat()
 }
 
-/// An iterable implementation of vector that stores its content on the trie.
-/// Uses the following map: index -> element.
+/// This is similar to the raffle collection but doesn't keep track of past winners
 #[derive(BorshSerialize, BorshDeserialize)]
 #[cfg_attr(not(feature = "expensive-debug"), derive(Debug))]
 pub struct Raffle {
