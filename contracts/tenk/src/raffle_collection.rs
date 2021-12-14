@@ -1,6 +1,6 @@
 #[warn(dead_code)]
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::collections::{LazyOption, LookupMap, Vector};
+use near_sdk::collections::{LookupMap, Vector};
 use near_sdk::{env, require, IntoStorageKey};
 
 use crate::raffle::ERR_INDEX_OUT_OF_BOUNDS;
@@ -120,11 +120,9 @@ mod tests {
         let mut set: HashSet<u32> = HashSet::new();
         let mut context = VMContextBuilder::new();
         testing_env!(context.build());
-        println!("{}", near_sdk::env::storage_usage());
         for i in 0..50 {
             let len = vec.len();
             let val = vec.draw().unwrap();
-            println!("{} len {}", val, len);
             assert!(set.insert(val));
             let winner = vec.get_winners(Some(i), Some(1));
             assert_eq!(winner, vec![val]);
@@ -136,7 +134,6 @@ mod tests {
         for _ in 0..49 {
             let len = vec.len();
             let val = vec.draw().unwrap();
-            println!("{}", val);
             assert!(set.insert(val));
             let next = rng.gen::<u64>().to_le_bytes().to_vec();
             testing_env!(context.random_seed(next).build());
@@ -144,7 +141,6 @@ mod tests {
         }
         let val = vec.draw();
         assert!(val.is_none());
-        println!("{}", near_sdk::env::storage_usage());
         assert_eq!(vec.num_winners(), 99);
     }
 }

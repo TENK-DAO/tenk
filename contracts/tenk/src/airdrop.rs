@@ -70,17 +70,8 @@ pub fn initialize_raffle_collection<S>(prefix: S, raffle_prefix: S, length: u32,
 where
     S: IntoStorageKey,
 {
-    let storage_usage = env::storage_usage();
-    env::log_str(&format!(
-        "used {} storage",
-        env::storage_usage() - storage_usage
-    ));
     let mut raffle = get_raffle_collection(prefix);
     require!(raffle.get().is_none(), "Raffle is already initialized");
     let inner_raffle = RaffleCollection::new(raffle_prefix, length, max_winners);
     raffle.set(&inner_raffle);
-    env::log_str(&format!(
-        "used {} storage",
-        env::storage_usage() - storage_usage
-    ));
 }
