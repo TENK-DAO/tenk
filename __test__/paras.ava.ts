@@ -35,7 +35,7 @@ function getRoyalties({ root, alice, eve }) {
 function delpoyParas(root: NearAccount, owner_id: NearAccount, treasury_id: NearAccount, approved_nft_contract_ids: NearAccount[]): Promise<NearAccount> {
   return root.createAndDeploy(
     "paras-market",
-    `${__dirname}/contracts/paras-marketplace-v1.testnet.wasm`,
+    `${__dirname}/contracts/paras.wasm`,
     {
       method: "new",
       args: {

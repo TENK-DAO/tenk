@@ -19,7 +19,10 @@ use std::collections::HashMap;
 /// financial contracts, so 10 is a safe upper limit.
 
 /// This currently deviates from the standard but is in the process of updating to use this type
-pub type Payout = HashMap<AccountId, U128>;
+#[derive(Default, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+pub struct Payout {
+    payout: HashMap<AccountId, U128>,
+}
 
 pub trait Payouts {
     /// Given a `token_id` and NEAR-denominated balance, return the `Payout`.
@@ -104,19 +107,21 @@ impl Royalties {
     }
     fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {
         let royalty_payment = apply_percent(self.percent, balance);
-        let mut payout: Payout = self
-            .accounts
-            .iter()
-            .map(|(account, percent)| {
-                (
-                    account.clone(),
-                    apply_percent(*percent, royalty_payment).into(),
-                )
-            })
-            .collect();
+        let mut payout = Payout {
+            payout: self
+                .accounts
+                .iter()
+                .map(|(account, percent)| {
+                    (
+                        account.clone(),
+                        apply_percent(*percent, royalty_payment).into(),
+                    )
+                })
+                .collect(),
+        };
         let rest = balance - royalty_payment;
-        let owner_payout: u128 = payout.get(owner_id).map_or(0, |x| x.0) + rest;
-        payout.insert(owner_id.clone(), owner_payout.into());
+        let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
+        payout.payout.insert(owner_id.clone(), owner_payout.into());
         payout
     }
 }
