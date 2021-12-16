@@ -1,17 +1,17 @@
-import { Workspace } from "near-workspaces";
-import { NEAR, Gas } from "near-units";
-import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "./utils";
+import { Workspace, NEAR, Gas } from "near-willem-workspaces";
+
+import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "./util";
 
 const network = "testnet";
 
 Workspace.open(
-  { network, rootAccount: "test.tenk.testnet" },
+  { network, rootAccount: "minimo.tenk.testnet" },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
-    if (rootBalance.lt(NEAR.parse("350 N"))) {
-      // @ts-expect-error is private
-      await root.manager.addFundsFromNetwork();
-    }
+    // if (rootBalance.lt(NEAR.parse("350 N"))) {
+    //   // @ts-expect-error is private
+    //   await root.manager.addFundsFromNetwork();
+    // }
     const accountView = await root.accountView();
     if (accountView.code_hash == "11111111111111111111111111111111") {
       const tx = await root

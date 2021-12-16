@@ -1,8 +1,15 @@
 use crate::*;
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::json_types::U128;
-use near_sdk::serde::{Deserialize, Serialize};
-use near_sdk::{assert_one_yocto, near_bindgen, AccountId};
+use near_sdk::{
+    assert_one_yocto,
+    borsh::{self, BorshDeserialize, BorshSerialize},
+    json_types::U128,
+    near_bindgen,
+    serde::{Deserialize, Serialize},
+    AccountId,
+};
+
+use std::collections::HashMap;
+
 /// Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 
 /// A mapping of NEAR accounts to the amount each should be paid out, in
@@ -11,6 +18,7 @@ use near_sdk::{assert_one_yocto, near_bindgen, AccountId};
 /// payout data. Any mapping of length 10 or less MUST be accepted by
 /// financial contracts, so 10 is a safe upper limit.
 
+/// This currently deviates from the standard but is in the process of updating to use this type
 pub type Payout = HashMap<AccountId, U128>;
 
 pub trait Payouts {
@@ -36,9 +44,14 @@ pub trait Payouts {
 impl Payouts for Contract {
     #[allow(unused_variables)]
     fn nft_payout(&self, token_id: String, balance: U128, max_len_payout: Option<u32>) -> Payout {
-        self.royalties.get().map_or(Payout::default(), |r| {
-            r.create_payout(balance.0, &self.tokens.owner_id)
-        })
+        let owner_id = self
+            .tokens
+            .owner_by_id
+            .get(&token_id)
+            .expect("No such token_id");
+        self.royalties
+            .get()
+            .map_or(Payout::default(), |r| r.create_payout(balance.0, &owner_id))
     }
 
     #[payable]
@@ -53,7 +66,12 @@ impl Payouts for Contract {
     ) -> Payout {
         assert_one_yocto();
         let payout = self.nft_payout(token_id.clone(), balance, max_len_payout);
-        self.nft_transfer(receiver_id, token_id, approval_id, memo);
+        self.nft_transfer(
+            receiver_id.clone(),
+            token_id.clone(),
+            approval_id.clone(),
+            memo.clone(),
+        );
         payout
     }
 }
@@ -76,10 +94,7 @@ impl Royalties {
         );
         let mut total: u8 = 0;
         self.accounts.iter().for_each(|(_, percent)| {
-            require!(
-                *percent <= 100,
-                "can only have a maximum of 10 accounts spliting royalties"
-            );
+            require!(*percent <= 100, "each royalty should be less than 100");
             total += percent;
         });
         require!(

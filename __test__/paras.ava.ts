@@ -1,22 +1,14 @@
 import {
   Workspace,
-  createKeyPair,
-  tGas,
   NearAccount,
-  KeyPair,
-  randomAccountId,
   ONE_NEAR,
-} from "near-workspaces-ava";
+} from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
 import {
-  costPerToken,
-  tokenStorageCost,
-  totalCost,
-  linkdropCost,
-  ActualTestnet,
-  MINT_ONE_GAS,
-} from "./utils";
-import { nftTokensForOwner } from "./util";
+  nftTokensForOwner,
+  mint,
+  BalanceDelta,
+} from "./util";
 
 const base_cost = NEAR.parse("0 N");
 const min_cost = NEAR.parse("0 N");
@@ -27,16 +19,33 @@ async function deployEmpty(account: NearAccount): Promise<void> {
   await account.createTransaction(account).deployContract(bytes).signAndSend();
 }
 
-function getRoyalties({ root, alice, bob, eve }) {
+function getRoyalties({ root, alice, eve }) {
   return {
     accounts: {
       [root.accountId]: 10,
-      [alice.accountId]: 10,
-      [bob.accountId]: 10,
+      [alice.accountId]: 20,
       [eve.accountId]: 70,
     },
     percent: 20,
   };
+}
+
+
+
+function delpoyParas(root: NearAccount, owner_id: NearAccount, treasury_id: NearAccount, approved_nft_contract_ids: NearAccount[]): Promise<NearAccount> {
+  return root.createAndDeploy(
+    "paras-market",
+    `${__dirname}/contracts/paras-marketplace-v1.testnet.wasm`,
+    {
+      method: "new",
+      args: {
+        owner_id,
+        treasury_id,
+        // approved_ft_token_ids: Option<Vec<ValidAccountId>>,
+        approved_nft_contract_ids,
+      },
+    }
+  );
 }
 
 const runner = Workspace.init(
@@ -46,7 +55,7 @@ const runner = Workspace.init(
     const alice = await root.createAccount("alice");
     const bob = await root.createAccount("bob");
     const eve = await root.createAccount("eve");
-    const royalties = getRoyalties({root, bob, alice, eve});
+    const royalties = getRoyalties({ root, alice, eve });
     const tenk = await root.createAndDeploy(
       "tenk",
       `${__dirname}/../target/wasm32-unknown-unknown/release/tenk.wasm`,
@@ -66,32 +75,11 @@ const runner = Workspace.init(
       }
     );
 
-    const token_id = (
-      (await root.call(
-        tenk,
-        "nft_mint_one",
-        {},
-        {
-          attachedDeposit: ONE_NEAR,
-        }
-      )) as any
-    ).token_id;
+    const token_id = await mint(tenk, bob);
 
-    const paras = await root.createAndDeploy(
-      "paras-market",
-      `${__dirname}/contracts/paras_marketplace_contract.wasm`,
-      {
-        method: "new",
-        args: {
-          owner_id,
-          treasury_id: owner_id,
-          // approved_ft_token_ids: Option<Vec<ValidAccountId>>,
-          approved_nft_contract_ids: [tenk.accountId],
-        },
-      }
-    );
+    const paras = await delpoyParas(root, root, root, [tenk]);
 
-    await root.call(
+    await bob.call(
       paras,
       "storage_deposit",
       {},
@@ -100,11 +88,11 @@ const runner = Workspace.init(
       }
     );
     const msg = JSON.stringify({
-          market_type: "sale",
-          price: ONE_NEAR.toString(),
-          ft_token_ids: "near",
-  });
-    await root.call(
+      market_type: "sale",
+      price: ONE_NEAR.toString(),
+      ft_token_ids: "near",
+    });
+    await bob.call(
       tenk,
       "nft_approve",
       {
@@ -116,24 +104,28 @@ const runner = Workspace.init(
         attachedDeposit: ONE_NEAR,
       }
     );
-    return { tenk, paras, eve };
+    return { tenk, paras, eve, bob };
   }
 );
 
-runner.test("buy one", async (t, { root, tenk, paras, eve }) => {
-  const bob = await root.createAccount("bob2");
-  const ids = await nftTokensForOwner(root, tenk);
+runner.test("buy one", async (t, { root, tenk, paras, bob, eve }) => {
+  const bob2 = await root.createAccount("bob2");
+  const ids = await nftTokensForOwner(bob, tenk);
   t.is(ids.length, 1);
   const token_id = ids[0].token_id;
-  t.log(token_id)
   t.log(
-    await paras.view("get_market_data", { nft_contract_id: tenk.accountId, token_id })
+    await paras.view("get_market_data", {
+      nft_contract_id: tenk.accountId,
+      token_id,
+    })
   );
 
   const balance = await root.availableBalance();
   const eveBalance = await eve.availableBalance();
+  const bobDelta = await BalanceDelta.create(bob, t);
+  const bob2Delta = await BalanceDelta.create(bob2, t);
 
-  await bob.call(
+  const res = await bob2.call_raw(
     paras,
     "buy",
     {
@@ -145,7 +137,13 @@ runner.test("buy one", async (t, { root, tenk, paras, eve }) => {
       attachedDeposit: ONE_NEAR,
     }
   );
-  t.log(await nftTokensForOwner(bob,tenk));
+
+  await bob2Delta.isLessOrEqual(ONE_NEAR.neg());
+  await bobDelta.isGreaterOrEqual(NEAR.parse("750 mN"));
+
+  t.assert(res.logsContain("EVENT_JSON"), `Expected EVENT_JSON got ${res.logs}`);
+  t.log(res.logs)
+  t.log(await nftTokensForOwner(bob2, tenk));
   const newBalance = await root.availableBalance();
   t.assert(newBalance.gt(balance));
   t.log(newBalance.sub(balance).toHuman());
