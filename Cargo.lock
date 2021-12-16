@@ -310,7 +310,7 @@ checksum = "8452105ba047068f40ff7093dd1d9da90898e63dd61736462e9cdda6a90ad3c3"
 [[package]]
 name = "near-contract-standards"
 version = "4.0.0-pre.4"
-source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#4e6c0bac8be69f6b3e988cf5685a6449560691fb"
+source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#b17577b4040f7d924f77328ea0506f25e0c88562"
 dependencies = [
  "near-sdk",
  "serde_with",
@@ -374,7 +374,7 @@ dependencies = [
 [[package]]
 name = "near-sdk"
 version = "4.0.0-pre.4"
-source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#4e6c0bac8be69f6b3e988cf5685a6449560691fb"
+source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#b17577b4040f7d924f77328ea0506f25e0c88562"
 dependencies = [
  "base64",
  "borsh",
@@ -391,7 +391,7 @@ dependencies = [
 [[package]]
 name = "near-sdk-macros"
 version = "4.0.0-pre.4"
-source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#4e6c0bac8be69f6b3e988cf5685a6449560691fb"
+source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#b17577b4040f7d924f77328ea0506f25e0c88562"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -402,7 +402,7 @@ dependencies = [
 [[package]]
 name = "near-sys"
 version = "0.1.0"
-source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#4e6c0bac8be69f6b3e988cf5685a6449560691fb"
+source = "git+https://github.com/willemneal/near-sdk-rs?branch=release#b17577b4040f7d924f77328ea0506f25e0c88562"
 
 [[package]]
 name = "near-units"
@@ -548,9 +548,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.33"
+version = "1.0.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb37d2df5df740e582f28f8560cf425f52bb267d872fe58358eadb554909f07a"
+checksum = "2f84e92c0f7c9d58328b85a78557813e4bd845130db68d7184635344399423b1"
 dependencies = [
  "unicode-xid",
 ]
@@ -660,18 +660,18 @@ checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
 
 [[package]]
 name = "serde"
-version = "1.0.131"
+version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b4ad69dfbd3e45369132cc64e6748c2d65cdfb001a2b1c232d128b4ad60561c1"
+checksum = "8b9875c23cf305cd1fd7eb77234cbb705f21ea6a72c637a5c6db5fe4b8e7f008"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.131"
+version = "1.0.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b710a83c4e0dff6a3d511946b95274ad9ca9e5d3ae497b63fda866ac955358d2"
+checksum = "ecc0db5cb2556c0e558887d9bbdcf6ac4471e83ff66cf696e5419024d1606276"
 dependencies = [
  "proc-macro2",
  "quote",

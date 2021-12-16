@@ -1,4 +1,3 @@
-use core::convert::TryInto;
 use std::marker::PhantomData;
 
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
@@ -93,10 +92,7 @@ impl Raffle {
     }
 
     pub fn draw(&mut self) -> u64 {
-        let seed = env::random_seed();
-        let mut arr: [u8; 8] = Default::default();
-        arr.copy_from_slice(&seed[..8]);
-        let seed_num: u64 = u64::from_le_bytes(arr).try_into().unwrap();
+        let seed_num = crate::util::get_random_number(0) as u64;
         u64::try_from_slice(&self.swap_remove_raw(seed_num % self.len())).unwrap()
     }
 }

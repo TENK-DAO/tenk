@@ -12,10 +12,12 @@ use near_sdk::{
 };
 use near_units::parse_gas;
 
+#[cfg(feature = "airdrop")]
 mod airdrop;
 pub mod linkdrop;
 pub mod payout;
 mod raffle;
+#[cfg(feature = "airdrop")]
 mod raffle_collection;
 mod util;
 
@@ -71,7 +73,9 @@ enum StorageKey {
     Ids,
     Royalties,
     LinkdropKeys,
+    #[cfg(feature = "airdrop")]
     AirdropLazyKey,
+    #[cfg(feature = "airdrop")]
     AirdropRaffleKey,
 }
 
