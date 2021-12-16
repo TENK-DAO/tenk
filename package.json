@@ -20,7 +20,7 @@
     "eslint": "^7.29.0",
     "near-api-js": "^0.44.1",
     "near-units": "^0.1.9",
-    "near-willem-workspaces-ava": "^1.0.2-alpha.0",
+    "near-willem-workspaces-ava": "^1.0.3-alpha.0",
     "nft.storage": "^5.0.0"
   }
 }
