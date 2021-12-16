@@ -77,10 +77,11 @@ runner.test("Get Payout", async (t, { root, tenk}) => {
     max_len_payout: 10,
   });
   const [bob, alice, eve] = subaccounts(root);
-  const payout = createRoyalties({ root, bob, alice, eve }).accounts;
-  t.log(payout);
-  Object.keys(payout).map((key) => (payout[key] = NEAR.parse(`${payout[key]}N`).toString()));
-  payout[root.accountId] = balance.mul(NEAR.from(4)).div(NEAR.from(5)).add(NEAR.from(payout[root.accountId])).toString();
+  let innerPayout = createRoyalties({ root, bob, alice, eve }).accounts;
+  t.log(innerPayout);
+  Object.keys(innerPayout).map((key) => (innerPayout[key] = NEAR.parse(`${innerPayout[key]}N`).toString()));
+  innerPayout[root.accountId] = balance.mul(NEAR.from(4)).div(NEAR.from(5)).add(NEAR.from(innerPayout[root.accountId])).toString();
+  const payout = {payout: innerPayout};
   t.log(payout, payouts);
   t.deepEqual(payouts, payout);
 
