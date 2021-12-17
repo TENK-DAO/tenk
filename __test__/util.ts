@@ -212,7 +212,7 @@ export async function create_account_and_claim(
   new_account_id,
   signWithKey,
   gas = Gas.parse("100 Tgas"),
-  testAccount = true,
+  testAccount = true
 ): Promise<NearAccount> {
   const actualKey = createKeyPair();
   const new_public_key = actualKey.getPublicKey().toString();
@@ -225,16 +225,18 @@ export async function create_account_and_claim(
     },
     {
       signWithKey,
-      gas
+      gas,
     }
   );
-
 
   t.log(gas.toHuman(), JSON.stringify(res, null, 2));
 
   let new_account = contract.getFullAccount(new_account_id);
   if (testAccount) {
-    t.assert(await new_account.exists(), `account ${new_account_id} does not exist`);
+    t.assert(
+      await new_account.exists(),
+      `account ${new_account_id} does not exist`
+    );
     await new_account.setKey(actualKey);
   }
   return new_account;
@@ -257,7 +259,7 @@ export async function createLinkAndNewAccount(
     contract,
     new_account_id,
     senderKey,
-    gas,
+    gas
   );
 
   // Add roots key to ensure it can be deleted later
@@ -440,16 +442,19 @@ export async function getDelta<T>(
   return [delta, await txns()];
 }
 
-export async function mint(tenk: NearAccount, root: NearAccount): Promise<string> {
-  return (await root.call<any>(
-    tenk,
-    "nft_mint_one",
-    {},
-    {
-      attachedDeposit: ONE_NEAR,
-    }
-  )
-  ).token_id
+export async function mint(
+  tenk: NearAccount,
+  root: NearAccount,
+  attachedDeposit = ONE_NEAR
+): Promise<string> {
+  return (
+    await root.call<any>(
+      tenk,
+      "nft_mint_one",
+      {},
+      {
+        attachedDeposit,
+      }
+    )
+  ).token_id;
 }
-
-

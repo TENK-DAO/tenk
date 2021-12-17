@@ -1,14 +1,6 @@
-import {
-  Workspace,
-  NearAccount,
-  ONE_NEAR,
-} from "near-willem-workspaces-ava";
+import { Workspace, NearAccount, ONE_NEAR } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
-import {
-  nftTokensForOwner,
-  mint,
-  BalanceDelta,
-} from "./util";
+import { nftTokensForOwner, mint, BalanceDelta, deploy, totalCost } from "./util";
 
 const base_cost = NEAR.parse("0 N");
 const min_cost = NEAR.parse("0 N");
@@ -30,9 +22,12 @@ function getRoyalties({ root, alice, eve }) {
   };
 }
 
-
-
-function delpoyParas(root: NearAccount, owner_id: NearAccount, treasury_id: NearAccount, approved_nft_contract_ids: NearAccount[]): Promise<NearAccount> {
+function delpoyParas(
+  root: NearAccount,
+  owner_id: NearAccount,
+  treasury_id: NearAccount,
+  approved_nft_contract_ids: NearAccount[]
+): Promise<NearAccount> {
   return root.createAndDeploy(
     "paras-market",
     `${__dirname}/contracts/paras.wasm`,
@@ -56,26 +51,8 @@ const runner = Workspace.init(
     const bob = await root.createAccount("bob");
     const eve = await root.createAccount("eve");
     const royalties = getRoyalties({ root, alice, eve });
-    const tenk = await root.createAndDeploy(
-      "tenk",
-      `${__dirname}/../target/wasm32-unknown-unknown/release/tenk.wasm`,
-      {
-        method: "new_default_meta",
-        args: {
-          owner_id,
-          name: "meerkats",
-          symbol: "N/A",
-          uri: "QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
-          size: 10_000,
-          base_cost,
-          min_cost,
-          royalties,
-        },
-        gas: Gas.parse("20 TGas"),
-      }
-    );
-
-    const token_id = await mint(tenk, bob);
+    const tenk = await deploy(root, "tenk", {royalties});
+    const token_id = await mint(tenk, bob, await totalCost(tenk, 1));
 
     const paras = await delpoyParas(root, root, root, [tenk]);
 
@@ -141,8 +118,11 @@ runner.test("buy one", async (t, { root, tenk, paras, bob, eve }) => {
   await bob2Delta.isLessOrEqual(ONE_NEAR.neg());
   await bobDelta.isGreaterOrEqual(NEAR.parse("750 mN"));
 
-  t.assert(res.logsContain("EVENT_JSON"), `Expected EVENT_JSON got ${res.logs}`);
-  t.log(res.logs)
+  t.assert(
+    res.logsContain("EVENT_JSON"),
+    `Expected EVENT_JSON got ${res.logs}`
+  );
+  t.log(res.logs);
   t.log(await nftTokensForOwner(bob2, tenk));
   const newBalance = await root.availableBalance();
   t.assert(newBalance.gt(balance));
