@@ -27,7 +27,9 @@ const runner = Workspace.init(
   { initialBalance: NEAR.parse("15 N").toString() },
   async ({ root }) => {
     const tenk = await deploy(root, "tenk");
-
+    if (Workspace.networkIsSandbox()) {
+      await root.createAccountFrom({testnetContract: "testnet", withData: false})
+    }
     return { tenk };
   }
 );
@@ -194,7 +196,7 @@ runner.test("Call `claim` with invalid key", async (t, { root, tenk }) => {
 // );
 
 // TODO figure out why this fails on sandbox
-if (Workspace.networkIsTestnet()) {
+if (true || Workspace.networkIsTestnet()) {
   runner.test(
     "Use `create_account_and_claim` with existent account",
     async (t, { root, tenk }) => {

@@ -1,7 +1,8 @@
 import { File, NFTStorage } from "nft.storage";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { API_TOKEN } from "./api_token";
+//
+import { API_TOKEN } from "../api_token";
 import { getInfo } from "./metadata";
 
 declare interface File {

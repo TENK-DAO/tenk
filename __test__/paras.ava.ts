@@ -2,15 +2,6 @@ import { Workspace, NearAccount, ONE_NEAR } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
 import { nftTokensForOwner, mint, BalanceDelta, deploy, totalCost } from "./util";
 
-const base_cost = NEAR.parse("0 N");
-const min_cost = NEAR.parse("0 N");
-
-async function deployEmpty(account: NearAccount): Promise<void> {
-  const empty = account.getFullAccount("empty.tn");
-  const bytes = await empty.viewCode();
-  await account.createTransaction(account).deployContract(bytes).signAndSend();
-}
-
 function getRoyalties({ root, alice, eve }) {
   return {
     accounts: {

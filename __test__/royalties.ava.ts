@@ -1,9 +1,6 @@
 import { Workspace, NearAccount } from "near-willem-workspaces-ava";
-import { NEAR, Gas } from "near-units";
-import { ActualTestnet, deploy, mint } from "./util";
-
-const base_cost = NEAR.parse("0 N");
-const min_cost = NEAR.parse("0 N");
+import { NEAR } from "near-units";
+import { deploy, mint } from "./util";
 
 function createRoyalties({ root, alice, bob, eve }) {
   return {
@@ -17,16 +14,14 @@ function createRoyalties({ root, alice, bob, eve }) {
   };
 }
 
-function subaccounts(root): string[] {
+function subaccounts(root: NearAccount): string[] {
   return ["bob", "alice", "eve"].map((n) => root.makeSubAccount(n));
 }
 
 const runner = Workspace.init(
   { initialBalance: NEAR.parse("20 N").toString() },
   async ({ root }) => {
-    const owner_id = root.accountId;
     const [bob, alice, eve] = subaccounts(root);
-    // const accounts = { bob, alice, eve };
     const royalties = createRoyalties({ root, bob, alice, eve });
     const tenk = await deploy(root, "tenk", {
       royalties,
@@ -55,6 +50,5 @@ runner.test("Get Payout", async (t, { root, tenk }) => {
     .add(NEAR.from(innerPayout[root.accountId]))
     .toString();
   const payout = { payout: innerPayout };
-  t.log(payout, payouts);
   t.deepEqual(payouts, payout);
 });

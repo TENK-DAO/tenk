@@ -1,8 +1,7 @@
 import { File, NFTStorage } from "nft.storage";
 import * as fs from "fs/promises";
 import * as path from "path";
-import { API_TOKEN } from "./api_token";
-// import { getInfo } from "./metadata";
+import { API_TOKEN } from "../api_token";
 
 declare interface File {
   _parts: any[];
@@ -60,4 +59,4 @@ async function main() {
   console.log(CID);
 }
 
-main();
+void main();
