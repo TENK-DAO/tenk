@@ -40,6 +40,9 @@ pub struct Contract {
     pub percent_off: u8,
     // Royalties
     royalties: LazyOption<Royalties>,
+    // Initial Royalties
+    initial_royalties: LazyOption<Royalties>,
+
 }
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
@@ -73,6 +76,7 @@ enum StorageKey {
     Ids,
     Royalties,
     LinkdropKeys,
+    InitialRoyalties,
     #[cfg(feature = "airdrop")]
     AirdropLazyKey,
     #[cfg(feature = "airdrop")]
@@ -96,8 +100,10 @@ impl Contract {
         reference: Option<String>,
         reference_hash: Option<Base64VecU8>,
         royalties: Option<Royalties>,
+        initial_royalties: Option<Royalties>,
     ) -> Self {
         royalties.as_ref().map(|r| r.validate());
+        initial_royalties.as_ref().map(|r|r.validate());
         Self::new(
             owner_id.clone(),
             NFTContractMetadata {
@@ -114,6 +120,7 @@ impl Contract {
             min_cost,
             percent_off.unwrap_or(DEFAULT_SUPPLY_FATOR_NUMERATOR),
             royalties,
+            initial_royalties,
         )
     }
 
@@ -126,6 +133,7 @@ impl Contract {
         min_cost: U128,
         percent_off: u8,
         royalties: Option<Royalties>,
+        initial_royalties: Option<Royalties>
     ) -> Self {
         metadata.assert_valid();
         Self {
@@ -144,6 +152,7 @@ impl Contract {
             min_cost: min_cost.0,
             percent_off,
             royalties: LazyOption::new(StorageKey::Royalties, royalties.as_ref()),
+            initial_royalties: LazyOption::new(StorageKey::InitialRoyalties, initial_royalties.as_ref()),
         }
     }
 
@@ -214,11 +223,20 @@ impl Contract {
             .map(|_| self.draw_and_mint(owner_id.clone(), None))
             .collect();
 
-        // Keep enough funds to cover storage and send rest to contract owner
-        refund_deposit_to_account(
-            env::storage_usage() - initial_storage_usage,
-            self.tokens.owner_id.clone(),
-        );
+        let storage_used = env::storage_usage() - initial_storage_usage;
+
+        if let Some(royalties) = self.initial_royalties.get() {
+          // Keep enough funds to cover storage and split the rest as royalties
+          let storage_cost = env::storage_byte_cost() * storage_used as Balance;
+          let left_over_funds = env::attached_deposit() - storage_cost;
+          royalties.send_funds(left_over_funds, &self.tokens.owner_id);
+        } else {
+          // Keep enough funds to cover storage and send rest to contract owner
+          refund_deposit_to_account(
+              storage_used,
+              self.tokens.owner_id.clone(),
+          );
+        }
 
         // Emit mint event log
         log_mint(
@@ -293,6 +311,7 @@ impl Contract {
     pub fn link_callback(&mut self, account_id: AccountId) -> Token {
         if is_promise_success(None) {
             self.pending_tokens -= 1;
+            //TODO: royalties
             let refund_account = if on_sale() {
                 Some(self.tokens.owner_id.clone())
             } else {
@@ -405,6 +424,7 @@ mod tests {
             10_000,
             TEN.into(),
             ONE.into(),
+            None,
             None,
             None,
             None,
