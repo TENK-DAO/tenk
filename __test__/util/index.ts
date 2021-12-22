@@ -16,7 +16,7 @@ import { ONE_NEAR } from "near-willem-workspaces-ava";
 const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
 
 export function binPath(name: string): string {
-  return join(__dirname, "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
+  return join(__dirname, "..", "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
 }
 
 // This will allow the contract account to be deleted since the size is reduced
