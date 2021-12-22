@@ -11,7 +11,7 @@ import {
   PublicKey,
   AccountManager,
 } from "near-willem-workspaces";
-import { ONE_NEAR } from "near-willem-workspaces-ava";
+import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
 
 const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
 
@@ -206,6 +206,18 @@ export function claim_raw(
   );
 }
 
+export function get_gas_profile(res) {
+  return res.result.receipts_outcome
+    .map((outcome) => {
+      const gas_profile = outcome.outcome["metadata"].gas_profile;
+      return gas_profile.map((info) => {
+        info.gas_used = Gas.parse(info.gas_used).toHuman();
+        return JSON.stringify(info, null, 2);
+      })
+    })
+    .join("\n");
+}
+
 export async function create_account_and_claim(
   t,
   contract: NearAccount,
@@ -229,10 +241,10 @@ export async function create_account_and_claim(
     }
   );
 
-  t.log(gas.toHuman(), JSON.stringify(res, null, 2));
-
   let new_account = contract.getFullAccount(new_account_id);
   if (testAccount) {
+    t.log(res.errors, res.promiseErrorMessages);
+    t.log(get_gas_profile(res));
     t.assert(
       await new_account.exists(),
       `account ${new_account_id} does not exist`

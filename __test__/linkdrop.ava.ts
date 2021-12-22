@@ -4,6 +4,7 @@ import {
   randomAccountId,
 } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
+import { readFile } from "fs/promises";
 import {
   ActualTestnet,
   createLinkdrop,
@@ -28,7 +29,14 @@ const runner = Workspace.init(
   async ({ root }) => {
     const tenk = await deploy(root, "tenk");
     if (Workspace.networkIsSandbox()) {
-      await root.createAccountFrom({testnetContract: "testnet", withData: false})
+      const testnet = root.getFullAccount("testnet");
+      await testnet.updateAccount({
+        amount: NEAR.parse("1000 N").toString(),
+        code_hash: "12XoaQ18TQYJhj9SaZR3MGUjcvgkE8rtKn4ZMCnVG8Lq",
+      });
+      await testnet.updateContract(
+        await readFile(`${__dirname}/contracts/testnet.wasm`)
+      );
     }
     return { tenk };
   }
@@ -196,7 +204,7 @@ runner.test("Call `claim` with invalid key", async (t, { root, tenk }) => {
 // );
 
 // TODO figure out why this fails on sandbox
-if (true || Workspace.networkIsTestnet()) {
+if (Workspace.networkIsTestnet()) {
   runner.test(
     "Use `create_account_and_claim` with existent account",
     async (t, { root, tenk }) => {

@@ -47,7 +47,7 @@ async function assertXTokens(t, root: NearAccount, tenk, num) {
     attachedDeposit: await totalCost(tenk, num),
     gas: MINT_ONE_GAS,
   });
-  t.true(res.succeeded, res.Failure);
+  t.true(res.succeeded, [res.Failure, ...res.promiseErrorMessages].join("\n"));
   t.is(num, (await nftTokensForOwner(root, tenk)).length);
   if (num == 30 && Workspace.networkIsTestnet()) {
     await deployEmpty(tenk);
