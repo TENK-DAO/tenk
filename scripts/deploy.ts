@@ -17,7 +17,7 @@ void Workspace.open(
       const tx = await root
         .createTransaction(root)
         .deployContractFile(CONTRACT_PATH);
-      tx.functionCall(
+      await tx.functionCall(
         "new_default_meta",
         DEFAULT_INIT_ARGS(root.accountId, NEAR.from(0), NEAR.from(0)),
         {

@@ -50,4 +50,4 @@ async function main() {
   console.log(CID);
 }
 
-main();
+void main();
