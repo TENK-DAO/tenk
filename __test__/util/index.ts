@@ -11,12 +11,12 @@ import {
   PublicKey,
   AccountManager,
 } from "near-willem-workspaces";
-import { ONE_NEAR } from "near-willem-workspaces-ava";
+import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
 
 const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
 
 export function binPath(name: string): string {
-  return join(__dirname, "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
+  return join(__dirname, "..", "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
 }
 
 // This will allow the contract account to be deleted since the size is reduced
@@ -206,13 +206,25 @@ export function claim_raw(
   );
 }
 
+export function get_gas_profile(res) {
+  return res.result.receipts_outcome
+    .map((outcome) => {
+      const gas_profile = outcome.outcome["metadata"].gas_profile;
+      return gas_profile.map((info) => {
+        info.gas_used = Gas.parse(info.gas_used).toHuman();
+        return JSON.stringify(info, null, 2);
+      })
+    })
+    .join("\n");
+}
+
 export async function create_account_and_claim(
   t,
   contract: NearAccount,
   new_account_id,
   signWithKey,
   gas = Gas.parse("100 Tgas"),
-  testAccount = true,
+  testAccount = true
 ): Promise<NearAccount> {
   const actualKey = createKeyPair();
   const new_public_key = actualKey.getPublicKey().toString();
@@ -225,16 +237,18 @@ export async function create_account_and_claim(
     },
     {
       signWithKey,
-      gas
+      gas,
     }
   );
 
-
-  t.log(gas.toHuman(), JSON.stringify(res, null, 2));
-
   let new_account = contract.getFullAccount(new_account_id);
   if (testAccount) {
-    t.assert(await new_account.exists(), `account ${new_account_id} does not exist`);
+    t.log(res.errors, res.promiseErrorMessages);
+    t.log(get_gas_profile(res));
+    t.assert(
+      await new_account.exists(),
+      `account ${new_account_id} does not exist`
+    );
     await new_account.setKey(actualKey);
   }
   return new_account;
@@ -257,7 +271,7 @@ export async function createLinkAndNewAccount(
     contract,
     new_account_id,
     senderKey,
-    gas,
+    gas
   );
 
   // Add roots key to ensure it can be deleted later
@@ -276,180 +290,21 @@ export async function getTokens(
   return contract.view("nft_tokens_for_owner", { account_id });
 }
 
-export class Delta {
-  static readonly ZERO_NEAR = NEAR.from(0);
-  constructor(public readonly amount: NEAR) {}
-
-  toHuman(): string {
-    if (this.isZero()) {
-      return `0 N`;
-    }
-    const absAmount = this.amount.abs();
-    return `${this.amount.isNeg() ? "-" : ""}${absAmount.toHuman()}`;
-  }
-
-  isZero(): boolean {
-    return this.amount.isZero();
-  }
-
-  gt(by: NEAR = Delta.ZERO_NEAR): boolean {
-    return this.amount.gt(by);
-  }
-
-  gte(by: NEAR = Delta.ZERO_NEAR): boolean {
-    return this.amount.gte(by);
-  }
-
-  lt(by: NEAR = Delta.ZERO_NEAR): boolean {
-    return this.amount.lt(by);
-  }
-
-  lte(by: NEAR = Delta.ZERO_NEAR): boolean {
-    return this.amount.lte(by);
-  }
+export async function mint(
+  tenk: NearAccount,
+  root: NearAccount,
+  attachedDeposit = ONE_NEAR
+): Promise<string> {
+  return (
+    await root.call<any>(
+      tenk,
+      "nft_mint_one",
+      {},
+      {
+        attachedDeposit,
+      }
+    )
+  ).token_id;
 }
 
-export class BalanceDelta {
-  private constructor(
-    public readonly initial: NEAR,
-    public readonly account: NearAccount,
-    private t: any
-  ) {}
-
-  static async create(account: NearAccount, t): Promise<BalanceDelta> {
-    return new BalanceDelta(await account.availableBalance(), account, t);
-  }
-
-  async delta(): Promise<Delta> {
-    const newBalance = await this.account.availableBalance();
-    return new Delta(newBalance.sub(this.initial));
-  }
-
-  async isZero(): Promise<void> {
-    return this.assert((delta) => delta.isZero(), "zero");
-  }
-
-  async isGreater(by?: NEAR): Promise<void> {
-    return this.assert((delta) => delta.gt(by), "greater");
-  }
-  async isGreaterOrEqual(by?: NEAR): Promise<void> {
-    return this.assert((delta) => delta.gte(by), "greater or equal");
-  }
-
-  async isLess(by?: NEAR): Promise<void> {
-    return this.assert((delta) => delta.lt(by), "less");
-  }
-
-  async isLessOrEqual(by?: NEAR): Promise<void> {
-    return this.assert((delta) => delta.lte(by), "less or equal");
-  }
-
-  private async assert(
-    fn: (d: Delta) => boolean,
-    innerString: string
-  ): Promise<void> {
-    const delta = await this.delta();
-    this.t.assert(
-      fn(delta),
-      `Account ${
-        this.account.accountId
-      } expected ${innerString} got: ${delta.toHuman()}`
-    );
-  }
-
-  async toHuman(): Promise<string> {
-    return (await this.delta()).toHuman();
-  }
-}
-
-function isZero(bd: BalanceDelta): Promise<void> {
-  return bd.isZero();
-}
-
-function gt(bd: BalanceDelta, by?: NEAR): Promise<void> {
-  return bd.isGreater(by);
-}
-function gte(bd: BalanceDelta, by?: NEAR): Promise<void> {
-  return bd.isGreaterOrEqual(by);
-}
-function lt(bd: BalanceDelta, by?: NEAR): Promise<void> {
-  return bd.isLess(by);
-}
-function lte(bd: BalanceDelta, by?: NEAR): Promise<void> {
-  return bd.isLessOrEqual(by);
-}
-
-type DeltaFn = (bd: BalanceDelta, by?: NEAR) => Promise<void>;
-
-export async function applyDelta<T>(
-  t,
-  account: NearAccount,
-  txns: () => Promise<T>,
-  deltaFn: DeltaFn,
-  by?: NEAR
-): Promise<T> {
-  const deltaBalance = await BalanceDelta.create(account, t);
-  const res = await txns();
-  await deltaFn(deltaBalance, by);
-  return res;
-}
-
-export function zeroDelta<T>(
-  t,
-  account: NearAccount,
-  txns: () => Promise<T>
-): Promise<T> {
-  return applyDelta(t, account, txns, isZero);
-}
-
-/* 
-  Asserts that the delata is within the bounds passed
-*/
-export function hasDelta<T>(
-  t,
-  account: NearAccount,
-  amount: NEAR,
-  // Whether to include equal to
-  inclusive: boolean,
-  txns: () => Promise<T>
-): Promise<T> {
-  let fn: DeltaFn;
-
-  if (amount.isNeg()) {
-    fn = inclusive ? gte : gt;
-  } else {
-    fn = inclusive ? lte : lt;
-  }
-
-  return applyDelta(t, account, txns, fn, amount);
-}
-
-export function repeat<T>(
-  iterations: number,
-  fn: (i: number) => Promise<T>
-): Promise<T[]> {
-  return Promise.all(Array.from({ length: iterations }).map(fn));
-}
-
-export async function getDelta<T>(
-  t,
-  account: NearAccount,
-  txns: () => Promise<T>
-): Promise<[BalanceDelta, T]> {
-  const delta = await BalanceDelta.create(account, t);
-  return [delta, await txns()];
-}
-
-export async function mint(tenk: NearAccount, root: NearAccount): Promise<string> {
-  return (await root.call<any>(
-    tenk,
-    "nft_mint_one",
-    {},
-    {
-      attachedDeposit: ONE_NEAR,
-    }
-  )
-  ).token_id
-}
-
-
+export * from "./delta";

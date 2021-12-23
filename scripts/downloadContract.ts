@@ -1,9 +1,9 @@
-import { Workspace, JsonRpcProvider } from "near-willem-workspaces";
+import { JsonRpcProvider } from "near-willem-workspaces";
 import * as path from "path";
 import * as fs from "fs/promises";
 
-const args = process.argv.slice(2);
 let network: "testnet" | "mainnet" = "testnet";
+const args = process.argv.slice(2);
 
 if (args.length < 1) {
   console.error("<contract> <network = testnet>");
@@ -12,7 +12,7 @@ if (args.length < 1) {
 
 const contract = args[0];
 
-let filePath = path.join(__dirname, "contracts", `${contract}.wasm`);
+let filePath; // = args[1] || path.join(__dirname,"..", "__test__", "contracts", `${contract}.wasm`);
 
 if (args.length > 1) {
   if (args[1] == "mainnet" || args[1] == "testnet") {
@@ -22,16 +22,14 @@ if (args.length > 1) {
   }
 }
 
-// Workspace.open(
-//   { network: "sandbox", rootAccount: "eve.testnet" },
-//   async ({ root }) => {
 async function main() {
   const provider = JsonRpcProvider.fromNetwork(network);
   const binary = await provider.viewCode(contract);
-  process.stdout.write(binary);
-  // await fs.writeFile(filePath, binary);
-  //   }
-  // );
+  if (filePath) {
+    await fs.writeFile(filePath, binary);
+  } else {
+    process.stdout.write(binary);
+  }
 }
 
-main();
+void main();

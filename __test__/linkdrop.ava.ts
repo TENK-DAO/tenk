@@ -4,6 +4,7 @@ import {
   randomAccountId,
 } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
+import { readFile } from "fs/promises";
 import {
   ActualTestnet,
   createLinkdrop,
@@ -17,6 +18,7 @@ import {
   hasDelta,
   getDelta,
   create_account_and_claim,
+  deploy,
 } from "./util";
 
 const base_cost = NEAR.parse("1 N");
@@ -25,33 +27,17 @@ const min_cost = NEAR.parse("0.01 N");
 const runner = Workspace.init(
   { initialBalance: NEAR.parse("15 N").toString() },
   async ({ root }) => {
-    const network: NearAccount = Workspace.networkIsTestnet()
-      ? // Just need accountId "testnet"
-        new ActualTestnet("testnet")
-      : // Otherwise use fake linkdrop acconut on sandbox
-        await root.createAccountFrom({
-          testnetContract: "testnet",
-          withData: false,
-        });
-    const owner_id = root;
-    const tenk = await root.createAndDeploy(
-      "tenk",
-      `${__dirname}/../target/wasm32-unknown-unknown/release/tenk.wasm`,
-      {
-        method: "new_default_meta",
-        args: {
-          owner_id,
-          name: "meerkats",
-          symbol: "N/A",
-          uri: "QmaDR7ozkawfnmEirvErfcJm27FEyFv5U1KQDfWkHGj5qD",
-          size: 10_000,
-          base_cost,
-          min_cost,
-        },
-        gas: Gas.parse("20 TGas"),
-      }
-    );
-
+    const tenk = await deploy(root, "tenk");
+    if (Workspace.networkIsSandbox()) {
+      const testnet = root.getFullAccount("testnet");
+      await testnet.updateAccount({
+        amount: NEAR.parse("1000 N").toString(),
+        code_hash: "12XoaQ18TQYJhj9SaZR3MGUjcvgkE8rtKn4ZMCnVG8Lq",
+      });
+      await testnet.updateContract(
+        await readFile(`${__dirname}/contracts/testnet.wasm`)
+      );
+    }
     return { tenk };
   }
 );

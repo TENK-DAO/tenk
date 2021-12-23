@@ -1,10 +1,10 @@
 import { Workspace, NEAR, Gas } from "near-willem-workspaces";
 
-import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "./util";
+import { CONTRACT_PATH, DEFAULT_INIT_ARGS } from "../__test__/util";
 
 const network = "testnet";
 
-Workspace.open(
+void Workspace.open(
   { network, rootAccount: "minimo.tenk.testnet" },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
@@ -17,7 +17,7 @@ Workspace.open(
       const tx = await root
         .createTransaction(root)
         .deployContractFile(CONTRACT_PATH);
-      tx.functionCall(
+      await tx.functionCall(
         "new_default_meta",
         DEFAULT_INIT_ARGS(root.accountId, NEAR.from(0), NEAR.from(0)),
         {
