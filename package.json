@@ -8,8 +8,9 @@
     "build:mainnet": "yarn build --features mainnet",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
+    "test:linkdrop": "yarn test:testnet '*/link*'",
     "test:unit": "cargo test",
-    "test:ci": "yarn test:unit && yarn test",
+    "test:ci": "yarn test:unit && yarn test && yarn test:linkdrop",
     "lint": "yarn eslint . --ext .ts"
   },
   "devDependencies": {
