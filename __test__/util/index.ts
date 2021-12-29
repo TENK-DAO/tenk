@@ -336,3 +336,7 @@ export async function mint(
 }
 
 export * from "./delta";
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}

@@ -23,10 +23,13 @@ import {
   create_account_and_claim,
   deploy,
   linkdropCost,
+  sleep,
 } from "./util";
 
 const base_cost = NEAR.parse("1 N");
 const min_cost = NEAR.parse("0.01 N");
+
+
 
 if (Workspace.networkIsTestnet()) {
   const runner = Workspace.init(
@@ -43,6 +46,7 @@ if (Workspace.networkIsTestnet()) {
           await readFile(`${__dirname}/contracts/testnet.wasm`)
         );
       }
+      await sleep(2000);
       return { tenk };
     }
   );
