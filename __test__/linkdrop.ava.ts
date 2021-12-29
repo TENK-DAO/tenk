@@ -46,7 +46,6 @@ if (Workspace.networkIsTestnet()) {
           await readFile(`${__dirname}/contracts/testnet.wasm`)
         );
       }
-      await sleep(2000);
       return { tenk };
     }
   );
@@ -55,6 +54,7 @@ if (Workspace.networkIsTestnet()) {
     "Use `claim` to send to existing account",
     async (t, { root, tenk }) => {
       const alice = await root.createAccount("alice");
+      await sleep(2000);
       t.log(NEAR.from(await tenk.view("token_storage_cost")).toHuman());
 
       // Create temporary keys for access key on linkdrop
@@ -86,6 +86,7 @@ if (Workspace.networkIsTestnet()) {
     "Use `claim` to send to existing account with normal account",
     async (t, { root, tenk }) => {
       const alice = await root.createAccount("alice");
+      await sleep(2000);
       t.log(NEAR.from(await tenk.view("token_storage_cost")).toHuman());
 
       // Create temporary keys for access key on linkdrop
@@ -117,7 +118,7 @@ if (Workspace.networkIsTestnet()) {
     "Use `claim` to send to existing account without enough gas",
     async (t, { root, tenk }) => {
       const alice = await root.createAccount("alice");
-      let senderKey;
+      await sleep(2000);
       // Create temporary keys for access key on linkdrop
       const [delta, _] = await getDelta(t, tenk, async () => {
         let [linkDelta, senderKey] = await getDelta(t, root, () =>
@@ -165,6 +166,7 @@ if (Workspace.networkIsTestnet()) {
       t.assert(await checkKey(senderKey.getPublicKey(), tenk));
       const tokens = await getTokens(tenk, new_account);
       t.assert(tokens.length == 0, "should contain only one token");
+      await sleep(2000);
 
       // await new_account.delete(root.accountId);
     }
