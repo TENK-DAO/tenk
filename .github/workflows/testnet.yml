@@ -26,6 +26,6 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: '/home/runner/work/tenk/tenk/.near-credentials/workspaces'
-          key: ${{ matrix.platform }}${{ workspaces.os }}-${{ hashFiles('$HOME/.near-credentials/workspaces/testnet/*') }}
+          key: ${{ matrix.platform }}-${{ hashFiles('$HOME/.near-credentials/workspaces/testnet/*') }}
       - name: Run tests
         run: yarn && yarn test:linkdrop
