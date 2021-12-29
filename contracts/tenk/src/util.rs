@@ -1,5 +1,5 @@
 use core::convert::TryInto;
-use near_sdk::{env, PromiseResult};
+use near_sdk::{env, AccountId, Promise, PromiseResult};
 
 pub fn is_promise_success(num_of_promises: Option<u64>) -> bool {
     let count = env::promise_results_count();
@@ -22,4 +22,11 @@ pub fn get_random_number(shift_amount: u32) -> u32 {
     seed.rotate_left(shift_amount as usize % seed_len);
     arr.copy_from_slice(&seed[..4]);
     u32::from_le_bytes(arr).try_into().unwrap()
+}
+
+pub fn refund(account_id: &AccountId, amount: u128) -> Option<Promise> {
+  if amount > 0 {
+    return Some(Promise::new(account_id.clone()).transfer(amount))
+  };
+  None
 }

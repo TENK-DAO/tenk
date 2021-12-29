@@ -16,19 +16,19 @@ export class NEARDelta {
     return this.amount.isZero();
   }
 
-  gt(by: NEAR = NEARDelta.ZERO_NEAR): boolean {
+  gt(by = NEARDelta.ZERO_NEAR): boolean {
     return this.amount.gt(by);
   }
 
-  gte(by: NEAR = NEARDelta.ZERO_NEAR): boolean {
+  gte(by = NEARDelta.ZERO_NEAR): boolean {
     return this.amount.gte(by);
   }
 
-  lt(by: NEAR = NEARDelta.ZERO_NEAR): boolean {
+  lt(by = NEARDelta.ZERO_NEAR): boolean {
     return this.amount.lt(by);
   }
 
-  lte(by: NEAR = NEARDelta.ZERO_NEAR): boolean {
+  lte(by = NEARDelta.ZERO_NEAR): boolean {
     return this.amount.lte(by);
   }
 }
@@ -85,6 +85,10 @@ export class BalanceDelta {
 
   async toHuman(): Promise<string> {
     return (await this.delta()).toHuman();
+  }
+
+  async log(): Promise<void> {
+    this.t.log(`${this.account.accountId} has delta ${await this.toHuman()}`);
   }
 }
 

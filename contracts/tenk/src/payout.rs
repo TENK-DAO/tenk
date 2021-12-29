@@ -5,7 +5,7 @@ use near_sdk::{
     json_types::U128,
     near_bindgen,
     serde::{Deserialize, Serialize},
-    AccountId,
+    AccountId, Promise,
 };
 
 use std::collections::HashMap;
@@ -22,6 +22,14 @@ use std::collections::HashMap;
 #[derive(Default, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
 pub struct Payout {
     payout: HashMap<AccountId, U128>,
+}
+
+impl Payout {
+    pub fn send_funds(self) {
+        self.payout.into_iter().for_each(|(account, amount)| {
+            Promise::new(account).transfer(amount.0);
+        });
+    }
 }
 
 pub trait Payouts {
@@ -105,7 +113,7 @@ impl Royalties {
             "total percent of each royalty split  must be less than 100"
         )
     }
-    fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {
+    pub(crate) fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {
         let royalty_payment = apply_percent(self.percent, balance);
         let mut payout = Payout {
             payout: self
@@ -123,6 +131,10 @@ impl Royalties {
         let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
         payout.payout.insert(owner_id.clone(), owner_payout.into());
         payout
+    }
+
+    pub(crate) fn send_funds(&self, balance: Balance, owner_id: &AccountId) {
+      self.create_payout(balance, owner_id).send_funds();
     }
 }
 
