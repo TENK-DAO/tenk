@@ -1,16 +1,17 @@
+use linkdrop::LINKDROP_DEPOSIT;
 use near_contract_standards::non_fungible_token::{
     metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
     refund_deposit_to_account, NearEvent, NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::{LazyOption, LookupSet},
+    collections::{LazyOption, LookupMap},
     env, ext_contract,
     json_types::Base64VecU8,
-    near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
+    log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
     PromiseOrValue, PublicKey,
 };
-use near_units::parse_gas;
+use near_units::{parse_gas, parse_near};
 
 #[cfg(feature = "airdrop")]
 mod airdrop;
@@ -23,7 +24,7 @@ mod util;
 
 use payout::*;
 use raffle::Raffle;
-use util::is_promise_success;
+use util::{is_promise_success, refund};
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -34,7 +35,7 @@ pub struct Contract {
     raffle: Raffle,
     pending_tokens: u32,
     // Linkdrop fields will be removed once proxy contract is deployed
-    pub accounts: LookupSet<PublicKey>,
+    pub accounts: LookupMap<PublicKey, bool>,
     pub base_cost: Balance,
     pub min_cost: Balance,
     pub percent_off: u8,
@@ -42,7 +43,6 @@ pub struct Contract {
     royalties: LazyOption<Royalties>,
     // Initial Royalties
     initial_royalties: LazyOption<Royalties>,
-
 }
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
@@ -63,7 +63,7 @@ trait Linkdrop {
 
     fn on_send_with_callback(&mut self) -> Promise;
 
-    fn link_callback(&mut self, account_id: AccountId) -> Token;
+    fn link_callback(&mut self, account_id: AccountId, mint_for_free: bool) -> Token;
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -103,7 +103,7 @@ impl Contract {
         initial_royalties: Option<Royalties>,
     ) -> Self {
         royalties.as_ref().map(|r| r.validate());
-        initial_royalties.as_ref().map(|r|r.validate());
+        initial_royalties.as_ref().map(|r| r.validate());
         Self::new(
             owner_id.clone(),
             NFTContractMetadata {
@@ -133,7 +133,7 @@ impl Contract {
         min_cost: U128,
         percent_off: u8,
         royalties: Option<Royalties>,
-        initial_royalties: Option<Royalties>
+        initial_royalties: Option<Royalties>,
     ) -> Self {
         metadata.assert_valid();
         Self {
@@ -147,12 +147,15 @@ impl Contract {
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
             raffle: Raffle::new(StorageKey::Ids, size as u64),
             pending_tokens: 0,
-            accounts: LookupSet::new(StorageKey::LinkdropKeys),
+            accounts: LookupMap::new(StorageKey::LinkdropKeys),
             base_cost: base_cost.0,
             min_cost: min_cost.0,
             percent_off,
             royalties: LazyOption::new(StorageKey::Royalties, royalties.as_ref()),
-            initial_royalties: LazyOption::new(StorageKey::InitialRoyalties, initial_royalties.as_ref()),
+            initial_royalties: LazyOption::new(
+                StorageKey::InitialRoyalties,
+                initial_royalties.as_ref(),
+            ),
         }
     }
 
@@ -170,19 +173,18 @@ impl Contract {
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_can_mint(1);
         let deposit = env::attached_deposit();
-        if !self.is_owner() {
-            let total_cost = self.cost_of_linkdrop().0;
-            require!(
-                total_cost <= deposit,
-                format!("attached deposit must be at least {}", total_cost)
-            );
-        }
+        let account = env::predecessor_account_id();
+        let total_cost = self.cost_of_linkdrop(&account).0;
         self.pending_tokens += 1;
-        self.send(public_key).then(ext_self::on_send_with_callback(
-            env::current_account_id(),
-            deposit,
-            GAS_REQUIRED_TO_CREATE_LINKDROP,
-        ))
+        let mint_for_free = self.is_owner(&account);
+        log!("Total cost of creation is {}", total_cost);
+        refund(&account, deposit - total_cost);
+        self.send(public_key, mint_for_free)
+            .then(ext_self::on_send_with_callback(
+                env::current_account_id(),
+                total_cost,
+                GAS_REQUIRED_TO_CREATE_LINKDROP,
+            ))
     }
 
     // #[payable]
@@ -215,29 +217,38 @@ impl Contract {
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         self.assert_can_mint(num);
-        let initial_storage_usage = env::storage_usage();
-        let owner_id = env::signer_account_id();
+        self.nft_mint_many_ungaurded(num, env::signer_account_id(), false)
+    }
+
+    fn nft_mint_many_ungaurded(
+        &mut self,
+        num: u32,
+        owner_id: AccountId,
+        mint_for_free: bool,
+    ) -> Vec<Token> {
+        let initial_storage_usage = if mint_for_free {
+            0
+        } else {
+            env::storage_usage()
+        };
 
         // Mint tokens
         let tokens: Vec<Token> = (0..num)
             .map(|_| self.draw_and_mint(owner_id.clone(), None))
             .collect();
 
-        let storage_used = env::storage_usage() - initial_storage_usage;
-
-        if let Some(royalties) = self.initial_royalties.get() {
-          // Keep enough funds to cover storage and split the rest as royalties
-          let storage_cost = env::storage_byte_cost() * storage_used as Balance;
-          let left_over_funds = env::attached_deposit() - storage_cost;
-          royalties.send_funds(left_over_funds, &self.tokens.owner_id);
-        } else {
-          // Keep enough funds to cover storage and send rest to contract owner
-          refund_deposit_to_account(
-              storage_used,
-              self.tokens.owner_id.clone(),
-          );
+        if !mint_for_free {
+            let storage_used = env::storage_usage() - initial_storage_usage;
+            if let Some(royalties) = self.initial_royalties.get() {
+                // Keep enough funds to cover storage and split the rest as royalties
+                let storage_cost = env::storage_byte_cost() * storage_used as Balance;
+                let left_over_funds = env::attached_deposit() - storage_cost;
+                royalties.send_funds(left_over_funds, &self.tokens.owner_id);
+            } else {
+                // Keep enough funds to cover storage and send rest to contract owner
+                refund_deposit_to_account(storage_used, self.tokens.owner_id.clone());
+            }
         }
-
         // Emit mint event log
         log_mint(
             owner_id.as_str(),
@@ -246,16 +257,20 @@ impl Contract {
         tokens
     }
 
-    pub fn cost_of_linkdrop(&self) -> U128 {
-        (crate::linkdrop::full_link_price() + self.total_cost(1).0).into()
+    pub fn cost_of_linkdrop(&self, minter: &AccountId) -> U128 {
+        (self.full_link_price(minter) + self.total_cost(1, minter).0).into()
     }
 
-    pub fn total_cost(&self, num: u32) -> U128 {
-        (num as Balance * self.cost_per_token(num).0).into()
+    pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
+        (num as Balance * self.cost_per_token(num, minter).0).into()
     }
 
-    pub fn cost_per_token(&self, num: u32) -> U128 {
-        let base_cost = (self.base_cost - self.discount(num).0).max(self.min_cost);
+    pub fn cost_per_token(&self, num: u32, minter: &AccountId) -> U128 {
+        let base_cost = if self.is_owner(minter) {
+            0
+        } else {
+            (self.base_cost - self.discount(num).0).max(self.min_cost)
+        };
         (base_cost + self.token_storage_cost().0).into()
     }
 
@@ -301,43 +316,35 @@ impl Contract {
             self.pending_tokens -= 1;
             let amount = env::attached_deposit();
             if amount > 0 {
-                Promise::new(env::signer_account_id()).transfer(amount);
+                refund(&env::signer_account_id(), amount);
             }
         }
     }
 
     #[payable]
     #[private]
-    pub fn link_callback(&mut self, account_id: AccountId) -> Token {
+    pub fn link_callback(&mut self, account_id: AccountId, mint_for_free: bool) -> Token {
         if is_promise_success(None) {
             self.pending_tokens -= 1;
-            //TODO: royalties
-            let refund_account = if on_sale() {
-                Some(self.tokens.owner_id.clone())
-            } else {
-                None
-            };
-            let token = self.draw_and_mint(account_id.clone(), refund_account);
-            log_mint(account_id.as_str(), vec![token.token_id.clone()]);
-            token
+            self.nft_mint_many_ungaurded(1, account_id, mint_for_free)[0].clone()
         } else {
-            env::panic_str(&"Promise before Linkdrop callback failed");
+            env::panic_str("Promise before Linkdrop callback failed");
         }
     }
 
     // Private methods
     fn assert_deposit(&self, num: u32) {
         require!(
-            env::attached_deposit() >= self.total_cost(num).0,
+            env::attached_deposit() >= self.total_cost(num, &env::signer_account_id()).0,
             "Not enough attached deposit to buy"
         );
     }
 
     fn assert_can_mint(&self, num: u32) {
         // Check quantity
-        require!(self.tokens_left() as u32 >= num, "No NFTs left to mint");
+        require!(self.tokens_left() >= num, "No NFTs left to mint");
         // Owner can mint for free
-        if self.is_owner() {
+        if self.signer_is_owner() {
             return;
         }
         if on_sale() {
@@ -348,12 +355,24 @@ impl Contract {
     }
 
     fn assert_owner(&self) {
-        require!(self.is_owner(), "Method is private to owner")
+        require!(self.signer_is_owner(), "Method is private to owner")
     }
 
-    fn is_owner(&self) -> bool {
-        let signer = env::signer_account_id();
-        signer == self.tokens.owner_id || signer.as_str() == TECH_BACKUP_OWNER
+    fn signer_is_owner(&self) -> bool {
+        self.is_owner(&env::signer_account_id())
+    }
+
+    fn is_owner(&self, minter: &AccountId) -> bool {
+        minter.as_str() == self.tokens.owner_id.as_str() || minter.as_str() == TECH_BACKUP_OWNER
+    }
+
+    fn full_link_price(&self, minter: &AccountId) -> u128 {
+        LINKDROP_DEPOSIT
+            + if self.is_owner(minter) {
+                parse_near!("0 mN")
+            } else {
+                parse_near!("8 mN")
+            }
     }
 
     fn draw_and_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
@@ -415,6 +434,10 @@ mod tests {
     const TEN: u128 = to_near(10);
     const ONE: u128 = to_near(1);
 
+    fn account() -> AccountId {
+        AccountId::new_unchecked("alice.near".to_string())
+    }
+
     fn new_contract() -> Contract {
         Contract::new_default_meta(
             AccountId::new_unchecked("root".to_string()),
@@ -438,18 +461,18 @@ mod tests {
     fn check_price() {
         let contract = new_contract();
         assert_eq!(
-            contract.cost_per_token(1).0,
+            contract.cost_per_token(1, &account()).0,
             TEN + contract.token_storage_cost().0
         );
         assert_eq!(
-            contract.cost_per_token(2).0,
+            contract.cost_per_token(2, &account()).0,
             TEN + contract.token_storage_cost().0 - contract.discount(2).0
         );
         println!(
             "{}, {}, {}",
             contract.discount(1).0,
             contract.discount(2).0,
-            contract.discount(10).0
+            contract.discount(10).0,
         );
         println!(
             "{}",
@@ -457,8 +480,8 @@ mod tests {
         );
         println!(
             "{}, {}",
-            contract.cost_per_token(24).0,
-            contract.cost_per_token(10).0
+            contract.cost_per_token(24, &account()).0,
+            contract.cost_per_token(10, &account()).0
         );
     }
 }

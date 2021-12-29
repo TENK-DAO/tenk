@@ -12,6 +12,7 @@ import {
   AccountManager,
 } from "near-willem-workspaces";
 import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
+import { BalanceDelta, getDelta } from "./delta";
 
 const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
 
@@ -87,17 +88,25 @@ export function DEFAULT_INIT_ARGS(
 
 export async function costPerToken(
   tenk: NearAccount,
-  num: number
+  num: number,
+  minter: string = "alice.near"
 ): Promise<NEAR> {
-  return NEAR.from(await tenk.view("cost_per_token", { num }));
+  return NEAR.from(await tenk.view("cost_per_token", { num, minter }));
 }
 
-export async function totalCost(tenk: NearAccount, num: number): Promise<NEAR> {
-  return NEAR.from(await tenk.view("total_cost", { num }));
+export async function totalCost(
+  tenk: NearAccount,
+  num: number,
+  minter: string = "alice.near"
+): Promise<NEAR> {
+  return NEAR.from(await tenk.view("total_cost", { num, minter }));
 }
 
-export async function linkdropCost(tenk: NearAccount): Promise<NEAR> {
-  return NEAR.from(await tenk.view("cost_of_linkdrop"));
+export async function linkdropCost(
+  tenk: NearAccount,
+  minter: string = "alice.near"
+): Promise<NEAR> {
+  return NEAR.from(await tenk.view("cost_of_linkdrop", { minter }));
 }
 
 export async function discount(tenk: NearAccount, num: number): Promise<NEAR> {
@@ -152,29 +161,45 @@ export async function createLinkdrop(
   const senderKey = createKeyPair();
   const public_key = senderKey.getPublicKey().toString();
   // const linkdrop_cost
-
+  attachedDeposit = attachedDeposit ?? (await linkdropCost(contract, root.accountId));
+  const contract_delta = await BalanceDelta.create(contract, t);
   // This adds the key as a function access key on `create_account_and_claim`
-  await root.call(
-    contract,
-    "create_linkdrop",
-    {
-      public_key,
-    },
-    {
-      attachedDeposit: attachedDeposit ?? (await linkdropCost(contract)),
-      gas: Gas.parse("40 Tgas"),
-    }
+  t.log("attachedDeposit", attachedDeposit.toHuman());
+  const root_delta = await BalanceDelta.create(root, t);
+  const [delta, res] = await getDelta(t, root, async () => {
+
+    await root_delta.log()
+    let res = await root.call_raw(
+      contract,
+      "create_linkdrop",
+      {
+        public_key,
+      },
+      {
+        attachedDeposit,
+        gas: Gas.parse("40 Tgas"),
+      }
+    )
+    await root_delta.log();
+    return res
+  }
   );
+  t.log(res.summary());
+  await contract_delta.log();
+  t.log(res.logs);
+  await delta.log();
+  t.assert(res.succeeded);
   t.assert(await checkKey(senderKey.getPublicKey(), contract));
   return senderKey;
 }
 
-export function claim(
+export async function claim(
+  t,
   tenk: NearAccount,
   alice: NearAccount,
   signWithKey: KeyPair
-) {
-  return tenk.call(
+): Promise<void> {
+  let res = await tenk.call_raw(
     tenk,
     "claim",
     {
@@ -185,6 +210,7 @@ export function claim(
       gas: Gas.parse("100 Tgas"),
     }
   );
+  t.log(res.logs)
 }
 
 export function claim_raw(
@@ -213,7 +239,7 @@ export function get_gas_profile(res) {
       return gas_profile.map((info) => {
         info.gas_used = Gas.parse(info.gas_used).toHuman();
         return JSON.stringify(info, null, 2);
-      })
+      });
     })
     .join("\n");
 }
@@ -221,7 +247,7 @@ export function get_gas_profile(res) {
 export async function create_account_and_claim(
   t,
   contract: NearAccount,
-  new_account_id,
+  new_account_id: string,
   signWithKey,
   gas = Gas.parse("100 Tgas"),
   testAccount = true
@@ -243,8 +269,10 @@ export async function create_account_and_claim(
 
   let new_account = contract.getFullAccount(new_account_id);
   if (testAccount) {
-    t.log(res.errors, res.promiseErrorMessages);
-    t.log(get_gas_profile(res));
+    // t.log(res.errors, res.promiseErrorMessages);
+    if (res.failed) {
+      t.log(get_gas_profile(res));
+    }
     t.assert(
       await new_account.exists(),
       `account ${new_account_id} does not exist`
