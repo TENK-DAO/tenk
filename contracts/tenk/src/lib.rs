@@ -110,7 +110,6 @@ impl Contract {
         initial_royalties: Option<Royalties>,
         is_premint: Option<bool>,
         is_premint_over: Option<bool>,
-        premint_deadline_at: Option<u64>,
     ) -> Self {
         royalties.as_ref().map(|r| r.validate());
         initial_royalties.as_ref().map(|r| r.validate());
@@ -133,7 +132,7 @@ impl Contract {
             initial_royalties,
             is_premint.unwrap_or(false),
             is_premint_over.unwrap_or(false),
-            premint_deadline_at.unwrap_or(0),
+            0,
         )
     }
 
@@ -186,8 +185,8 @@ impl Contract {
 
     #[cfg(not(feature = "mainnet"))]
     pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId) {
-      self.whitelist.insert(&account_id);
-  }
+        self.whitelist.insert(&account_id);
+    }
 
     pub fn start_premint(&mut self, duration: u64) {
         self.assert_owner();
@@ -279,7 +278,7 @@ impl Contract {
         let owner_id = env::signer_account_id();
         let tokens = self.nft_mint_many_ungaurded(num, &owner_id, false);
         if self.is_premint && !self.is_owner(&owner_id) {
-          self.whitelist.remove(&owner_id);
+            self.whitelist.remove(&owner_id);
         }
         tokens
     }
@@ -525,7 +524,6 @@ mod tests {
             10_000,
             TEN.into(),
             ONE.into(),
-            None,
             None,
             None,
             None,

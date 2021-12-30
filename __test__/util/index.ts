@@ -1,4 +1,3 @@
-import { join } from "path";
 import { Gas, NEAR } from "near-units";
 import {
   Account,
@@ -12,13 +11,10 @@ import {
   AccountManager,
 } from "near-willem-workspaces";
 import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
+import { binPath } from "./bin";
 import { BalanceDelta, getDelta } from "./delta";
 
-const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
-
-export function binPath(name: string): string {
-  return join(__dirname, "..", "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
-}
+export * from "./bin";
 
 // This will allow the contract account to be deleted since the size is reduced
 export async function deployEmpty(account: NearAccount): Promise<void> {
@@ -45,6 +41,7 @@ export function deploy(
       size: 100,
       base_cost: NEAR.parse("1 N"),
       min_cost: NEAR.parse("1 N"),
+      is_premint_over: true,
       ...args,
     },
   });
@@ -65,7 +62,6 @@ export async function nftTokensForOwner(
 
 // export const ONE_NEAR = NEAR.parse("1 N")
 
-export const CONTRACT_PATH = binPath("tenk");
 
 export const DEFAULT_BASE_COST = NEAR.parse("10 N");
 export const DEFAULT_MIN_COST = NEAR.parse("1 N");
