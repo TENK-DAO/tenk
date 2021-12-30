@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "pretest": "yarn build && yarn lint",
-    "build": "cargo build --target wasm32-unknown-unknown --release --features on_sale",
+    "build": "RUSTFLAGS='-C link-arg=-s' cargo build --target wasm32-unknown-unknown --release --features on_sale",
     "build:mainnet": "yarn build --features mainnet",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
