@@ -161,14 +161,14 @@ export async function createLinkdrop(
   const senderKey = createKeyPair();
   const public_key = senderKey.getPublicKey().toString();
   // const linkdrop_cost
-  attachedDeposit = attachedDeposit ?? (await linkdropCost(contract, root.accountId));
+  attachedDeposit =
+    attachedDeposit ?? (await linkdropCost(contract, root.accountId));
   const contract_delta = await BalanceDelta.create(contract, t);
   // This adds the key as a function access key on `create_account_and_claim`
   t.log("attachedDeposit", attachedDeposit.toHuman());
   const root_delta = await BalanceDelta.create(root, t);
   const [delta, res] = await getDelta(t, root, async () => {
-
-    await root_delta.log()
+    await root_delta.log();
     let res = await root.call_raw(
       contract,
       "create_linkdrop",
@@ -179,11 +179,10 @@ export async function createLinkdrop(
         attachedDeposit,
         gas: Gas.parse("40 Tgas"),
       }
-    )
+    );
     await root_delta.log();
-    return res
-  }
-  );
+    return res;
+  });
   t.log(res.summary());
   await contract_delta.log();
   t.log(res.logs);
@@ -210,7 +209,7 @@ export async function claim(
       gas: Gas.parse("100 Tgas"),
     }
   );
-  t.log(res.logs)
+  t.log(res.logs);
 }
 
 export function claim_raw(
@@ -323,16 +322,23 @@ export async function mint(
   root: NearAccount,
   attachedDeposit = ONE_NEAR
 ): Promise<string> {
-  return (
-    await root.call<any>(
-      tenk,
-      "nft_mint_one",
-      {},
-      {
-        attachedDeposit,
-      }
-    )
-  ).token_id;
+  let res = await mint_raw(tenk, root, attachedDeposit);
+  return res.parseResult<any>().token_id;
+}
+
+export function mint_raw(
+  tenk: NearAccount,
+  root: NearAccount,
+  attachedDeposit = ONE_NEAR
+): Promise<TransactionResult> {
+  return root.call_raw(
+    tenk,
+    "nft_mint_one",
+    {},
+    {
+      attachedDeposit,
+    }
+  );
 }
 
 export * from "./delta";

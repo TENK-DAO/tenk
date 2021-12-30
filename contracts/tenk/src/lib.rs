@@ -5,7 +5,7 @@ use near_contract_standards::non_fungible_token::{
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::{LazyOption, LookupMap},
+    collections::{LazyOption, LookupMap, LookupSet},
     env, ext_contract,
     json_types::Base64VecU8,
     log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
@@ -43,6 +43,12 @@ pub struct Contract {
     royalties: LazyOption<Royalties>,
     // Initial Royalties
     initial_royalties: LazyOption<Royalties>,
+
+    // Whitelist
+    whitelist: LookupSet<AccountId>,
+    is_premint: bool,
+    is_premint_over: bool,
+    premint_deadline_at: u64,
 }
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
@@ -77,6 +83,7 @@ enum StorageKey {
     Royalties,
     LinkdropKeys,
     InitialRoyalties,
+    Whitelist,
     #[cfg(feature = "airdrop")]
     AirdropLazyKey,
     #[cfg(feature = "airdrop")]
@@ -101,6 +108,9 @@ impl Contract {
         reference_hash: Option<Base64VecU8>,
         royalties: Option<Royalties>,
         initial_royalties: Option<Royalties>,
+        is_premint: Option<bool>,
+        is_premint_over: Option<bool>,
+        premint_deadline_at: Option<u64>,
     ) -> Self {
         royalties.as_ref().map(|r| r.validate());
         initial_royalties.as_ref().map(|r| r.validate());
@@ -121,6 +131,9 @@ impl Contract {
             percent_off.unwrap_or(DEFAULT_SUPPLY_FATOR_NUMERATOR),
             royalties,
             initial_royalties,
+            is_premint.unwrap_or(false),
+            is_premint_over.unwrap_or(false),
+            premint_deadline_at.unwrap_or(0),
         )
     }
 
@@ -134,6 +147,9 @@ impl Contract {
         percent_off: u8,
         royalties: Option<Royalties>,
         initial_royalties: Option<Royalties>,
+        is_premint: bool,
+        is_premint_over: bool,
+        premint_deadline_at: u64,
     ) -> Self {
         metadata.assert_valid();
         Self {
@@ -156,7 +172,50 @@ impl Contract {
                 StorageKey::InitialRoyalties,
                 initial_royalties.as_ref(),
             ),
+            whitelist: LookupSet::new(StorageKey::Whitelist),
+            is_premint,
+            is_premint_over,
+            premint_deadline_at,
         }
+    }
+
+    pub fn add_whitelist_account(&mut self, account_id: AccountId) {
+        self.assert_owner();
+        self.whitelist.insert(&account_id);
+    }
+
+    #[cfg(not(feature = "mainnet"))]
+    pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId) {
+      self.whitelist.insert(&account_id);
+  }
+
+    pub fn start_premint(&mut self, duration: u64) {
+        self.assert_owner();
+        require!(self.is_premint == false, "premint has already started");
+        require!(
+            self.is_premint_over == false,
+            "premint has already been done"
+        );
+        self.is_premint = true;
+        self.premint_deadline_at = env::block_timestamp() + duration;
+    }
+
+    pub fn end_premint(&mut self, base_cost: U128, min_cost: U128) {
+        self.assert_owner();
+        require!(self.is_premint, "premint must have started");
+        require!(
+            self.is_premint_over == false,
+            "premint has already been done"
+        );
+        require!(
+            env::block_timestamp() > self.premint_deadline_at,
+            "premint is still in process"
+        );
+        self.is_premint = false;
+        self.is_premint_over = true;
+        self.percent_off = 0;
+        self.base_cost = base_cost.into();
+        self.min_cost = min_cost.into();
     }
 
     #[payable]
@@ -217,13 +276,18 @@ impl Contract {
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         self.assert_can_mint(num);
-        self.nft_mint_many_ungaurded(num, env::signer_account_id(), false)
+        let owner_id = env::signer_account_id();
+        let tokens = self.nft_mint_many_ungaurded(num, &owner_id, false);
+        if self.is_premint && !self.is_owner(&owner_id) {
+          self.whitelist.remove(&owner_id);
+        }
+        tokens
     }
 
     fn nft_mint_many_ungaurded(
         &mut self,
         num: u32,
-        owner_id: AccountId,
+        owner_id: &AccountId,
         mint_for_free: bool,
     ) -> Vec<Token> {
         let initial_storage_usage = if mint_for_free {
@@ -326,7 +390,7 @@ impl Contract {
     pub fn link_callback(&mut self, account_id: AccountId, mint_for_free: bool) -> Token {
         if is_promise_success(None) {
             self.pending_tokens -= 1;
-            self.nft_mint_many_ungaurded(1, account_id, mint_for_free)[0].clone()
+            self.nft_mint_many_ungaurded(1, &account_id, mint_for_free)[0].clone()
         } else {
             env::panic_str("Promise before Linkdrop callback failed");
         }
@@ -347,6 +411,20 @@ impl Contract {
         if self.signer_is_owner() {
             return;
         }
+
+        if self.is_premint {
+            require!(
+                self.whitelist.contains(&env::signer_account_id()),
+                "Account is not in whitelist"
+            );
+            require!(
+                num == 1,
+                "Only one NFT can be minted during the premint period"
+            );
+        } else {
+            require!(self.is_premint_over, "Premint period must be over");
+        }
+
         if on_sale() {
             self.assert_deposit(num);
         } else {
@@ -447,6 +525,9 @@ mod tests {
             10_000,
             TEN.into(),
             ONE.into(),
+            None,
+            None,
+            None,
             None,
             None,
             None,
