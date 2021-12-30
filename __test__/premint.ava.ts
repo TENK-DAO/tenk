@@ -1,6 +1,6 @@
 import { ONE_NEAR, Workspace } from "near-willem-workspaces-ava";
 import { NEAR } from "near-units";
-import { deploy, mint_raw, sleep, totalCost } from "./util";
+import { claim, createLinkdrop, deploy, mint, mint_raw, sleep, totalCost } from "./util";
 
 const sale_price = NEAR.parse("0.8 N");
 
@@ -21,12 +21,19 @@ const runner = Workspace.init(
 
 runner.test("premint", async (t, { root, tenk, alice }) => {
   const cost = await totalCost(tenk, 1, alice.accountId);
+  const token = await mint(tenk, root);
+  const linkkeys = await createLinkdrop(t, tenk, root);
   t.log(cost.toHuman());
+  await claim(t, tenk, alice, linkkeys);
   await root.call(tenk, "start_premint", { duration: 10 });
   const sleepTimer = sleep(1000 * 11);
 
   let initial_try = await mint_raw(tenk, alice, cost);
   t.log(initial_try.promiseErrorMessages);
+
+  // owner can still mint
+  const second_token = await mint(tenk, root);
+
 
   await root.call(tenk, "add_whitelist_account", { account_id: alice });
   let try_mint = await mint_raw(tenk, alice, cost);
