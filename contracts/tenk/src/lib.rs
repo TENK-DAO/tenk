@@ -281,9 +281,6 @@ impl Contract {
         self.assert_can_mint(num);
         let owner_id = env::signer_account_id();
         let tokens = self.nft_mint_many_ungaurded(num, &owner_id, false);
-        if self.is_premint && !self.is_owner(&owner_id) {
-            self.whitelist.remove(&owner_id);
-        }
         tokens
     }
 
