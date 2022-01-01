@@ -29,6 +29,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
   const sleepTimer = sleep(1000 * 11);
 
   let initial_try = await mint_raw(tenk, alice, cost);
+  t.assert(initial_try.failed);
   t.log(initial_try.promiseErrorMessages);
 
   // owner can still mint
@@ -39,7 +40,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
   let try_mint = await mint_raw(tenk, alice, cost);
   t.log(try_mint.parseResult());
   let last_try = await mint_raw(tenk, alice, cost);
-  t.log(last_try.promiseErrorMessages);
+  t.assert(last_try.succeeded);
   await sleepTimer;
 
   await root.call(tenk, "end_premint", {
