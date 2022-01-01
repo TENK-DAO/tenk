@@ -183,6 +183,10 @@ impl Contract {
         self.whitelist.insert(&account_id);
     }
 
+    pub fn whitelisted(&self, account_id: AccountId) -> bool {
+      self.whitelist.contains(&account_id)
+    }
+
     #[cfg(not(feature = "mainnet"))]
     pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId) {
         self.whitelist.insert(&account_id);
