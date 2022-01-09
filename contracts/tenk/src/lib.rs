@@ -5,7 +5,7 @@ use near_contract_standards::non_fungible_token::{
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::{LazyOption, LookupMap, LookupSet},
+    collections::{LazyOption, LookupMap},
     env, ext_contract,
     json_types::Base64VecU8,
     log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
@@ -45,7 +45,7 @@ pub struct Contract {
     initial_royalties: LazyOption<Royalties>,
 
     // Whitelist
-    whitelist: LookupSet<AccountId>,
+    whitelist: LookupMap<AccountId, u32>,
     is_premint: bool,
     is_premint_over: bool,
     premint_deadline_at: u64,
@@ -171,25 +171,25 @@ impl Contract {
                 StorageKey::InitialRoyalties,
                 initial_royalties.as_ref(),
             ),
-            whitelist: LookupSet::new(StorageKey::Whitelist),
+            whitelist: LookupMap::new(StorageKey::Whitelist),
             is_premint,
             is_premint_over,
             premint_deadline_at,
         }
     }
 
-    pub fn add_whitelist_account(&mut self, account_id: AccountId) {
+    pub fn add_whitelist_account(&mut self, account_id: AccountId, allowance: u32) {
         self.assert_owner();
-        self.whitelist.insert(&account_id);
+        self.whitelist.insert(&account_id, &allowance);
     }
 
     pub fn whitelisted(&self, account_id: AccountId) -> bool {
-      self.whitelist.contains(&account_id)
+        self.whitelist.contains_key(&account_id)
     }
 
     #[cfg(not(feature = "mainnet"))]
-    pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId) {
-        self.whitelist.insert(&account_id);
+    pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId, allowance: u32) {
+        self.whitelist.insert(&account_id, &allowance);
     }
 
     pub fn start_premint(&mut self, duration: u64) {
@@ -241,6 +241,9 @@ impl Contract {
         let mint_for_free = self.is_owner(&account);
         log!("Total cost of creation is {}", total_cost);
         refund(&account, deposit - total_cost);
+        if self.is_premint {
+          self.update_whitelist_allowance(1);
+        }
         self.send(public_key, mint_for_free)
             .then(ext_self::on_send_with_callback(
                 env::current_account_id(),
@@ -281,6 +284,9 @@ impl Contract {
         self.assert_can_mint(num);
         let owner_id = env::signer_account_id();
         let tokens = self.nft_mint_many_ungaurded(num, &owner_id, false);
+        if self.is_premint {
+          self.update_whitelist_allowance(num);
+        }
         tokens
     }
 
@@ -414,12 +420,8 @@ impl Contract {
 
         if self.is_premint {
             require!(
-                self.whitelist.contains(&env::signer_account_id()),
+                self.whitelist.get(&env::signer_account_id()).unwrap() <= num,
                 "Account is not in whitelist"
-            );
-            require!(
-                num == 1,
-                "Only one NFT can be minted during the premint period"
             );
         } else {
             require!(self.is_premint_over, "Premint period must be over");
@@ -487,6 +489,16 @@ impl Contract {
             reference,   // URL to an off-chain JSON file with more info.
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
         }
+    }
+
+    fn update_whitelist_allowance(&mut self, num: u32) {
+      let signer_id = env::signer_account_id();
+      let allowance = self.whitelist.get(&signer_id);
+      require!(allowance.is_some(), "Account not on whitelist");
+      let allowance = allowance.unwrap();
+      let new_allowance = allowance - num;
+      self.whitelist.insert(&signer_id, &new_allowance);
+      
     }
 }
 
