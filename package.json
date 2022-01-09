@@ -9,6 +9,12 @@
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
     "test:linkdrop": "yarn test:testnet '*/link*'",
+    "deploy:testnet": "yarn build && ts-node ./scripts/deploy.ts",
+    "delpoy:mainnet": "yarn build:mainnet && near repl -s ./scripts/deploy-zodiac.js",
+    "createKeys": "ts-node ./scripts/create-keys.ts",
+    "createLinkUrls": "ts-node ./scripts/create-linkdrops-urls.ts",
+    "createLinkdrops":"near repl -s ./scripts/create-linkdrops.js",
+    "addWhitelist": "near repl -s ./scripts/add-whitelist.js",
     "test:unit": "cargo test",
     "test:ci": "yarn test:unit && yarn test",
     "lint": "yarn eslint . --ext .ts"

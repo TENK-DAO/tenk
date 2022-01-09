@@ -11,7 +11,7 @@ async function main({ account, near, nearAPI, argv }) {
   const [file, contractId] = argv;
   let keys = JSON.parse(await readFile(file, "utf8"));
 
-  for (let i = 500; i < 900; i++) {
+  for (let i = 0; i < keys.length; i++) {
     const { publicKey } = keys[i];
     const public_key = publicKey;
     const keyAdded = await account.viewFunction(contractId, "check_key", {

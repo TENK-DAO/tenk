@@ -4,7 +4,7 @@ import * as fs from "fs";
 const res = process.argv.slice(2);
 
 if (res.length < 2) {
-  console.error("Help:\n<num of links> <output file>");
+  console.error("Create list of keys for linkdrop:\n<num of links> <output file>");
   process.exit(1);
 }
 

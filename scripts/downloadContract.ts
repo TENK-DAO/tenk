@@ -6,6 +6,7 @@ let network: "testnet" | "mainnet" = "testnet";
 const args = process.argv.slice(2);
 
 if (args.length < 1) {
+  console.error("Download the binary of a contract");
   console.error("<contract> <network = testnet>");
   process.exit(1);
 }

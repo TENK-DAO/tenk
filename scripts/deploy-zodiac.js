@@ -68,11 +68,11 @@ async function main({ account, near, nearAPI }) {
      console.log("about to initialize")
   }
 
-  await contractAccount.signAndSendTransaction({
+  let res = await contractAccount.signAndSendTransaction({
     receiverId: contractId,
     actions,
   });
-  console.log(`deployed ${contractId}`);
+  console.log(`deployed ${contractId} \n ${JSON.stringify(res, null, 4)}`);
 }
 
 module.exports.main = main;
