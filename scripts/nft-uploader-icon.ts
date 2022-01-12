@@ -54,7 +54,9 @@ function makeLink(s: string): string {
 }
 
 async function main() {
-  const initialFiles = await parseFiles();
+  // const initialFiles = await parseFiles();
+  const image_data = await fs.readFile("/Users/willem/Downloads/tongdao.jpeg");
+  let initialFiles = [new File([image_data], "tongdao.jpeg")];
   const client = new NFTStorage({ token: API_TOKEN });
   const CID = await client.storeDirectory(initialFiles);
   console.log(makeLink(CID));

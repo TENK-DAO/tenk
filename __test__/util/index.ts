@@ -1,4 +1,3 @@
-import { join } from "path";
 import { Gas, NEAR } from "near-units";
 import {
   Account,
@@ -12,13 +11,10 @@ import {
   AccountManager,
 } from "near-willem-workspaces";
 import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
+import { binPath } from "./bin";
 import { BalanceDelta, getDelta } from "./delta";
 
-const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
-
-export function binPath(name: string): string {
-  return join(__dirname, "..", "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
-}
+export * from "./bin";
 
 // This will allow the contract account to be deleted since the size is reduced
 export async function deployEmpty(account: NearAccount): Promise<void> {
@@ -45,6 +41,7 @@ export function deploy(
       size: 100,
       base_cost: NEAR.parse("1 N"),
       min_cost: NEAR.parse("1 N"),
+      is_premint_over: true,
       ...args,
     },
   });
@@ -65,7 +62,6 @@ export async function nftTokensForOwner(
 
 // export const ONE_NEAR = NEAR.parse("1 N")
 
-export const CONTRACT_PATH = binPath("tenk");
 
 export const DEFAULT_BASE_COST = NEAR.parse("10 N");
 export const DEFAULT_MIN_COST = NEAR.parse("1 N");
@@ -161,14 +157,12 @@ export async function createLinkdrop(
   const senderKey = createKeyPair();
   const public_key = senderKey.getPublicKey().toString();
   // const linkdrop_cost
-  attachedDeposit = attachedDeposit ?? (await linkdropCost(contract, root.accountId));
+  attachedDeposit =
+    attachedDeposit ?? (await linkdropCost(contract, root.accountId));
   const contract_delta = await BalanceDelta.create(contract, t);
   // This adds the key as a function access key on `create_account_and_claim`
-  t.log("attachedDeposit", attachedDeposit.toHuman());
   const root_delta = await BalanceDelta.create(root, t);
   const [delta, res] = await getDelta(t, root, async () => {
-
-    await root_delta.log()
     let res = await root.call_raw(
       contract,
       "create_linkdrop",
@@ -179,15 +173,12 @@ export async function createLinkdrop(
         attachedDeposit,
         gas: Gas.parse("40 Tgas"),
       }
-    )
-    await root_delta.log();
-    return res
-  }
-  );
-  t.log(res.summary());
-  await contract_delta.log();
-  t.log(res.logs);
-  await delta.log();
+    );
+    return res;
+  });
+  // await contract_delta.log();
+  // t.log(res.logs);
+  // await delta.log();
   t.assert(res.succeeded);
   t.assert(await checkKey(senderKey.getPublicKey(), contract));
   return senderKey;
@@ -198,8 +189,8 @@ export async function claim(
   tenk: NearAccount,
   alice: NearAccount,
   signWithKey: KeyPair
-): Promise<void> {
-  let res = await tenk.call_raw(
+): Promise<TransactionResult> {
+  return tenk.call_raw(
     tenk,
     "claim",
     {
@@ -209,8 +200,7 @@ export async function claim(
       signWithKey,
       gas: Gas.parse("100 Tgas"),
     }
-  );
-  t.log(res.logs)
+  )
 }
 
 export function claim_raw(
@@ -323,16 +313,23 @@ export async function mint(
   root: NearAccount,
   attachedDeposit = ONE_NEAR
 ): Promise<string> {
-  return (
-    await root.call<any>(
-      tenk,
-      "nft_mint_one",
-      {},
-      {
-        attachedDeposit,
-      }
-    )
-  ).token_id;
+  let res = await mint_raw(tenk, root, attachedDeposit);
+  return res.parseResult<any>().token_id;
+}
+
+export function mint_raw(
+  tenk: NearAccount,
+  root: NearAccount,
+  attachedDeposit = ONE_NEAR
+): Promise<TransactionResult> {
+  return root.call_raw(
+    tenk,
+    "nft_mint_one",
+    {},
+    {
+      attachedDeposit,
+    }
+  );
 }
 
 export * from "./delta";
