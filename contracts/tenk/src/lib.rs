@@ -392,9 +392,9 @@ impl Contract {
     }
 
     fn create_metadata(&mut self, token_id: &String) -> TokenMetadata {
-        let media = Some(format!("{}.png", token_id));
-        let reference = Some(format!("{}.json", token_id));
-        let title = Some(format!("{}", token_id));
+        let media = Some(format!("https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/{}.png", token_id));
+        let reference = Some(format!("https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/{}.json", token_id));
+        let title = Some(format!("NDN {}", token_id));
         TokenMetadata {
             title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             description: None, // free-form description
