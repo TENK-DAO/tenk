@@ -204,25 +204,17 @@ impl Contract {
         log!("New deadline {}", self.premint_deadline_at);
     }
 
-    pub fn end_premint(&mut self, base_cost: U128, min_cost: U128) {
+    pub fn end_premint(&mut self, base_cost: U128, min_cost: U128, percent_off: Option<u8>) {
         self.assert_owner();
         require!(self.is_premint, "premint must have started");
         require!(
             self.is_premint_over == false,
             "premint has already been done"
         );
-        let current_block = env::block_height();
-        let deadline_passed = current_block > self.premint_deadline_at;
-        log!(
-            "Current time {} deadline {}, is over {}",
-            current_block,
-            self.premint_deadline_at,
-            deadline_passed
-        );
-        require!(deadline_passed, "premint is still in process");
+        require!(self.premint_deadline_at < env::block_height() , "premint is still in process");
         self.is_premint = false;
         self.is_premint_over = true;
-        self.percent_off = 0;
+        self.percent_off = percent_off.unwrap_or(0);
         self.base_cost = base_cost.into();
         self.min_cost = min_cost.into();
     }
@@ -422,7 +414,7 @@ impl Contract {
         // Owner can mint for free
         if !self.is_owner(account_id) {
             if self.is_premint {
-                let allowance = self.get_whitelist_allowance(&env::signer_account_id());
+                let allowance = self.get_whitelist_allowance(&account_id);
                 num = u32::min(allowance, num);
                 require!(num > 0, "Account has no more allowance in the whitelist");
             } else {
