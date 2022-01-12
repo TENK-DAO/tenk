@@ -119,9 +119,9 @@ mod tests {
         for _ in 0..100 {
             let len = vec.len();
             assert!(set.insert(vec.draw()));
+            assert_eq!(len - 1, vec.len());
             let next = rng.gen::<u64>().to_le_bytes().to_vec();
             testing_env!(context.random_seed(next).build());
-            assert_eq!(len - 1, vec.len())
         }
     }
 }

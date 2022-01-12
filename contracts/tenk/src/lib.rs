@@ -200,7 +200,8 @@ impl Contract {
             "premint has already been done"
         );
         self.is_premint = true;
-        self.premint_deadline_at = env::block_timestamp() + duration;
+        self.premint_deadline_at = env::block_height() + duration;
+        log!("New deadline {}", self.premint_deadline_at);
     }
 
     pub fn end_premint(&mut self, base_cost: U128, min_cost: U128) {
@@ -210,10 +211,15 @@ impl Contract {
             self.is_premint_over == false,
             "premint has already been done"
         );
-        require!(
-            env::block_timestamp() > self.premint_deadline_at,
-            "premint is still in process"
+        let current_block = env::block_height();
+        let deadline_passed = current_block > self.premint_deadline_at;
+        log!(
+            "Current time {} deadline {}, is over {}",
+            current_block,
+            self.premint_deadline_at,
+            deadline_passed
         );
+        require!(deadline_passed, "premint is still in process");
         self.is_premint = false;
         self.is_premint_over = true;
         self.percent_off = 0;
@@ -233,16 +239,16 @@ impl Contract {
 
     #[payable]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
-        self.assert_can_mint(1);
         let deposit = env::attached_deposit();
-        let account = env::predecessor_account_id();
-        let total_cost = self.cost_of_linkdrop(&account).0;
+        let account = &env::predecessor_account_id();
+        self.assert_can_mint(account, 1);
+        let total_cost = self.cost_of_linkdrop(account).0;
         self.pending_tokens += 1;
-        let mint_for_free = self.is_owner(&account);
+        let mint_for_free = self.is_owner(account);
         log!("Total cost of creation is {}", total_cost);
-        refund(&account, deposit - total_cost);
+        refund(account, deposit - total_cost);
         if self.is_premint {
-          self.update_whitelist_allowance(1);
+            self.use_whitelist_allowance(account, 1);
         }
         self.send(public_key, mint_for_free)
             .then(ext_self::on_send_with_callback(
@@ -281,11 +287,11 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
-        self.assert_can_mint(num);
-        let owner_id = env::signer_account_id();
-        let tokens = self.nft_mint_many_ungaurded(num, &owner_id, false);
+        let owner_id = &env::signer_account_id();
+        let num = self.assert_can_mint(owner_id, num);
+        let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
         if self.is_premint {
-          self.update_whitelist_allowance(num);
+            self.use_whitelist_allowance(owner_id, num);
         }
         tokens
     }
@@ -410,28 +416,27 @@ impl Contract {
         );
     }
 
-    fn assert_can_mint(&self, num: u32) {
+    fn assert_can_mint(&self, account_id: &AccountId, num: u32) -> u32 {
+        let mut num = num;
         // Check quantity
-        require!(self.tokens_left() >= num, "No NFTs left to mint");
         // Owner can mint for free
-        if self.signer_is_owner() {
-            return;
+        if !self.is_owner(account_id) {
+            if self.is_premint {
+                let allowance = self.get_whitelist_allowance(&env::signer_account_id());
+                num = u32::min(allowance, num);
+                require!(num > 0, "Account has no more allowance in the whitelist");
+            } else {
+                require!(self.is_premint_over, "Premint period must be over");
+            }
         }
-
-        if self.is_premint {
-            require!(
-                self.whitelist.get(&env::signer_account_id()).unwrap() <= num,
-                "Account is not in whitelist"
-            );
-        } else {
-            require!(self.is_premint_over, "Premint period must be over");
-        }
+        require!(self.tokens_left() >= num, "No NFTs left to mint");
 
         if on_sale() {
             self.assert_deposit(num);
         } else {
             env::panic_str("Minting is not available")
-        }
+        };
+        num
     }
 
     fn assert_owner(&self) {
@@ -491,14 +496,16 @@ impl Contract {
         }
     }
 
-    fn update_whitelist_allowance(&mut self, num: u32) {
-      let signer_id = env::signer_account_id();
-      let allowance = self.whitelist.get(&signer_id);
-      require!(allowance.is_some(), "Account not on whitelist");
-      let allowance = allowance.unwrap();
-      let new_allowance = allowance - num;
-      self.whitelist.insert(&signer_id, &new_allowance);
-      
+    fn use_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) {
+        let allowance = self.get_whitelist_allowance(account_id);
+        let new_allowance = allowance - num;
+        self.whitelist.insert(&account_id, &new_allowance);
+    }
+
+    fn get_whitelist_allowance(&self, account_id: &AccountId) -> u32 {
+        self.whitelist
+            .get(account_id)
+            .unwrap_or_else(|| panic!("Account not on whitelist"))
     }
 }
 
