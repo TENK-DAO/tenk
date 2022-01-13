@@ -6,12 +6,12 @@ if (Workspace.networkIsSandbox()) {
   function createRoyalties({ root, alice, bob, eve }) {
     return {
       accounts: {
-        [root.accountId]: 10,
-        [alice.accountId]: 10,
-        [bob.accountId]: 10,
-        [eve.accountId]: 70,
+        [root.accountId]: 1_000,
+        [alice.accountId]: 1_000,
+        [bob.accountId]: 1_000,
+        [eve.accountId]: 7_000,
       },
-      percent: 20,
+      percent: 2_000,
     };
   }
 
@@ -44,11 +44,17 @@ if (Workspace.networkIsSandbox()) {
       balance,
       max_len_payout: 10,
     });
+    t.log(payouts)
+    t.log((await tenk.view_raw("nft_payout", {
+      token_id,
+      balance,
+      max_len_payout: 10,
+    })).logs);
     let innerPayout = createRoyalties({ root, bob, alice, eve }).accounts;
     t.log(innerPayout);
     Object.keys(innerPayout).map(
       (key) =>
-        (innerPayout[key] = NEAR.parse(`${innerPayout[key]}N`).toString())
+        (innerPayout[key] = NEAR.parse(`${innerPayout[key]}cN`).toString())
     );
     innerPayout[root.accountId] = balance
       .mul(NEAR.from(4))

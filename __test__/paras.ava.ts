@@ -5,11 +5,11 @@ import { nftTokensForOwner, mint, BalanceDelta, deploy, totalCost } from "./util
 function getRoyalties({ root, alice, eve }) {
   return {
     accounts: {
-      [root.accountId]: 10,
-      [alice.accountId]: 20,
-      [eve.accountId]: 70,
+      [root.accountId]: 1_000,
+      [alice.accountId]: 2_000,
+      [eve.accountId]: 7_000,
     },
-    percent: 20,
+    percent: 2_000,
   };
 }
 
@@ -105,7 +105,8 @@ runner.test("buy one", async (t, { root, tenk, paras, bob, eve }) => {
       attachedDeposit: ONE_NEAR,
     }
   );
-
+  
+  await bob2Delta.log();
   await bob2Delta.isLessOrEqual(ONE_NEAR.neg());
   await bobDelta.isGreaterOrEqual(NEAR.parse("750 mN"));
 
