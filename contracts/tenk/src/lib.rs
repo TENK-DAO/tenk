@@ -49,6 +49,7 @@ pub struct Contract {
     is_premint: bool,
     is_premint_over: bool,
     premint_deadline_at: u64,
+    allowance: Option<u32>,
 }
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
 const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
@@ -110,6 +111,7 @@ impl Contract {
         initial_royalties: Option<Royalties>,
         is_premint: Option<bool>,
         is_premint_over: Option<bool>,
+        allowance: Option<u32>,
     ) -> Self {
         royalties.as_ref().map(|r| r.validate());
         initial_royalties.as_ref().map(|r| r.validate());
@@ -133,6 +135,7 @@ impl Contract {
             is_premint.unwrap_or(false),
             is_premint_over.unwrap_or(false),
             0,
+            allowance,
         )
     }
 
@@ -149,6 +152,7 @@ impl Contract {
         is_premint: bool,
         is_premint_over: bool,
         premint_deadline_at: u64,
+        allowance: Option<u32>,
     ) -> Self {
         metadata.assert_valid();
         Self {
@@ -175,12 +179,20 @@ impl Contract {
             is_premint,
             is_premint_over,
             premint_deadline_at,
+            allowance,
         }
     }
 
-    pub fn add_whitelist_account(&mut self, account_id: AccountId, allowance: u32) {
+    pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) {
         self.assert_owner();
-        self.whitelist.insert(&account_id, &allowance);
+        require!(
+            accounts.len() <= 10,
+            "Can't add more than ten accounts at a time"
+        );
+        let allowance = allowance.unwrap_or(self.allowance.unwrap_or(0));
+        accounts.iter().for_each(|account_id| {
+            self.whitelist.insert(account_id, &allowance);
+        });
     }
 
     pub fn whitelisted(&self, account_id: AccountId) -> bool {
@@ -201,7 +213,6 @@ impl Contract {
         );
         self.is_premint = true;
         self.premint_deadline_at = env::block_height() + duration;
-        log!("New deadline {}", self.premint_deadline_at);
     }
 
     pub fn end_premint(&mut self, base_cost: U128, min_cost: U128, percent_off: Option<u8>) {
@@ -211,7 +222,10 @@ impl Contract {
             self.is_premint_over == false,
             "premint has already been done"
         );
-        require!(self.premint_deadline_at < env::block_height() , "premint is still in process");
+        require!(
+            self.premint_deadline_at < env::block_height(),
+            "premint is still in process"
+        );
         self.is_premint = false;
         self.is_premint_over = true;
         self.percent_off = percent_off.unwrap_or(0);
@@ -237,11 +251,9 @@ impl Contract {
         let total_cost = self.cost_of_linkdrop(account).0;
         self.pending_tokens += 1;
         let mint_for_free = self.is_owner(account);
+        self.use_whitelist_allowance(account, 1);
         log!("Total cost of creation is {}", total_cost);
         refund(account, deposit - total_cost);
-        if self.is_premint {
-            self.use_whitelist_allowance(account, 1);
-        }
         self.send(public_key, mint_for_free)
             .then(ext_self::on_send_with_callback(
                 env::current_account_id(),
@@ -282,9 +294,7 @@ impl Contract {
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
-        if self.is_premint {
-            self.use_whitelist_allowance(owner_id, num);
-        }
+        self.use_whitelist_allowance(owner_id, num);
         tokens
     }
 
@@ -358,6 +368,10 @@ impl Contract {
         self.metadata.get().unwrap()
     }
 
+    pub fn remaining_allowance(&self, account_id: &AccountId) -> u32 {
+      self.whitelist.get(account_id).unwrap_or(0)
+    }
+
     // Owner private methods
 
     pub fn transfer_ownership(&mut self, new_owner: AccountId) {
@@ -373,6 +387,11 @@ impl Contract {
         self.assert_owner();
         royalties.validate();
         self.royalties.replace(&royalties)
+    }
+
+    pub fn update_allowance(&mut self, allowance: u32) {
+      self.assert_owner();
+      self.allowance = Some(allowance);
     }
 
     // Contract private methods
@@ -401,33 +420,29 @@ impl Contract {
     }
 
     // Private methods
-    fn assert_deposit(&self, num: u32) {
+    fn assert_deposit(&self, num: u32, account_id: &AccountId) {
         require!(
-            env::attached_deposit() >= self.total_cost(num, &env::signer_account_id()).0,
+            env::attached_deposit() >= self.total_cost(num, account_id).0,
             "Not enough attached deposit to buy"
         );
     }
 
-    fn assert_can_mint(&self, account_id: &AccountId, num: u32) -> u32 {
+    fn assert_can_mint(&mut self, account_id: &AccountId, num: u32) -> u32 {
         let mut num = num;
         // Check quantity
         // Owner can mint for free
         if !self.is_owner(account_id) {
-            if self.is_premint {
-                let allowance = self.get_whitelist_allowance(&account_id);
-                num = u32::min(allowance, num);
-                require!(num > 0, "Account has no more allowance in the whitelist");
+            let allowance = if self.is_premint {
+                self.get_whitelist_allowance(&account_id)
             } else {
                 require!(self.is_premint_over, "Premint period must be over");
-            }
+                self.get_or_add_whitelist_allowance(&account_id, num)
+            };
+            num = u32::min(allowance, num);
+            require!(num > 0, "Account has no more allowance left");
         }
         require!(self.tokens_left() >= num, "No NFTs left to mint");
-
-        if on_sale() {
-            self.assert_deposit(num);
-        } else {
-            env::panic_str("Minting is not available")
-        };
+        self.assert_deposit(num, account_id);
         num
     }
 
@@ -489,15 +504,29 @@ impl Contract {
     }
 
     fn use_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) {
-        let allowance = self.get_whitelist_allowance(account_id);
-        let new_allowance = allowance - num;
-        self.whitelist.insert(&account_id, &new_allowance);
+        if self.has_allowance() && !self.is_owner(account_id) {
+            let allowance = self.get_whitelist_allowance(account_id);
+            let new_allowance = allowance - u32::min(num, allowance);
+            self.whitelist.insert(&account_id, &new_allowance);
+        }
     }
 
     fn get_whitelist_allowance(&self, account_id: &AccountId) -> u32 {
         self.whitelist
             .get(account_id)
             .unwrap_or_else(|| panic!("Account not on whitelist"))
+    }
+
+    fn get_or_add_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) -> u32 {
+        self.allowance.map_or(num, |allowance| {
+            self.whitelist.get(account_id).unwrap_or_else(|| {
+                self.whitelist.insert(&account_id, &allowance);
+                allowance
+            })
+        })
+    }
+    fn has_allowance(&self) -> bool {
+        self.allowance.is_some() || self.is_premint
     }
 }
 
@@ -508,11 +537,6 @@ near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 fn log_mint(owner_id: &str, token_ids: Vec<String>) {
     NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
 }
-
-fn on_sale() -> bool {
-    cfg!(feature = "on_sale")
-}
-
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance
 }
@@ -536,6 +560,7 @@ mod tests {
             10_000,
             TEN.into(),
             ONE.into(),
+            None,
             None,
             None,
             None,
