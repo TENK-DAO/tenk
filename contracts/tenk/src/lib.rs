@@ -43,6 +43,7 @@ pub struct Contract {
     royalties: LazyOption<Royalties>,
     // Initial Royalties
     initial_royalties: LazyOption<Royalties>,
+    initial_size: u32,
 
     // Whitelist
     whitelist: LookupMap<AccountId, u32>,
@@ -175,6 +176,7 @@ impl Contract {
                 StorageKey::InitialRoyalties,
                 initial_royalties.as_ref(),
             ),
+            initial_size: size,
             whitelist: LookupMap::new(StorageKey::Whitelist),
             is_premint,
             is_premint_over,
@@ -200,7 +202,7 @@ impl Contract {
     }
 
     #[cfg(not(feature = "mainnet"))]
-    pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId, allowance: u32) {
+    pub fn add_whitelist_account_unguarded(&mut self, account_id: AccountId, allowance: u32) {
         self.whitelist.insert(&account_id, &allowance);
     }
 
@@ -236,11 +238,19 @@ impl Contract {
     #[payable]
     pub fn nft_mint(
         &mut self,
-        _token_id: TokenId,
-        _token_owner_id: AccountId,
-        _token_metadata: TokenMetadata,
+        token_id: TokenId,
+        token_owner_id: AccountId,
+        _token_metadata: Option<TokenMetadata>,
     ) -> Token {
-        self.nft_mint_one()
+        self.assert_owner();
+        if  self.initial_size <= token_id.parse::<u32>().unwrap() {
+          let token = self.internal_mint(token_id, token_owner_id, None);
+          log_mint(token.owner_id.as_str(), vec![token.token_id.clone()]);
+          token
+        } else {
+          panic!("Cannot mint tokens under {}", self.initial_size);
+        }
+
     }
 
     #[payable]
@@ -290,7 +300,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+    fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -369,7 +379,7 @@ impl Contract {
     }
 
     pub fn remaining_allowance(&self, account_id: &AccountId) -> u32 {
-      self.whitelist.get(account_id).unwrap_or(0)
+        self.whitelist.get(account_id).unwrap_or(0)
     }
 
     // Owner private methods
@@ -390,8 +400,16 @@ impl Contract {
     }
 
     pub fn update_allowance(&mut self, allowance: u32) {
-      self.assert_owner();
-      self.allowance = Some(allowance);
+        self.assert_owner();
+        self.allowance = Some(allowance);
+    }
+
+    pub fn update_uri(&mut self, uri: String) {
+        self.assert_owner();
+        let mut metadata = self.metadata.get().unwrap();
+        log!("New URI: {}", &uri);
+        metadata.base_uri = Some(uri);
+        self.metadata.set(&metadata);
     }
 
     // Contract private methods
@@ -518,6 +536,7 @@ impl Contract {
     }
 
     fn get_or_add_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) -> u32 {
+        // return num if allowance isn't set
         self.allowance.map_or(num, |allowance| {
             self.whitelist.get(account_id).unwrap_or_else(|| {
                 self.whitelist.insert(&account_id, &allowance);

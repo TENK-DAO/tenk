@@ -109,7 +109,10 @@ impl Royalties {
         );
         let mut total: BasisPoint = 0;
         self.accounts.iter().for_each(|(_, percent)| {
-            require!(*percent <= ONE_HUNDRED_PERCENT_IN_BPS, "each royalty should be less than 10,000");
+            require!(
+                *percent <= ONE_HUNDRED_PERCENT_IN_BPS,
+                "each royalty should be less than 10,000"
+            );
             total += percent;
         });
         require!(
@@ -138,11 +141,11 @@ impl Royalties {
     }
 
     pub(crate) fn send_funds(&self, balance: Balance, owner_id: &AccountId) {
-      self.create_payout(balance, owner_id).send_funds();
+        self.create_payout(balance, owner_id).send_funds();
     }
 }
 
 fn apply_percent(percent: BasisPoint, int: u128) -> u128 {
-  let res = int * percent as u128 / 10_000u128;
-  res
+    let res = int * percent as u128 / 10_000u128;
+    res
 }
