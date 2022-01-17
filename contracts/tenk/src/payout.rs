@@ -78,10 +78,10 @@ impl Payouts for Contract {
         assert_one_yocto();
         let payout = self.nft_payout(token_id.clone(), balance, max_len_payout);
         self.nft_transfer(
-            receiver_id.clone(),
-            token_id.clone(),
-            approval_id.clone(),
-            memo.clone(),
+            receiver_id,
+            token_id,
+            approval_id,
+            memo,
         );
         payout
     }
@@ -146,6 +146,5 @@ impl Royalties {
 }
 
 fn apply_percent(percent: BasisPoint, int: u128) -> u128 {
-    let res = int * percent as u128 / 10_000u128;
-    res
+    int * percent as u128 / 10_000u128
 }

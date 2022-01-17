@@ -116,9 +116,9 @@ impl Contract {
         royalties.as_ref().map(|r| r.validate());
         initial_royalties.as_ref().map(|r| r.validate());
         Self::new(
-            owner_id.clone(),
+            owner_id,
             NFTContractMetadata {
-                spec: spec.unwrap_or(NFT_METADATA_SPEC.to_string()),
+                spec: spec.unwrap_or_else(|| NFT_METADATA_SPEC.to_string()),
                 name,
                 symbol,
                 icon,
@@ -189,7 +189,7 @@ impl Contract {
             accounts.len() <= 10,
             "Can't add more than ten accounts at a time"
         );
-        let allowance = allowance.unwrap_or(self.allowance.unwrap_or(0));
+        let allowance = allowance.unwrap_or_else(||self.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
         });
@@ -206,11 +206,8 @@ impl Contract {
 
     pub fn start_premint(&mut self, duration: u64) {
         self.assert_owner();
-        require!(self.is_premint == false, "premint has already started");
-        require!(
-            self.is_premint_over == false,
-            "premint has already been done"
-        );
+        require!(!self.is_premint, "premint has already started");
+        require!(!self.is_premint_over, "premint has already been done");
         self.is_premint = true;
         self.premint_deadline_at = env::block_height() + duration;
     }
@@ -218,10 +215,7 @@ impl Contract {
     pub fn end_premint(&mut self, base_cost: U128, min_cost: U128, percent_off: Option<u8>) {
         self.assert_owner();
         require!(self.is_premint, "premint must have started");
-        require!(
-            self.is_premint_over == false,
-            "premint has already been done"
-        );
+        require!(!self.is_premint_over, "premint has already been done");
         require!(
             self.premint_deadline_at < env::block_height(),
             "premint is still in process"
@@ -433,10 +427,10 @@ impl Contract {
         // Owner can mint for free
         if !self.is_owner(account_id) {
             let allowance = if self.is_premint {
-                self.get_whitelist_allowance(&account_id)
+                self.get_whitelist_allowance(account_id)
             } else {
                 require!(self.is_premint_over, "Premint period must be over");
-                self.get_or_add_whitelist_allowance(&account_id, num)
+                self.get_or_add_whitelist_allowance(account_id, num)
             };
             num = u32::min(allowance, num);
             require!(num > 0, "Account has no more allowance left");
@@ -483,10 +477,10 @@ impl Contract {
             .internal_mint_with_refund(token_id, token_owner_id, token_metadata, refund_id)
     }
 
-    fn create_metadata(&mut self, token_id: &String) -> TokenMetadata {
+    fn create_metadata(&mut self, token_id: &str) -> TokenMetadata {
         let media = Some(format!("{}.png", token_id));
         let reference = Some(format!("{}.json", token_id));
-        let title = Some(format!("{}", token_id));
+        let title = Some(token_id.to_string());
         TokenMetadata {
             title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             description: None, // free-form description
@@ -507,7 +501,7 @@ impl Contract {
         if self.has_allowance() && !self.is_owner(account_id) {
             let allowance = self.get_whitelist_allowance(account_id);
             let new_allowance = allowance - u32::min(num, allowance);
-            self.whitelist.insert(&account_id, &new_allowance);
+            self.whitelist.insert(account_id, &new_allowance);
         }
     }
 
@@ -521,7 +515,7 @@ impl Contract {
         // return num if allowance isn't set
         self.allowance.map_or(num, |allowance| {
             self.whitelist.get(account_id).unwrap_or_else(|| {
-                self.whitelist.insert(&account_id, &allowance);
+                self.whitelist.insert(account_id, &allowance);
                 allowance
             })
         })
