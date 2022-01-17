@@ -56,7 +56,6 @@ const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
 const GAS_REQUIRED_TO_CREATE_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
-const TECH_BACKUP_OWNER: &str = "willem.near";
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
@@ -290,7 +289,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+    fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -369,7 +368,7 @@ impl Contract {
     }
 
     pub fn remaining_allowance(&self, account_id: &AccountId) -> u32 {
-      self.whitelist.get(account_id).unwrap_or(0)
+        self.whitelist.get(account_id).unwrap_or(0)
     }
 
     // Owner private methods
@@ -390,8 +389,8 @@ impl Contract {
     }
 
     pub fn update_allowance(&mut self, allowance: u32) {
-      self.assert_owner();
-      self.allowance = Some(allowance);
+        self.assert_owner();
+        self.allowance = Some(allowance);
     }
 
     // Contract private methods
@@ -455,7 +454,7 @@ impl Contract {
     }
 
     fn is_owner(&self, minter: &AccountId) -> bool {
-        minter.as_str() == self.tokens.owner_id.as_str() || minter.as_str() == TECH_BACKUP_OWNER
+        minter.as_str() == self.tokens.owner_id.as_str()
     }
 
     fn full_link_price(&self, minter: &AccountId) -> u128 {
@@ -518,6 +517,7 @@ impl Contract {
     }
 
     fn get_or_add_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) -> u32 {
+        // return num if allowance isn't set
         self.allowance.map_or(num, |allowance| {
             self.whitelist.get(account_id).unwrap_or_else(|| {
                 self.whitelist.insert(&account_id, &allowance);
