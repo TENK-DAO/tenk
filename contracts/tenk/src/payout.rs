@@ -87,30 +87,34 @@ impl Payouts for Contract {
     }
 }
 
+type BasisPoint = u16;
+
+const ONE_HUNDRED_PERCENT_IN_BPS: BasisPoint = 10_000;
+
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 pub struct Royalties {
-    pub accounts: HashMap<AccountId, u8>,
-    pub percent: u8,
+    pub accounts: HashMap<AccountId, BasisPoint>,
+    pub percent: BasisPoint,
 }
 
 impl Royalties {
     pub(crate) fn validate(&self) {
         require!(
-            self.percent <= 100,
-            "royalty percent must be between 0 - 100"
+            self.percent <= ONE_HUNDRED_PERCENT_IN_BPS,
+            "royalty percent is in basis points and must be between 0 - 10,0000"
         );
         require!(
             self.accounts.len() <= 10,
             "can only have a maximum of 10 accounts spliting royalties"
         );
-        let mut total: u8 = 0;
+        let mut total: BasisPoint = 0;
         self.accounts.iter().for_each(|(_, percent)| {
-            require!(*percent <= 100, "each royalty should be less than 100");
+            require!(*percent <= ONE_HUNDRED_PERCENT_IN_BPS, "each royalty should be less than 10,000");
             total += percent;
         });
         require!(
-            total <= 100,
-            "total percent of each royalty split  must be less than 100"
+            total <= ONE_HUNDRED_PERCENT_IN_BPS,
+            "total percent of each royalty split must be less than 10,000"
         )
     }
     pub(crate) fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {
@@ -127,7 +131,7 @@ impl Royalties {
                 })
                 .collect(),
         };
-        let rest = balance - royalty_payment;
+        let rest = balance - u128::min(royalty_payment, balance);
         let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
         payout.payout.insert(owner_id.clone(), owner_payout.into());
         payout
@@ -138,6 +142,7 @@ impl Royalties {
     }
 }
 
-fn apply_percent(percent: u8, int: u128) -> u128 {
-    int * percent as u128 / 100u128
+fn apply_percent(percent: BasisPoint, int: u128) -> u128 {
+  let res = int * percent as u128 / 10_000u128;
+  res
 }
