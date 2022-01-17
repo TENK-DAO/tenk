@@ -5,7 +5,7 @@
   "scripts": {
     "pretest": "yarn build && yarn lint",
     "upload:nft": "ts-node ./scripts/nft-uploader.ts",
-    "build": "cargo build --target wasm32-unknown-unknown --release --features on_sale",
+    "build": "cargo build --target wasm32-unknown-unknown --release",
     "build:mainnet": "yarn build --features mainnet",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
