@@ -25,8 +25,8 @@ pub fn get_random_number(shift_amount: u32) -> u32 {
 }
 
 pub fn refund(account_id: &AccountId, amount: u128) -> Option<Promise> {
-  if amount > 0 {
-    return Some(Promise::new(account_id.clone()).transfer(amount))
-  };
-  None
+    if amount > 0 {
+        return Some(Promise::new(account_id.clone()).transfer(amount));
+    };
+    None
 }

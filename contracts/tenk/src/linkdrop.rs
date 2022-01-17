@@ -1,6 +1,7 @@
 use crate::*;
 use near_sdk::{
-    env, ext_contract, json_types::U128, near_bindgen, AccountId, Balance, Gas, Promise, PublicKey, log,
+    env, ext_contract, json_types::U128, log, near_bindgen, AccountId, Balance, Gas, Promise,
+    PublicKey,
 };
 use near_units::parse_near;
 
