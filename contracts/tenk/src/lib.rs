@@ -393,6 +393,14 @@ impl Contract {
         self.allowance = Some(allowance);
     }
 
+    pub fn update_uri(&mut self, uri: String) {
+      self.assert_owner();
+      let mut metadata = self.metadata.get().unwrap();
+      log!("New URI: {}", &uri);
+      metadata.base_uri = Some(uri);
+      self.metadata.set(&metadata);
+  }
+
     // Contract private methods
 
     #[private]
