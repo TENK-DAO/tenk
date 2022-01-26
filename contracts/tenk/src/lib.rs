@@ -1,13 +1,17 @@
 use linkdrop::LINKDROP_DEPOSIT;
-use near_contract_standards::non_fungible_token::{
-    metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
-    refund_deposit_to_account, NearEvent, NonFungibleToken, Token, TokenId,
+use near_contract_standards::{
+    event::NftMintData,
+    non_fungible_token::{
+        metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
+        refund_deposit_to_account, NonFungibleToken, Token, TokenId,
+    },
+    NearEvent,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::{LazyOption, LookupMap},
     env, ext_contract,
-    json_types::Base64VecU8,
+    json_types::{Base64VecU8, U128},
     log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
     PromiseOrValue, PublicKey,
 };
@@ -189,7 +193,7 @@ impl Contract {
             accounts.len() <= 10,
             "Can't add more than ten accounts at a time"
         );
-        let allowance = allowance.unwrap_or_else(||self.allowance.unwrap_or(0));
+        let allowance = allowance.unwrap_or_else(|| self.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
         });
@@ -322,10 +326,7 @@ impl Contract {
             }
         }
         // Emit mint event log
-        log_mint(
-            owner_id.as_str(),
-            tokens.iter().map(|t| t.token_id.to_string()).collect(),
-        );
+        log_mint(&owner_id, &tokens);
         tokens
     }
 
@@ -529,8 +530,9 @@ near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
-fn log_mint(owner_id: &str, token_ids: Vec<String>) {
-    NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
+fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
+    let token_ids = tokens.iter().map(|t| t.token_id.as_str()).collect();
+    NearEvent::nft_mint(vec![NftMintData::new(owner_id, token_ids, None)]).emit();
 }
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance
