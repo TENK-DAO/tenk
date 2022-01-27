@@ -16,8 +16,7 @@ const min_cost = NEAR.parse("0.01 N");
 const runner = Workspace.init(
   { initialBalance: NEAR.parse("15 N").toString() },
   async ({ root }) => {
-    const tenk = await deploy(root, "tenk", { base_cost, min_cost });
-    return { tenk };
+    return { tenk: await deploy(root, "tenk", { price_structure: {base_cost, min_cost }}) };
   }
 );
 

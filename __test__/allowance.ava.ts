@@ -19,9 +19,14 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      base_cost: sale_price,
+      price_structure: {
+        base_cost: sale_price,
       min_cost: sale_price,
-      allowance,
+      },
+      sale: {
+        is_premint_over: true,
+        allowance,
+      }
     });
     return { tenk, alice };
   }
@@ -32,7 +37,7 @@ runner.test("allowance should allow only 2 tokens", async (t, { root, tenk, alic
   await mint(tenk, alice, cost);
   await mint(tenk, alice, cost);
   let last_try = await mint_raw(tenk, alice, cost);
-  t.assert(last_try.failed);
+  t.assert(last_try.failed, "tx didn't fail");
   const tokens = await getTokens(tenk, alice);
   t.assert(tokens.length == 2);
 });

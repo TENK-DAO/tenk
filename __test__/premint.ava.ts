@@ -19,10 +19,12 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      is_premint_over: false,
-      base_cost: sale_price,
-      min_cost: sale_price,
-      allowance,
+      sale: {
+        base_cost: sale_price,
+        min_cost: sale_price,
+        is_premint_over: false,
+        allowance,
+      },
     });
     return { tenk, alice };
   }
