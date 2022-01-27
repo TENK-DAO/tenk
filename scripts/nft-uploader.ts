@@ -10,12 +10,14 @@ declare interface File {
 const id_regex = /^(?<id>[0-9]+)/;
 
 async function getInfo(fullPath: string): Promise<{ id: string; info: any }> {
-  const [dir, file] = [path.dirname(fullPath), path.basename(fullPath)];
+  let [dir, file] = [path.dirname(fullPath), path.basename(fullPath)];
+  dir = path.dirname(dir);
   const { id } = file.match(id_regex).groups;
   if (!id) {
     console.error(`Failed to find the id in ${fullPath}`);
   }
-  const infoFile = path.join(dir, `${id}.json`);
+  const infoFile = path.join(dir + "/json/", `${id}.json`);
+  console.log(infoFile);
   const info = await fs.readFile(infoFile, { encoding: "utf8" });
   return {
     id,
@@ -23,13 +25,16 @@ async function getInfo(fullPath: string): Promise<{ id: string; info: any }> {
   };
 }
 
-async function parseFiles(directory: string, asset_extension = ".png"): Promise<typeof File[]> {
+async function parseFiles(
+  directory: string,
+  asset_extension = ".png"
+): Promise<typeof File[]> {
   const directoryFiles = await fs.readdir(directory);
   const pics = directoryFiles.filter((s) => s.endsWith(asset_extension));
   const total = pics.length;
   const twentieth = Math.floor(total / 20);
   let finished = 0;
-  
+
   const files = await Promise.all(
     pics.map(async (f) => {
       const file = path.join(directory, f);
@@ -40,7 +45,7 @@ async function parseFiles(directory: string, asset_extension = ".png"): Promise<
       ];
       finished++;
       if (finished % twentieth == 0) {
-        console.log(`${Math.floor(finished/total*100)}%`)
+        console.log(`${Math.floor((finished / total) * 100)}%`);
       }
       return res;
     })
@@ -54,22 +59,39 @@ function makeLink(s: string): string {
 }
 
 async function main() {
-  const [directory, asset_extension] = process.argv.slice(2);
-  if (!directory) {
-    console.error("Upload NFT assets to nft.storage");
-    console.error("Usage: <directory> <assetExtension>?");
-    console.error("directory where images and metadata that are numbered starting at zero.\n\t\t\t\t e.g. '0.png', '0.json'");
-    console.error("assetExtension is optional (default: '.png')");
-    process.exit(1);
+  try {
+    const [directory, asset_extension] = process.argv.slice(2);
+    console.log("HHUSEH");
+    if (!directory) {
+      console.error("Upload NFT assets to nft.storage");
+      console.error("Usage: <directory> <assetExtension>?");
+      console.error(
+        "directory where images and metadata that are numbered starting at zero.\n\t\t\t\t e.g. '0.png', '0.json'"
+      );
+      console.error("assetExtension is optional (default: '.png')");
+      return;
+    }
+    const initialFiles = await parseFiles(
+      directory + "/images",
+      asset_extension
+    );
+    console.log(initialFiles);
+    if (initialFiles.length == 0) {
+      console.error("Failed to find files in " + directory);
+      return;
+    }
+    const client = new NFTStorage({ token: API_TOKEN });
+    const CID = await client.storeDirectory(initialFiles);
+    const link = makeLink(CID);
+    console.log(CID);
+    console.log(link);
+    console.log(link + "/0.png");
+    console.log(link + "/0.json");
+  } catch(e) {
+    console.error(e);
+    return;
+
   }
-  const initialFiles = await parseFiles(directory, asset_extension);
-  const client = new NFTStorage({ token: API_TOKEN });
-  const CID = await client.storeDirectory(initialFiles);
-  const link = makeLink(CID)
-  console.log(CID);
-  console.log(link);
-  console.log(link +"/0.png")
-  console.log(link +"/0.json")
 }
 
 void main();

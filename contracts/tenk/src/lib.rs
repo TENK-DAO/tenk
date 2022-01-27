@@ -237,10 +237,10 @@ impl Contract {
 
     pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) {
         self.assert_owner();
-        require!(
-            accounts.len() <= 10,
-            "Can't add more than ten accounts at a time"
-        );
+        // require!(
+        //     accounts.len() <= 10,
+        //     "Can't add more than ten accounts at a time"
+        // );
         let allowance = allowance.unwrap_or_else(|| self.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
@@ -335,8 +335,7 @@ impl Contract {
         self.nft_mint_many(1)[0].clone()
     }
 
-    #[payable]
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+    fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -436,6 +435,14 @@ impl Contract {
         self.assert_owner();
         self.allowance = Some(allowance);
     }
+
+    pub fn update_uri(&mut self, uri: String) {
+      self.assert_owner();
+      let mut metadata = self.metadata.get().unwrap();
+      log!("New URI: {}", &uri);
+      metadata.base_uri = Some(uri);
+      self.metadata.set(&metadata);
+  }
 
     // Contract private methods
 

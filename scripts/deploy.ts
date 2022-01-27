@@ -1,72 +1,93 @@
-import { Workspace, NEAR, Gas } from "near-willem-workspaces";
+import { NEAR, Gas } from "near-units";
+import { readFile } from "fs/promises";
+import { join } from "path";
+import { Context } from "near-cli/context";
 
-import { CONTRACT_PATH } from "../__test__/util/bin";
-
-const network = "testnet";
-const uri =
-  "https://bafybeiffwsfco67klvesltd7yavfpdf5jov2a27ykhcyhoqhih7f6lrkmu.ipfs.dweb.link/";
 
 const sale_price = NEAR.parse("0.8 N");
 
-const initial_royalties = {
-  percent: 100,
-  accounts: {
-    "tenk.sputnik-dao.near": 2,
-    "near-cn-nft-club.sputnik-dao.near": 15,
-    "ca2079.sputnik-dao.near": 83,
+
+const metadata = {
+  uri: "https://bafybeicdbhp5hntuiwkfpfftjv4oxkjkmbhvsytgj3xga5ebysbzi6y4gm.ipfs.dweb.link",
+  name: "Kokumo KongZ",
+  symbol: "KongZ",
+  icon: "https://bafkreiaboggro5ri5eeujb6xzyjbwe45q4w2cp7o3pg5uvjtic6lllkx2i.ipfs.dweb.link",
+};
+
+const sale = {
+  initial_royalties: {
+    percent: 10_000,
+    accounts: {
+      "tenk.sputnik-dao.near": 1_500,
+      "kokumo.near": 8_500,
+    },
+  },
+  royalties: {
+    percent: 690,
+    accounts: {
+      "tenk.sputnik-dao.near": 2500,
+      "kukumo.near": 2900,
+      "clownpoop.near": 2300,
+      "supermariorpg.near": 2300,
+    },
   },
 };
 
-const royalties = {
-  percent: 10,
-  accounts: { "tenk.sputnik-dao.near": 20, "ca2079.sputnik-dao.near": 80 },
+
+function binPath(name) {
+  const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
+  return join(__dirname, "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
+}
+
+const CONTRACT_PATH = binPath("tenk");
+
+const initialArgs = {
+  metadata,
+  size: 5000,
+  sale,
+  price_structure: {
+    base_cost: NEAR.parse("5 N"),
+    min_cost: NEAR.parse("5 N"),
+  },
 };
 
-const icon = "https://bafybeihcrg5rv647uq5akyduswxu2fv2mxrsh65c3upbx5nr2p5x6hfwza.ipfs.dweb.link/tongdao.jpeg";
-const name = "TD12 Zodiac Club";
-const symbol= "TD12ZC";
-const initial_price = NEAR.parse("1.6 N");
-const contract = "zodiac.tenk.near"
+const ZERO_DEPOSIT = NEAR.from(0);
 
-void Workspace.open(
-  { network, rootAccount: "tongv0.tenk.testnet" },
-  async ({ root }) => {
-    const rootBalance = await root.availableBalance();
-    // if (rootBalance.lt(NEAR.parse("350 N"))) {
-    //   // @ts-expect-error is private
-    //   await root.manager.addFundsFromNetwork();
-    // }
-
-    const royalties = {
-      accounts: { "tenk.testnet": 20, meta: 70, "eve.testnet": 10 },
-      percent: 20,
-    };
-    const accountView = await root.accountView();
-    const owner_id = root.accountId;
-    if (accountView.code_hash == "11111111111111111111111111111111") {
-      const tx = await root
-        .createTransaction(root)
-        .deployContractFile(CONTRACT_PATH);
-      await tx
-        .functionCall(
-          "new_default_meta",
-          {
-            owner_id,
-            name,
-            symbol,
-            icon,
-            uri,
-            size: 12000,
-            base_cost: sale_price,
-            min_cost: sale_price,
-            royalties,
-            initial_royalties: royalties,
-          },
-          {
-            gas: Gas.parse("20 TGas"),
-          }
-        )
-        .signAndSend();
-    }
+export async function main({ account, nearAPI }: Context) {
+  const contractId = account.accountId;
+  if (contractId.endsWith("testnet")) {
+    sale.initial_royalties = null;
   }
-);
+  const {
+    transactions: { deployContract, functionCall },
+  } = nearAPI;
+  const contractAccount = account;
+  const state = await contractAccount.state();
+  const contractBytes = await readFile(CONTRACT_PATH);
+  const owner_id = contractId;
+  const actions = [deployContract(contractBytes)];
+
+  if (state.code_hash === "11111111111111111111111111111111") {
+    actions.push(
+      functionCall(
+        "new_default_meta",
+        { owner_id, ...initialArgs },
+        Gas.parse("50Tgas"),
+        ZERO_DEPOSIT
+      )
+    );
+    console.log("about to initialize");
+  }
+
+  // @ts-expect-error currently private
+  let res = await contractAccount.signAndSendTransaction({
+    receiverId: contractId,
+    actions,
+  });
+  //@ts-ignore
+  if (res.status.SuccessValue != undefined) {
+    console.log(`deployed ${contractId}`);
+  } else {
+    console.log(res)
+  }
+}
