@@ -54,8 +54,10 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
   await premint_period({ tenk, root, duration, base_cost }, async () => {
     await t.throwsAsync(
       root.call(tenk, "end_premint", {
-        base_cost,
-        min_cost: base_cost,
+        price_structure: {
+          base_cost,
+          min_cost: base_cost,
+        },
       })
     );
 
@@ -77,6 +79,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
     t.assert(tokens.length == 3);
   });
   const sale_price = await totalCost(tenk, 1, alice.accountId);
+  t.log(sale_price.toHuman(), cost.toHuman());
   t.assert(sale_price.gt(cost), "actual sale price has increased");
 
   t.assert((await mint_raw(tenk, alice, sale_price)).failed);
