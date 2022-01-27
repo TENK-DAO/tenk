@@ -264,6 +264,11 @@ impl Contract {
         self.premint_deadline_at = env::block_height() + duration;
     }
 
+    pub fn stop_premint(&mut self) {
+      self.assert_owner();
+      self.is_premint = false;
+    }
+
     pub fn end_premint(&mut self, base_cost: U128, min_cost: U128, percent_off: Option<u8>) {
         self.assert_owner();
         require!(self.is_premint, "premint must have started");
