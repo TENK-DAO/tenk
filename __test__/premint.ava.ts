@@ -19,9 +19,11 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      sale: {
+      price_structure: {
         base_cost: sale_price,
         min_cost: sale_price,
+      },
+      sale: {
         is_premint_over: false,
         allowance,
       },
@@ -54,10 +56,8 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
   await premint_period({ tenk, root, duration, base_cost }, async () => {
     await t.throwsAsync(
       root.call(tenk, "end_premint", {
-        price_structure: {
-          base_cost,
-          min_cost: base_cost,
-        },
+        base_cost,
+        min_cost: base_cost,
       })
     );
 
