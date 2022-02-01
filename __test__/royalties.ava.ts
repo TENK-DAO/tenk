@@ -30,6 +30,7 @@ if (Workspace.networkIsSandbox()) {
         sale: {
           royalties,
           initial_royalties: royalties,
+          is_premint_over: true,
         },
         price_structure: {
           base_cost: NEAR.parse("5 N"),
