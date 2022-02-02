@@ -1,6 +1,4 @@
-use core::convert::TryInto;
 use near_sdk::{env, AccountId, Promise, PromiseResult};
-
 pub fn is_promise_success(num_of_promises: Option<u64>) -> bool {
     let count = env::promise_results_count();
     if num_of_promises.map_or(false, |num| num != count) {
@@ -21,7 +19,7 @@ pub fn get_random_number(shift_amount: u32) -> u32 {
     let mut arr: [u8; 4] = Default::default();
     seed.rotate_left(shift_amount as usize % seed_len);
     arr.copy_from_slice(&seed[..4]);
-    u32::from_le_bytes(arr).try_into().unwrap()
+    u32::from_le_bytes(arr)
 }
 
 pub fn refund(account_id: &AccountId, amount: u128) -> Option<Promise> {

@@ -19,10 +19,14 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      is_premint_over: false,
-      base_cost: sale_price,
-      min_cost: sale_price,
-      allowance,
+      price_structure: {
+        base_cost: sale_price,
+        min_cost: sale_price,
+      },
+      sale: {
+        is_premint_over: false,
+        allowance,
+      },
     });
     return { tenk, alice };
   }
@@ -75,6 +79,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
     t.assert(tokens.length == 3);
   });
   const sale_price = await totalCost(tenk, 1, alice.accountId);
+  t.log(sale_price.toHuman(), cost.toHuman());
   t.assert(sale_price.gt(cost), "actual sale price has increased");
 
   t.assert((await mint_raw(tenk, alice, sale_price)).failed);

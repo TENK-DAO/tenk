@@ -1,13 +1,17 @@
 use linkdrop::LINKDROP_DEPOSIT;
-use near_contract_standards::non_fungible_token::{
-    metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
-    refund_deposit_to_account, NearEvent, NonFungibleToken, Token, TokenId,
+use near_contract_standards::{
+    event::NftMintData,
+    non_fungible_token::{
+        metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
+        refund_deposit_to_account, NonFungibleToken, Token, TokenId,
+    },
+    NearEvent,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::{LazyOption, LookupMap},
     env, ext_contract,
-    json_types::Base64VecU8,
+    json_types::{Base64VecU8, U128},
     log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
     PromiseOrValue, PublicKey,
 };
@@ -24,6 +28,7 @@ mod util;
 
 use payout::*;
 use raffle::Raffle;
+use serde::{Deserialize, Serialize};
 use util::{is_promise_success, refund};
 
 #[near_bindgen]
@@ -91,51 +96,105 @@ enum StorageKey {
     AirdropRaffleKey,
 }
 
+#[derive(Deserialize, Serialize, Default)]
+pub struct InitialMetadata {
+    name: String,
+    symbol: String,
+    uri: String,
+    icon: Option<String>,
+    spec: Option<String>,
+    reference: Option<String>,
+    reference_hash: Option<Base64VecU8>,
+}
+
+impl From<InitialMetadata> for NFTContractMetadata {
+    fn from(inital_metadata: InitialMetadata) -> Self {
+        let InitialMetadata {
+            spec,
+            name,
+            symbol,
+            icon,
+            uri,
+            reference,
+            reference_hash,
+        } = inital_metadata;
+        NFTContractMetadata {
+            spec: spec.unwrap_or_else(|| NFT_METADATA_SPEC.to_string()),
+            name,
+            symbol,
+            icon,
+            base_uri: Some(uri),
+            reference,
+            reference_hash,
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct PriceStructure {
+    base_cost: U128,
+    min_cost: Option<U128>,
+    percent_off: Option<u8>,
+}
+
+impl PriceStructure {
+    pub(crate) fn min_cost(&self) -> Balance {
+        self.min_cost.unwrap_or(self.base_cost).into()
+    }
+
+    pub fn percent_off(&self) -> u8 {
+        self.percent_off.unwrap_or(DEFAULT_SUPPLY_FATOR_NUMERATOR)
+    }
+
+    pub fn base_cost(&self) -> Balance {
+        self.base_cost.into()
+    }
+}
+
+#[derive(Deserialize, Serialize, Default)]
+pub struct Sale {
+    royalties: Option<Royalties>,
+    initial_royalties: Option<Royalties>,
+    is_premint: Option<bool>,
+    is_premint_over: Option<bool>,
+    allowance: Option<u32>,
+}
+
+impl Sale {
+    pub fn validate(&self) {
+        if let Some(r) = self.royalties.as_ref() {
+            r.validate()
+        }
+        if let Some(r) = self.initial_royalties.as_ref() {
+            r.validate()
+        }
+    }
+
+    pub fn is_premint(&self) -> bool {
+        self.is_premint.unwrap_or(false)
+    }
+
+    pub fn is_premint_over(&self) -> bool {
+        self.is_premint_over.unwrap_or(false)
+    }
+}
+
 #[near_bindgen]
 impl Contract {
     #[init]
     pub fn new_default_meta(
         owner_id: AccountId,
-        name: String,
-        symbol: String,
-        uri: String,
+        metadata: InitialMetadata,
         size: u32,
-        base_cost: U128,
-        min_cost: U128,
-        percent_off: Option<u8>,
-        icon: Option<String>,
-        spec: Option<String>,
-        reference: Option<String>,
-        reference_hash: Option<Base64VecU8>,
-        royalties: Option<Royalties>,
-        initial_royalties: Option<Royalties>,
-        is_premint: Option<bool>,
-        is_premint_over: Option<bool>,
-        allowance: Option<u32>,
+        price_structure: PriceStructure,
+        sale: Option<Sale>,
     ) -> Self {
-        royalties.as_ref().map(|r| r.validate());
-        initial_royalties.as_ref().map(|r| r.validate());
         Self::new(
-            owner_id.clone(),
-            NFTContractMetadata {
-                spec: spec.unwrap_or(NFT_METADATA_SPEC.to_string()),
-                name,
-                symbol,
-                icon,
-                base_uri: Some(uri),
-                reference,
-                reference_hash,
-            },
+            owner_id,
+            metadata.into(),
             size,
-            base_cost,
-            min_cost,
-            percent_off.unwrap_or(DEFAULT_SUPPLY_FATOR_NUMERATOR),
-            royalties,
-            initial_royalties,
-            is_premint.unwrap_or(false),
-            is_premint_over.unwrap_or(false),
-            0,
-            allowance,
+            price_structure,
+            sale.unwrap_or_default(),
         )
     }
 
@@ -144,15 +203,8 @@ impl Contract {
         owner_id: AccountId,
         metadata: NFTContractMetadata,
         size: u32,
-        base_cost: U128,
-        min_cost: U128,
-        percent_off: u8,
-        royalties: Option<Royalties>,
-        initial_royalties: Option<Royalties>,
-        is_premint: bool,
-        is_premint_over: bool,
-        premint_deadline_at: u64,
-        allowance: Option<u32>,
+        price_structure: PriceStructure,
+        sale: Sale,
     ) -> Self {
         metadata.assert_valid();
         Self {
@@ -167,19 +219,19 @@ impl Contract {
             raffle: Raffle::new(StorageKey::Ids, size as u64),
             pending_tokens: 0,
             accounts: LookupMap::new(StorageKey::LinkdropKeys),
-            base_cost: base_cost.0,
-            min_cost: min_cost.0,
-            percent_off,
-            royalties: LazyOption::new(StorageKey::Royalties, royalties.as_ref()),
+            base_cost: price_structure.base_cost(),
+            min_cost: price_structure.min_cost(),
+            percent_off: price_structure.percent_off(),
+            royalties: LazyOption::new(StorageKey::Royalties, sale.royalties.as_ref()),
             initial_royalties: LazyOption::new(
                 StorageKey::InitialRoyalties,
-                initial_royalties.as_ref(),
+                sale.initial_royalties.as_ref(),
             ),
             whitelist: LookupMap::new(StorageKey::Whitelist),
-            is_premint,
-            is_premint_over,
-            premint_deadline_at,
-            allowance,
+            is_premint: sale.is_premint(),
+            is_premint_over: sale.is_premint_over(),
+            premint_deadline_at: 0,
+            allowance: sale.allowance,
         }
     }
 
@@ -189,7 +241,7 @@ impl Contract {
             accounts.len() <= 10,
             "Can't add more than ten accounts at a time"
         );
-        let allowance = allowance.unwrap_or(self.allowance.unwrap_or(0));
+        let allowance = allowance.unwrap_or_else(|| self.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
         });
@@ -206,11 +258,8 @@ impl Contract {
 
     pub fn start_premint(&mut self, duration: u64) {
         self.assert_owner();
-        require!(self.is_premint == false, "premint has already started");
-        require!(
-            self.is_premint_over == false,
-            "premint has already been done"
-        );
+        require!(!self.is_premint, "premint has already started");
+        require!(!self.is_premint_over, "premint has already been done");
         self.is_premint = true;
         self.premint_deadline_at = env::block_height() + duration;
     }
@@ -218,10 +267,7 @@ impl Contract {
     pub fn end_premint(&mut self, base_cost: U128, min_cost: U128, percent_off: Option<u8>) {
         self.assert_owner();
         require!(self.is_premint, "premint must have started");
-        require!(
-            self.is_premint_over == false,
-            "premint has already been done"
-        );
+        require!(!self.is_premint_over, "premint has already been done");
         require!(
             self.premint_deadline_at < env::block_height(),
             "premint is still in process"
@@ -328,10 +374,7 @@ impl Contract {
             }
         }
         // Emit mint event log
-        log_mint(
-            owner_id.as_str(),
-            tokens.iter().map(|t| t.token_id.to_string()).collect(),
-        );
+        log_mint(owner_id, &tokens);
         tokens
     }
 
@@ -433,10 +476,10 @@ impl Contract {
         // Owner can mint for free
         if !self.is_owner(account_id) {
             let allowance = if self.is_premint {
-                self.get_whitelist_allowance(&account_id)
+                self.get_whitelist_allowance(account_id)
             } else {
                 require!(self.is_premint_over, "Premint period must be over");
-                self.get_or_add_whitelist_allowance(&account_id, num)
+                self.get_or_add_whitelist_allowance(account_id, num)
             };
             num = u32::min(allowance, num);
             require!(num > 0, "Account has no more allowance left");
@@ -483,10 +526,10 @@ impl Contract {
             .internal_mint_with_refund(token_id, token_owner_id, token_metadata, refund_id)
     }
 
-    fn create_metadata(&mut self, token_id: &String) -> TokenMetadata {
+    fn create_metadata(&mut self, token_id: &str) -> TokenMetadata {
         let media = Some(format!("{}.png", token_id));
         let reference = Some(format!("{}.json", token_id));
-        let title = Some(format!("{}", token_id));
+        let title = Some(token_id.to_string());
         TokenMetadata {
             title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             description: None, // free-form description
@@ -507,7 +550,7 @@ impl Contract {
         if self.has_allowance() && !self.is_owner(account_id) {
             let allowance = self.get_whitelist_allowance(account_id);
             let new_allowance = allowance - u32::min(num, allowance);
-            self.whitelist.insert(&account_id, &new_allowance);
+            self.whitelist.insert(account_id, &new_allowance);
         }
     }
 
@@ -521,7 +564,7 @@ impl Contract {
         // return num if allowance isn't set
         self.allowance.map_or(num, |allowance| {
             self.whitelist.get(account_id).unwrap_or_else(|| {
-                self.whitelist.insert(&account_id, &allowance);
+                self.whitelist.insert(account_id, &allowance);
                 allowance
             })
         })
@@ -535,8 +578,9 @@ near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
-fn log_mint(owner_id: &str, token_ids: Vec<String>) {
-    NearEvent::log_nft_mint(owner_id.to_string(), token_ids, None);
+fn log_mint(owner_id: &AccountId, tokens: &[Token]) {
+    let token_ids = tokens.iter().map(|t| t.token_id.as_str()).collect();
+    NearEvent::nft_mint(vec![NftMintData::new(owner_id, token_ids, None)]).emit();
 }
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance
@@ -552,24 +596,25 @@ mod tests {
         AccountId::new_unchecked("alice.near".to_string())
     }
 
+    fn initial_metadata() -> InitialMetadata {
+        InitialMetadata {
+            name: "name".to_string(),
+            symbol: "sym".to_string(),
+            uri: "https://".to_string(),
+            ..Default::default()
+        }
+    }
+
     fn new_contract() -> Contract {
         Contract::new_default_meta(
             AccountId::new_unchecked("root".to_string()),
-            "name".to_string(),
-            "sym".to_string(),
-            "https://".to_string(),
+            initial_metadata(),
             10_000,
-            TEN.into(),
-            ONE.into(),
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
+            PriceStructure {
+                base_cost: TEN.into(),
+                min_cost: Some(ONE.into()),
+                percent_off: None,
+            },
             None,
         )
     }

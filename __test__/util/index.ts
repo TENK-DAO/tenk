@@ -35,13 +35,19 @@ export function deploy(
     method: "new_default_meta",
     args: {
       owner_id: owner,
-      name: "TENK NFT",
-      symbol: "TENK",
-      uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+      metadata: {
+        name: "TENK NFT",
+        symbol: "TENK",
+        uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+      },
       size: 100,
-      base_cost: NEAR.parse("1 N"),
-      min_cost: NEAR.parse("1 N"),
-      is_premint_over: true,
+      price_structure: {
+        base_cost: NEAR.parse("1 N"),
+        min_cost: NEAR.parse("1 N"),
+      },
+      sale: {
+        is_premint_over: true,
+      },
       ...args,
     },
   });

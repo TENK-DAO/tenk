@@ -40,11 +40,11 @@ impl Raffle {
     where
         S: IntoStorageKey,
     {
-        return Self {
+        Self {
             len,
             prefix: prefix.into_storage_key(),
             el: PhantomData,
-        };
+        }
     }
 
     fn index_to_lookup_key(&self, index: u64) -> Vec<u8> {
@@ -104,13 +104,11 @@ mod tests {
     use std::collections::HashSet;
 
     use super::Raffle;
-    use near_sdk::test_utils::test_env;
     use near_sdk::test_utils::VMContextBuilder;
     use near_sdk::testing_env;
 
     #[test]
     pub fn test_swap_remove() {
-        test_env::setup();
         let mut rng = rand_xorshift::XorShiftRng::seed_from_u64(2);
         let mut vec = Raffle::new(b"v".to_vec(), 100);
         let mut set: HashSet<u64> = HashSet::new();
@@ -120,8 +118,7 @@ mod tests {
             let len = vec.len();
             assert!(set.insert(vec.draw()));
             assert_eq!(len - 1, vec.len());
-            let next = rng.gen::<u64>().to_le_bytes().to_vec();
-            testing_env!(context.random_seed(next).build());
+            testing_env!(context.random_seed(rng.gen()).build());
         }
     }
 }

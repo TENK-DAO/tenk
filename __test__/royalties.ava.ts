@@ -27,10 +27,15 @@ if (Workspace.networkIsSandbox()) {
       const [bob, alice, eve] = await subaccounts(root);
       const royalties = createRoyalties({ root, bob, alice, eve });
       const tenk = await deploy(root, "tenk", {
-        royalties,
-        initial_royalties: royalties,
-        base_cost: NEAR.parse("5 N"),
-        min_cost: NEAR.parse("5 N"),
+        sale: {
+          royalties,
+          initial_royalties: royalties,
+          is_premint_over: true,
+        },
+        price_structure: {
+          base_cost: NEAR.parse("5 N"),
+          min_cost: NEAR.parse("5 N"),
+        },
       });
       return { tenk, bob, alice, eve };
     }
@@ -44,12 +49,16 @@ if (Workspace.networkIsSandbox()) {
       balance,
       max_len_payout: 10,
     });
-    t.log(payouts)
-    t.log((await tenk.view_raw("nft_payout", {
-      token_id,
-      balance,
-      max_len_payout: 10,
-    })).logs);
+    t.log(payouts);
+    t.log(
+      (
+        await tenk.view_raw("nft_payout", {
+          token_id,
+          balance,
+          max_len_payout: 10,
+        })
+      ).logs
+    );
     let innerPayout = createRoyalties({ root, bob, alice, eve }).accounts;
     t.log(innerPayout);
     Object.keys(innerPayout).map(

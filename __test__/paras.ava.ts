@@ -42,7 +42,7 @@ const runner = Workspace.init(
     const bob = await root.createAccount("bob");
     const eve = await root.createAccount("eve");
     const royalties = getRoyalties({ root, alice, eve });
-    const tenk = await deploy(root, "tenk", {royalties});
+    const tenk = await deploy(root, "tenk", {sale:{royalties, is_premint_over: true}});
     const token_id = await mint(tenk, bob, await totalCost(tenk, 1));
 
     const paras = await delpoyParas(root, root, root, [tenk]);
