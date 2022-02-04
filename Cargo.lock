@@ -29,6 +29,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.53"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94a45b455c14666b85fc40a019e8ab9eb75e3a124e05494f5397122bc9eb06e0"
+
+[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -189,6 +195,37 @@ checksum = "d27dae93fe7b1e0424dc57179ac396908c26b035a87234809f5c4dfd1b47dc80"
 dependencies = [
  "cipher",
  "ppv-lite86",
+]
+
+[[package]]
+name = "camino"
+version = "1.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6f3132262930b0522068049f5870a856ab8affc80c70d08b6ecb785771a6fc23"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "cargo-platform"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cbdb825da8a5df079a43676dbe042702f1707b1109f713a01420fbb4cc71fa27"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "cargo_metadata"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba2ae6de944143141f6155a473a6b02f66c7c3f9f47316f802f80204ebfe6e12"
+dependencies = [
+ "camino",
+ "cargo-platform",
+ "semver",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -438,6 +475,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "heck"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
+
+[[package]]
 name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -550,13 +593,12 @@ dependencies = [
 
 [[package]]
 name = "near-contract-standards"
-version = "4.0.0-pre.6"
-source = "git+https://github.com/near/near-sdk-rs?rev=ea8c1f48e0f7fef8b5721848dc312646d3c1c20e#ea8c1f48e0f7fef8b5721848dc312646d3c1c20e"
+version = "4.0.0-pre.7"
+source = "git+https://github.com/ahalabs/near-sdk-rs?rev=87044d1cd5a2215cc3616586432c14fafdde2eac#87044d1cd5a2215cc3616586432c14fafdde2eac"
 dependencies = [
  "near-sdk",
  "serde",
  "serde_json",
- "serde_with",
 ]
 
 [[package]]
@@ -664,8 +706,8 @@ dependencies = [
 
 [[package]]
 name = "near-sdk"
-version = "4.0.0-pre.6"
-source = "git+https://github.com/near/near-sdk-rs?rev=ea8c1f48e0f7fef8b5721848dc312646d3c1c20e#ea8c1f48e0f7fef8b5721848dc312646d3c1c20e"
+version = "4.0.0-pre.7"
+source = "git+https://github.com/ahalabs/near-sdk-rs?rev=87044d1cd5a2215cc3616586432c14fafdde2eac#87044d1cd5a2215cc3616586432c14fafdde2eac"
 dependencies = [
  "base64 0.13.0",
  "borsh",
@@ -677,23 +719,25 @@ dependencies = [
  "serde",
  "serde_json",
  "wee_alloc",
+ "witgen",
 ]
 
 [[package]]
 name = "near-sdk-macros"
-version = "4.0.0-pre.6"
-source = "git+https://github.com/near/near-sdk-rs?rev=ea8c1f48e0f7fef8b5721848dc312646d3c1c20e#ea8c1f48e0f7fef8b5721848dc312646d3c1c20e"
+version = "4.0.0-pre.7"
+source = "git+https://github.com/ahalabs/near-sdk-rs?rev=87044d1cd5a2215cc3616586432c14fafdde2eac#87044d1cd5a2215cc3616586432c14fafdde2eac"
 dependencies = [
  "Inflector",
  "proc-macro2",
  "quote",
  "syn",
+ "witgen_macro_helper 0.7.0 (git+https://github.com/ahalabs/witgen?rev=1aca670c8c4589a214a7e9e1e79bd9a89001870e)",
 ]
 
 [[package]]
 name = "near-sys"
 version = "0.1.0"
-source = "git+https://github.com/near/near-sdk-rs?rev=ea8c1f48e0f7fef8b5721848dc312646d3c1c20e#ea8c1f48e0f7fef8b5721848dc312646d3c1c20e"
+source = "git+https://github.com/ahalabs/near-sdk-rs?rev=87044d1cd5a2215cc3616586432c14fafdde2eac#87044d1cd5a2215cc3616586432c14fafdde2eac"
 
 [[package]]
 name = "near-units"
@@ -1085,6 +1129,9 @@ name = "semver"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "568a8e6258aa33c13358f81fd834adb854c6f7c9468520910a9b1e8fac068012"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "serde"
@@ -1427,6 +1474,61 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "witgen"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0f2b18206525741eeeec4ea89ec351d407353b587da4c8d0a00b6c65562af358"
+dependencies = [
+ "witgen_macro",
+]
+
+[[package]]
+name = "witgen_macro"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5473d0f7e30fdef765282c727dbbf8646d343a488f690369845b707a71dd6cf6"
+dependencies = [
+ "anyhow",
+ "once_cell",
+ "proc-macro2",
+ "syn",
+ "witgen_macro_helper 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "witgen_macro_helper"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70743dd4139e7c700554ce81e269cc4ff6e58ffdb7b352c3e67378a88bddf06a"
+dependencies = [
+ "anyhow",
+ "cargo_metadata",
+ "heck",
+ "hex",
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "sha2",
+ "syn",
+]
+
+[[package]]
+name = "witgen_macro_helper"
+version = "0.7.0"
+source = "git+https://github.com/ahalabs/witgen?rev=1aca670c8c4589a214a7e9e1e79bd9a89001870e#1aca670c8c4589a214a7e9e1e79bd9a89001870e"
+dependencies = [
+ "anyhow",
+ "cargo_metadata",
+ "heck",
+ "hex",
+ "once_cell",
+ "proc-macro2",
+ "quote",
+ "sha2",
+ "syn",
+]
 
 [[package]]
 name = "wyz"

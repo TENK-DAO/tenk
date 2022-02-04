@@ -1,72 +1,76 @@
-import { Workspace, NEAR, Gas } from "near-willem-workspaces";
+import { NEAR, Gas } from "near-units";
+import { readFile } from "fs/promises";
+import { Context } from "near-cli/context";
+import * as tenk from "..";
+import { binPath } from "./utils";
 
-import { CONTRACT_PATH } from "../__test__/util/bin";
+const metadata: tenk.InitialMetadata = {
+  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+  name: "TENK NFT",
+  symbol: "TENK",
+};
+ 
+const price_structure: tenk.PriceStructure =  {
+  base_cost: NEAR.parse("1 N").toJSON(),
+}
 
-const network = "testnet";
-const uri =
-  "https://bafybeiffwsfco67klvesltd7yavfpdf5jov2a27ykhcyhoqhih7f6lrkmu.ipfs.dweb.link/";
-
-const sale_price = NEAR.parse("0.8 N");
-
-const initial_royalties = {
-  percent: 100,
-  accounts: {
-    "tenk.sputnik-dao.near": 2,
-    "near-cn-nft-club.sputnik-dao.near": 15,
-    "ca2079.sputnik-dao.near": 83,
-  },
+const sale: tenk.Sale = {
+  is_premint_over: true,
+  // initial_royalties: {
+  //   percent: 10_000,
+  //   accounts: {
+  //     "tenk.sputnik-dao.near": 1_500,
+  //     "kokumo.near": 8_500,
+  //   },
+  // },
+  // royalties: {
+  //   percent: 690,
+  //   accounts: {
+  //     "tenk.sputnik-dao.near": 2500,
+  //     "kukumo.near": 2900,
+  //     "clownpoop.near": 2300,
+  //     "supermariorpg.near": 2300,
+  //   },
+  // },
 };
 
-const royalties = {
-  percent: 10,
-  accounts: { "tenk.sputnik-dao.near": 20, "ca2079.sputnik-dao.near": 80 },
-};
 
-const icon = "https://bafybeihcrg5rv647uq5akyduswxu2fv2mxrsh65c3upbx5nr2p5x6hfwza.ipfs.dweb.link/tongdao.jpeg";
-const name = "TD12 Zodiac Club";
-const symbol= "TD12ZC";
-const initial_price = NEAR.parse("1.6 N");
-const contract = "zodiac.tenk.near"
+export async function main({ account, nearAPI, argv, near }: Context) {
+  let { Account } = nearAPI;
+  const contractBytes = await readFile(binPath("tenk"));
 
-void Workspace.open(
-  { network, rootAccount: "tongv0.tenk.testnet" },
-  async ({ root }) => {
-    const rootBalance = await root.availableBalance();
-    // if (rootBalance.lt(NEAR.parse("350 N"))) {
-    //   // @ts-expect-error is private
-    //   await root.manager.addFundsFromNetwork();
-    // }
+  let [contractId] = argv ?? [];
+  contractId = contractId ?? account.accountId;
+  let contractAccount = new Account(near.connection, contractId);
 
-    const royalties = {
-      accounts: { "tenk.testnet": 20, meta: 70, "eve.testnet": 10 },
-      percent: 20,
-    };
-    const accountView = await root.accountView();
-    const owner_id = root.accountId;
-    if (accountView.code_hash == "11111111111111111111111111111111") {
-      const tx = await root
-        .createTransaction(root)
-        .deployContractFile(CONTRACT_PATH);
-      await tx
-        .functionCall(
-          "new_default_meta",
-          {
-            owner_id,
-            name,
-            symbol,
-            icon,
-            uri,
-            size: 12000,
-            base_cost: sale_price,
-            min_cost: sale_price,
-            royalties,
-            initial_royalties: royalties,
-          },
-          {
-            gas: Gas.parse("20 TGas"),
-          }
-        )
-        .signAndSend();
-    }
+  const isTestnet = contractId.endsWith("testnet");
+  if (isTestnet) {
+    sale.initial_royalties = null;
   }
-);
+  const initialArgs = {
+    owner_id: account.accountId,
+    metadata,
+    size: 100,
+    sale,
+    price_structure,
+  };
+
+  const contract = tenk.init(account, contractId);
+
+  const tx = account
+    .createTransaction(contractId)
+    .deployContract(contractBytes);
+
+  if (await contractAccount.hasDeployedContract()) {
+    console.log(`initializing with: \n${JSON.stringify(initialArgs, null, 2)}`)
+    tx.actions.push(contract.new_default_metaTx(initialArgs, { gas: Gas.parse("50Tgas") }))
+  }
+  let res = await tx.signAndSend();
+  console.log(`https://explorer${isTestnet ? ".testnet": ""}.near.org/transactions/${res.transaction_outcome.id}`)
+  //@ts-ignore
+  if (res.status.SuccessValue != undefined) {
+    console.log(`deployed ${contractId}`);
+  } else {
+    console.log(res);
+  }
+}

@@ -2,6 +2,8 @@
   "name": "tenk-nft",
   "version": "0.1.0",
   "license": "MIT",
+  "main": "./contracts/tenk/dist/index.js",
+  "types": "./contracts/tenk/dist/index.d.ts",
   "scripts": {
     "pretest": "yarn build && yarn lint",
     "upload:nft": "ts-node ./scripts/nft-uploader.ts",
@@ -14,11 +16,12 @@
     "delpoy:mainnet": "yarn build:mainnet && near repl -s ./scripts/deploy-zodiac.js",
     "createKeys": "ts-node ./scripts/create-keys.ts",
     "createLinkUrls": "ts-node ./scripts/create-linkdrops-urls.ts",
-    "createLinkdrops":"near repl -s ./scripts/create-linkdrops.js",
+    "createLinkdrops": "near repl -s ./scripts/create-linkdrops.ts",
     "addWhitelist": "near repl -s ./scripts/add-whitelist.js",
     "test:unit": "cargo test",
     "test:ci": "yarn test:unit && yarn test",
-    "lint": "yarn eslint . --ext .ts"
+    "lint": "yarn eslint . --ext .ts",
+    "wit": "(cd contracts/tenk; ./build.sh)"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.4.0",
@@ -26,10 +29,12 @@
     "acquit": "^1.2.1",
     "acquit-markdown": "^0.1.0",
     "eslint": "^7.29.0",
-    "near-api-js": "^0.44.1",
+    "near-api-js": "git+https://github.com/ahalabs/near-api-js#beta",
+    "near-cli": "git+https://github.com/ahalabs/near-cli#beta",
     "near-units": "^0.1.9",
     "near-willem-workspaces-ava": "^1.0.3-alpha.0",
     "nft.storage": "^5.0.0",
-    "near-cli": "git+https://github.com/willemneal/near-cli#feat/script_command"
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.5"
   }
 }

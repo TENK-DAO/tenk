@@ -1,19 +1,18 @@
 use linkdrop::LINKDROP_DEPOSIT;
 use near_contract_standards::{
-    event::NftMintData,
     non_fungible_token::{
+        events::NftMint,
         metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
         refund_deposit_to_account, NonFungibleToken, Token, TokenId,
     },
-    NearEvent,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::{LazyOption, LookupMap},
     env, ext_contract,
     json_types::{Base64VecU8, U128},
-    log, near_bindgen, require, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
-    PromiseOrValue, PublicKey,
+    log, near_bindgen, require, witgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
+    Promise, PromiseOrValue, PublicKey,
 };
 use near_units::{parse_gas, parse_near};
 
@@ -96,6 +95,7 @@ enum StorageKey {
     AirdropRaffleKey,
 }
 
+#[witgen]
 #[derive(Deserialize, Serialize, Default)]
 pub struct InitialMetadata {
     name: String,
@@ -130,6 +130,7 @@ impl From<InitialMetadata> for NFTContractMetadata {
     }
 }
 
+#[witgen]
 #[derive(Deserialize, Serialize)]
 pub struct PriceStructure {
     base_cost: U128,
@@ -151,6 +152,7 @@ impl PriceStructure {
     }
 }
 
+#[witgen]
 #[derive(Deserialize, Serialize, Default)]
 pub struct Sale {
     royalties: Option<Royalties>,
@@ -290,6 +292,7 @@ impl Contract {
     }
 
     #[payable]
+    /// Create a pending token that can be claimed with corresponding private key
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         let deposit = env::attached_deposit();
         let account = &env::predecessor_account_id();
@@ -578,9 +581,9 @@ near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
-fn log_mint(owner_id: &AccountId, tokens: &[Token]) {
-    let token_ids = tokens.iter().map(|t| t.token_id.as_str()).collect();
-    NearEvent::nft_mint(vec![NftMintData::new(owner_id, token_ids, None)]).emit();
+fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
+    let token_ids = &tokens.iter().map(|t| t.token_id.as_str()).collect::<Vec<&str>>();
+    NftMint {owner_id, token_ids, memo: None }.emit()
 }
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance

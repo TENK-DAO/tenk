@@ -20,6 +20,7 @@ use std::collections::HashMap;
 
 /// This currently deviates from the standard but is in the process of updating to use this type
 #[derive(Default, BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+#[near_sdk::witgen]
 pub struct Payout {
     payout: HashMap<AccountId, U128>,
 }
@@ -86,6 +87,7 @@ type BasisPoint = u16;
 
 const ONE_HUNDRED_PERCENT_IN_BPS: BasisPoint = 10_000;
 
+#[near_sdk::witgen]
 #[derive(BorshSerialize, BorshDeserialize, Deserialize, Serialize, Default)]
 pub struct Royalties {
     pub accounts: HashMap<AccountId, BasisPoint>,
