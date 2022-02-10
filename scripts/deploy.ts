@@ -5,7 +5,7 @@ import * as tenk from "..";
 import { binPath } from "./utils";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+  uri: "https://bafybeigojkegiyzlqk6zb4ydtkurcfkmfnubpqjal3ffenqgihlinvmkj4.ipfs.dweb.link",
   name: "Cute Penguin Club",
   symbol: "cutepenguinclub",
 };
@@ -34,6 +34,9 @@ const sale: tenk.Sale = {
   },
 };
 
+let size = 2222;
+
+
 export async function main({ account, nearAPI, argv, near }: Context) {
   let { Account } = nearAPI;
   const contractBytes = await readFile(binPath("tenk"));
@@ -43,13 +46,16 @@ export async function main({ account, nearAPI, argv, near }: Context) {
   let contractAccount = new Account(near.connection, contractId);
 
   const isTestnet = contractId.endsWith("testnet");
+
   if (isTestnet) {
     sale.initial_royalties = null;
+    sale.is_premint_over = true;
+    size = 100;
   }
   const initialArgs = {
     owner_id: account.accountId,
     metadata,
-    size: 100,
+    size,
     sale,
     price_structure,
   };

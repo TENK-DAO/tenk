@@ -1,10 +1,8 @@
 use linkdrop::LINKDROP_DEPOSIT;
-use near_contract_standards::{
-    non_fungible_token::{
-        events::NftMint,
-        metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
-        refund_deposit_to_account, NonFungibleToken, Token, TokenId,
-    },
+use near_contract_standards::non_fungible_token::{
+    events::NftMint,
+    metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
+    refund_deposit_to_account, NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -239,10 +237,6 @@ impl Contract {
 
     pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) {
         self.assert_owner();
-        require!(
-            accounts.len() <= 10,
-            "Can't add more than ten accounts at a time"
-        );
         let allowance = allowance.unwrap_or_else(|| self.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
@@ -270,10 +264,10 @@ impl Contract {
         self.assert_owner();
         require!(self.is_premint, "premint must have started");
         require!(!self.is_premint_over, "premint has already been done");
-        require!(
-            self.premint_deadline_at < env::block_height(),
-            "premint is still in process"
-        );
+        // require!(
+        //     self.premint_deadline_at < env::block_height(),
+        //     "premint is still in process"
+        // );
         self.is_premint = false;
         self.is_premint_over = true;
         self.percent_off = percent_off.unwrap_or(0);
@@ -386,6 +380,16 @@ impl Contract {
     }
 
     pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
+        let num = if !self.is_premint_over && !self.is_owner(minter) {
+            let wl_num = self.whitelist.get(minter).unwrap_or(0);
+            u32::min(wl_num, num)
+        } else {
+            num
+        };
+        self.total_cost_private(num, minter)
+    }
+
+    fn total_cost_private(&self, num: u32, minter: &AccountId) -> U128 {
         (num as Balance * self.cost_per_token(num, minter).0).into()
     }
 
@@ -402,12 +406,10 @@ impl Contract {
         (env::storage_byte_cost() * self.tokens.extra_storage_in_bytes_per_token as Balance).into()
     }
     pub fn discount(&self, num: u32) -> U128 {
-        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR)
-            .min(self.base_cost)
-            .into()
+        0u128.into()
     }
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens
+        self.raffle.len() as u32 - self.pending_tokens - 722
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {
@@ -474,6 +476,10 @@ impl Contract {
     }
 
     fn assert_can_mint(&mut self, account_id: &AccountId, num: u32) -> u32 {
+        require!(
+            num as u128 + self.nft_total_supply().0 <= 1500,
+            "Total supply capped to 1500"
+        );
         let mut num = num;
         // Check quantity
         // Owner can mint for free
@@ -582,8 +588,16 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
 fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
-    let token_ids = &tokens.iter().map(|t| t.token_id.as_str()).collect::<Vec<&str>>();
-    NftMint {owner_id, token_ids, memo: None }.emit()
+    let token_ids = &tokens
+        .iter()
+        .map(|t| t.token_id.as_str())
+        .collect::<Vec<&str>>();
+    NftMint {
+        owner_id,
+        token_ids,
+        memo: None,
+    }
+    .emit()
 }
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance

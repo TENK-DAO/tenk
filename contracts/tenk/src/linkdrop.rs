@@ -38,7 +38,7 @@ impl Contract {
                 account_id.clone(),
                 mint_for_free,
                 env::current_account_id(),
-                self.total_cost(1, &account_id).0,
+                self.total_cost_private(1, &account_id).0,
                 GAS_REQUIRED_FOR_LINKDROP,
             ))
             .then(ext_linkdrop::on_create_and_claim(
@@ -64,7 +64,7 @@ impl Contract {
                 new_account_id.clone(),
                 mint_for_free,
                 env::current_account_id(),
-                self.total_cost(1, &new_account_id).0,
+                self.total_cost_private(1, &new_account_id).0,
                 GAS_REQUIRED_FOR_LINKDROP,
             ))
             .then(ext_linkdrop::on_create_and_claim(

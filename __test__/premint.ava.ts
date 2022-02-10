@@ -46,7 +46,8 @@ async function premint_period<T>(
 }
 
 runner.test("premint", async (t, { root, tenk, alice }) => {
-  const cost = await totalCost(tenk, 1, alice.accountId);
+  t.log(tenk.accountId)
+  // const cost = await totalCost(tenk, 1, alice.accountId);
   const token = await mint(tenk, root);
   const duration = 20;
   const linkkeys = await createLinkdrop(t, tenk, root);
@@ -61,7 +62,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
       })
     );
 
-    let initial_try = await mint_raw(tenk, alice, cost);
+    let initial_try = await mint_raw(tenk, alice, sale_price);
     t.assert(initial_try.failed);
     // owner can still mint
     const second_token = await mint_raw(tenk, root);
@@ -71,6 +72,8 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
       accounts: [alice],
       allowance: 2,
     });
+    t.log((await totalCost(tenk, 3, alice.accountId)).toHuman());
+    const cost = await totalCost(tenk, 1, alice.accountId);
     await mint(tenk, alice, cost);
     await mint(tenk, alice, cost);
     let last_try = await mint_raw(tenk, alice, cost);
@@ -78,7 +81,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
     const tokens = await getTokens(tenk, alice);
     t.assert(tokens.length == 3);
   });
-  const sale_price = await totalCost(tenk, 1, alice.accountId);
+  const cost = await totalCost(tenk, 1, alice.accountId);
   t.log(sale_price.toHuman(), cost.toHuman());
   t.assert(sale_price.gt(cost), "actual sale price has increased");
 
