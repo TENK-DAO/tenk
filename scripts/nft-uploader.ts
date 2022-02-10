@@ -13,7 +13,7 @@ declare interface File {
   _parts: any[];
 }
 
-const id_regex = /^(?<id>[0-9]+)\./;
+const id_regex = /^(?<id>[0-9]+)/;
 
 async function getInfo(
   fullPath: string,
@@ -31,7 +31,9 @@ async function getInfo(
 
   if (infoFiles.length != 1) {
     throw new Error(
-      `Found multiple metadata files for ${fullPath}: ${JSON.stringify(infoFiles)}`
+      `Found multiple metadata files for ${fullPath}: ${JSON.stringify(
+        infoFiles
+      )}`
     );
   }
   const info = await fs.readFile(infoFiles[0], { encoding: "utf8" });
@@ -47,24 +49,24 @@ async function parseFiles(
 ): Promise<typeof File[]> {
   const directoryFiles = await glob(`${directory}/**/*${asset_extension}`);
   const total = directoryFiles.length;
-  console.log(`about to handles ${total} files`)
+  console.log(`about to load ${total} files with extension: ${asset_extension}`);
   const twentieth = Math.floor(total / 20);
   let finished = 0;
 
-  const files = await Promise.all(
-    directoryFiles.map(async (file) => {
-      const { id, info } = await getInfo(file, directory);
-      let res = [
-        new File([await fs.readFile(file)], `${id}${asset_extension}`),
-        new File([info], `${id}.json`),
-      ];
-      finished++;
-      if (finished % twentieth == 0) {
-        console.log(`${Math.floor((finished / total) * 100)}%`);
-      }
-      return res;
-    })
-  );
+  const files = [];
+
+  for (let file of directoryFiles) {
+    finished++;
+    if (finished % twentieth == 0) {
+      console.log(`Read ${Math.floor((finished / total) * 100)}%`);
+    }
+    const { id, info } = await getInfo(file, directory);
+    let res = [
+      new File([await fs.readFile(file)], `${id}${asset_extension}`),
+      new File([info], `${id}.json`),
+    ];
+    files.push(...res);
+  }
 
   return files.flat();
 }
@@ -85,7 +87,7 @@ async function main() {
     process.exit(1);
   }
   const initialFiles = await parseFiles(directory, asset_extension);
-  // console.log(initialFiles.slice(0, 10))
+  // console.log(initialFiles)
   // return;
   if (!API_TOKEN) {
     console.error("Environment variable `NFT_STORAGE_API_TOKEN` is not set");
