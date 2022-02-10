@@ -5,6 +5,6 @@ cargo install --git https://github.com/ahalabs/wit-bindgen --rev 7cff7a3173d82ac
 # cargo install --path ~/c/wit-bindgen
 
 cargo witgen generate --prefix-file ./sdk.wit
-aha-wit-bindgen js-near -i ./witgen.wit --out-dir res/
-mv res/witgen.ts res/index.ts
+aha-wit-bindgen js-near -i ./witgen.wit --out-dir ts/
+mv ts/witgen.ts ts/index.ts
 tsc
