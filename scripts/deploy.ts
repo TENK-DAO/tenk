@@ -6,34 +6,33 @@ import { binPath } from "./utils";
 
 const metadata: tenk.InitialMetadata = {
   uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
-  name: "TENK NFT",
-  symbol: "TENK",
+  name: "Cute Penguin Club",
+  symbol: "cutepenguinclub",
 };
- 
-const price_structure: tenk.PriceStructure =  {
-  base_cost: NEAR.parse("1 N").toJSON(),
-}
+
+const price_structure: tenk.PriceStructure = {
+  base_cost: NEAR.parse("3.5 N").toJSON(),
+};
 
 const sale: tenk.Sale = {
-  is_premint_over: true,
-  // initial_royalties: {
-  //   percent: 10_000,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 1_500,
-  //     "kokumo.near": 8_500,
-  //   },
-  // },
-  // royalties: {
-  //   percent: 690,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 2500,
-  //     "kukumo.near": 2900,
-  //     "clownpoop.near": 2300,
-  //     "supermariorpg.near": 2300,
-  //   },
-  // },
+  initial_royalties: {
+    percent: 10_000,
+    accounts: {
+      "tenk.sputnik-dao.near": 3000,
+      "collectiblesdao.sputnik-dao.near": 1000,
+      "deadman1854.near": 3000,
+      "theduck.near": 3000,
+    },
+  },
+  royalties: {
+    percent: 800,
+    accounts: {
+      "tenk.sputnik-dao.near": 3000,
+      "collectiblesdao.sputnik-dao.near": 6000,
+      "theduck.near": 1000,
+    },
+  },
 };
-
 
 export async function main({ account, nearAPI, argv, near }: Context) {
   let { Account } = nearAPI;
