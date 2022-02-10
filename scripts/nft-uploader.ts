@@ -13,7 +13,7 @@ declare interface File {
   _parts: any[];
 }
 
-const id_regex = /^(?<id>[0-9]+)/;
+const id_regex = /^\#(?<id>[0-9]+)/;
 
 async function getInfo(
   fullPath: string,
