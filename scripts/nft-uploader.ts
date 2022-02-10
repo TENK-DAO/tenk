@@ -1,46 +1,66 @@
+#!/usr/bin/env node -r ts-node/register --max-old-space-size=16000
+
 import { File, NFTStorage } from "nft.storage";
 import * as fs from "fs/promises";
 import * as path from "path";
 import { API_TOKEN } from "../api_token";
+import { glob as g } from "glob";
+import { promisify } from "util";
+
+const glob = promisify(g);
 
 declare interface File {
   _parts: any[];
 }
 
-const id_regex = /^(?<id>[0-9]+)/;
+const id_regex = /^(?<id>[0-9]+)\./;
 
-async function getInfo(fullPath: string): Promise<{ id: string; info: any }> {
+async function getInfo(
+  fullPath: string,
+  rootDir: string
+): Promise<{ id: string; info: any }> {
   const [dir, file] = [path.dirname(fullPath), path.basename(fullPath)];
   const { id } = file.match(id_regex).groups;
   if (!id) {
     console.error(`Failed to find the id in ${fullPath}`);
   }
-  const infoFile = path.join(dir, `${id}.json`);
-  const info = await fs.readFile(infoFile, { encoding: "utf8" });
+  const infoFiles = await glob(`${rootDir}/**/${id}.json`);
+  if (infoFiles.length == 0) {
+    throw new Error(`Can't find metadata for ${fullPath}`);
+  }
+
+  if (infoFiles.length != 1) {
+    throw new Error(
+      `Found multiple metadata files for ${fullPath}: ${JSON.stringify(infoFiles)}`
+    );
+  }
+  const info = await fs.readFile(infoFiles[0], { encoding: "utf8" });
   return {
     id,
     info,
   };
 }
 
-async function parseFiles(directory: string, asset_extension = ".png"): Promise<typeof File[]> {
-  const directoryFiles = await fs.readdir(directory);
-  const pics = directoryFiles.filter((s) => s.endsWith(asset_extension));
-  const total = pics.length;
+async function parseFiles(
+  directory: string,
+  asset_extension = ".png"
+): Promise<typeof File[]> {
+  const directoryFiles = await glob(`${directory}/**/*${asset_extension}`);
+  const total = directoryFiles.length;
+  console.log(`about to handles ${total} files`)
   const twentieth = Math.floor(total / 20);
   let finished = 0;
-  
+
   const files = await Promise.all(
-    pics.map(async (f) => {
-      const file = path.join(directory, f);
-      const { id, info } = await getInfo(file);
+    directoryFiles.map(async (file) => {
+      const { id, info } = await getInfo(file, directory);
       let res = [
         new File([await fs.readFile(file)], `${id}${asset_extension}`),
         new File([info], `${id}.json`),
       ];
       finished++;
       if (finished % twentieth == 0) {
-        console.log(`${Math.floor(finished/total*100)}%`)
+        console.log(`${Math.floor((finished / total) * 100)}%`);
       }
       return res;
     })
@@ -58,18 +78,26 @@ async function main() {
   if (!directory) {
     console.error("Upload NFT assets to nft.storage");
     console.error("Usage: <directory> <assetExtension>?");
-    console.error("directory where images and metadata that are numbered starting at zero.\n\t\t\t\t e.g. '0.png', '0.json'");
+    console.error(
+      "directory where images and metadata that are numbered starting at zero.\n\t\t\t\t e.g. '0.png', '0.json'"
+    );
     console.error("assetExtension is optional (default: '.png')");
     process.exit(1);
   }
   const initialFiles = await parseFiles(directory, asset_extension);
+  // console.log(initialFiles.slice(0, 10))
+  // return;
+  if (!API_TOKEN) {
+    console.error("Environment variable `NFT_STORAGE_API_TOKEN` is not set");
+    return;
+  }
   const client = new NFTStorage({ token: API_TOKEN });
   const CID = await client.storeDirectory(initialFiles);
-  const link = makeLink(CID)
+  const link = makeLink(CID);
   console.log(CID);
   console.log(link);
-  console.log(link +"/0.png")
-  console.log(link +"/0.json")
+  console.log(link + "/0.png");
+  console.log(link + "/0.json");
 }
 
 void main();

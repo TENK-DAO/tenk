@@ -1,5 +1,5 @@
 import { Context } from "near-cli/context";
-import { init } from "..";
+import { Contract } from "..";
 
 const royalties = {
   percent: 690,
@@ -14,7 +14,7 @@ const royalties = {
 export async function main({ account }: Context) {
 
   const contractId = account.accountId
-  let contract = init(account, contractId);
+  let contract = new Contract(account, contractId);
   let res = await contract.update_royalties({ royalties });
   console.log("Old royalties");
   console.log(res);

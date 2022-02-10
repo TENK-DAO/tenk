@@ -55,18 +55,24 @@ export async function main({ account, nearAPI, argv, near }: Context) {
     price_structure,
   };
 
-  const contract = tenk.init(account, contractId);
+  const contract = new tenk.Contract(account, contractId);
 
   const tx = account
     .createTransaction(contractId)
     .deployContract(contractBytes);
 
   if (await contractAccount.hasDeployedContract()) {
-    console.log(`initializing with: \n${JSON.stringify(initialArgs, null, 2)}`)
-    tx.actions.push(contract.new_default_metaTx(initialArgs, { gas: Gas.parse("50Tgas") }))
+    console.log(`initializing with: \n${JSON.stringify(initialArgs, null, 2)}`);
+    tx.actions.push(
+      contract.new_default_metaTx(initialArgs, { gas: Gas.parse("50Tgas") })
+    );
   }
   let res = await tx.signAndSend();
-  console.log(`https://explorer${isTestnet ? ".testnet": ""}.near.org/transactions/${res.transaction_outcome.id}`)
+  console.log(
+    `https://explorer${isTestnet ? ".testnet" : ""}.near.org/transactions/${
+      res.transaction_outcome.id
+    }`
+  );
   //@ts-ignore
   if (res.status.SuccessValue != undefined) {
     console.log(`deployed ${contractId}`);

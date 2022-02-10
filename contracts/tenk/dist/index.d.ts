@@ -1,4 +1,15 @@
-import { Contract as _Contract, Account, ChangeMethodOptions, ViewFunctionOptions, transactions, providers } from 'near-api-js';
+import { Account, transactions, providers } from 'near-api-js';
+import BN from 'bn.js';
+export interface ChangeMethodOptions {
+    gas?: BN;
+    attachedDeposit?: BN;
+    walletMeta?: string;
+    walletCallbackUrl?: string;
+}
+export interface ViewFunctionOptions {
+    parse?: (response: Uint8Array) => any;
+    stringify?: (input: any) => any;
+}
 /**
 * Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
 */
@@ -81,13 +92,13 @@ export interface Royalties {
     accounts: Record<AccountId, BasisPoint>;
     percent: BasisPoint;
 }
-export interface Contract extends _Contract {
+export declare class Contract {
+    account: Account;
+    readonly contractId: string;
+    constructor(account: Account, contractId: string);
     update_allowance(args: {
         allowance: number;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     update_allowanceRaw(args: {
         allowance: number;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
@@ -97,9 +108,6 @@ export interface Contract extends _Contract {
     transfer_ownership(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     transfer_ownershipRaw(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
@@ -111,9 +119,6 @@ export interface Contract extends _Contract {
         account_id: AccountId;
         msg?: string;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     nft_approveRaw(args: {
         token_id: TokenId;
         account_id: AccountId;
@@ -134,9 +139,6 @@ export interface Contract extends _Contract {
     nft_mint_many(args: {
         num: number;
     }, options?: ChangeMethodOptions): Promise<Token[]>;
-    /**
-    * returns raw execution outcome
-    */
     nft_mint_manyRaw(args: {
         num: number;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
@@ -146,9 +148,6 @@ export interface Contract extends _Contract {
     start_premint(args: {
         duration: bigint;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     start_premintRaw(args: {
         duration: bigint;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
@@ -167,9 +166,6 @@ export interface Contract extends _Contract {
         memo?: string;
         msg: string;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     nft_transfer_callRaw(args: {
         receiver_id: AccountId;
         token_id: TokenId;
@@ -192,9 +188,6 @@ export interface Contract extends _Contract {
         balance: U128;
         max_len_payout?: number;
     }, options?: ChangeMethodOptions): Promise<Payout>;
-    /**
-    * returns raw execution outcome
-    */
     nft_transfer_payoutRaw(args: {
         receiver_id: AccountId;
         token_id: string;
@@ -219,11 +212,14 @@ export interface Contract extends _Contract {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): Promise<void>;
     /**
-    * returns raw execution outcome
+    * Create a pending token that can be claimed with corresponding private key
     */
     create_linkdropRaw(args: {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Create a pending token that can be claimed with corresponding private key
+    */
     create_linkdropTx(args: {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): transactions.Action;
@@ -234,9 +230,6 @@ export interface Contract extends _Contract {
         accounts: AccountId[];
         allowance?: number;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     add_whitelist_accountsRaw(args: {
         accounts: AccountId[];
         allowance?: number;
@@ -251,9 +244,6 @@ export interface Contract extends _Contract {
         min_cost: U128;
         percent_off?: number;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     end_premintRaw(args: {
         base_cost: U128;
         min_cost: U128;
@@ -280,9 +270,6 @@ export interface Contract extends _Contract {
         approval_id?: bigint;
         memo?: string;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     nft_transferRaw(args: {
         receiver_id: AccountId;
         token_id: TokenId;
@@ -298,9 +285,6 @@ export interface Contract extends _Contract {
     nft_revoke_all(args: {
         token_id: TokenId;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     nft_revoke_allRaw(args: {
         token_id: TokenId;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
@@ -310,9 +294,6 @@ export interface Contract extends _Contract {
     update_royalties(args: {
         royalties: Royalties;
     }, options?: ChangeMethodOptions): Promise<Royalties | null>;
-    /**
-    * returns raw execution outcome
-    */
     update_royaltiesRaw(args: {
         royalties: Royalties;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
@@ -324,16 +305,13 @@ export interface Contract extends _Contract {
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
     nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
-    new (args: {
+    new(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
         size: number;
         price_structure: PriceStructure;
         sale: Sale;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     newRaw(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
@@ -356,9 +334,6 @@ export interface Contract extends _Contract {
         token_id: TokenId;
         account_id: AccountId;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     nft_revokeRaw(args: {
         token_id: TokenId;
         account_id: AccountId;
@@ -381,9 +356,6 @@ export interface Contract extends _Contract {
         token_owner_id: AccountId;
         token_metadata: TokenMetadata;
     }, options?: ChangeMethodOptions): Promise<Token>;
-    /**
-    * returns raw execution outcome
-    */
     nft_mintRaw(args: {
         token_id: TokenId;
         token_owner_id: AccountId;
@@ -404,9 +376,6 @@ export interface Contract extends _Contract {
         price_structure: PriceStructure;
         sale?: Sale;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     new_default_metaRaw(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
@@ -425,9 +394,6 @@ export interface Contract extends _Contract {
         account_id: AccountId;
         allowance: number;
     }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * returns raw execution outcome
-    */
     add_whitelist_account_ungaurdedRaw(args: {
         account_id: AccountId;
         allowance: number;
@@ -437,14 +403,6 @@ export interface Contract extends _Contract {
         allowance: number;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_mint_one(args?: {}, options?: ChangeMethodOptions): Promise<Token>;
-    /**
-    * returns raw execution outcome
-    */
     nft_mint_oneRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_mint_oneTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
 }
-/**
-* Inializing the contract with `contractId`, the accountId of the contract,
-* and the `account` that will sign change calls.
-*/
-export declare function init(account: Account, contractId: string): Contract;

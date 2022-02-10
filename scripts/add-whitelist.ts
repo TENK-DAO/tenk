@@ -1,11 +1,15 @@
 import { Gas } from "near-units";
 import { readFile } from "fs/promises";
 import { Context } from "near-cli/context";
-import { init, Contract } from "..";
+import { Contract } from "..";
+import { valid_account_id } from "./utils";
 
-async function isWhitelisted(contract: Contract, account_id: string): Promise<boolean> {
+async function isWhitelisted(
+  contract: Contract,
+  account_id: string
+): Promise<boolean> {
   try {
-    return contract.whitelisted({account_id});
+    return contract.whitelisted({ account_id });
   } catch (e) {
     console.log(e);
     console.log(`Problem with ${account_id}`);
@@ -24,28 +28,32 @@ export async function main({ account, argv }: Context) {
   const allowance = parseInt(allowance_str);
   let atATime = number ? parseInt(number) : 100;
   let whitelist = JSON.parse(await readFile(file, "utf8"));
-  const contract = init(account, contractId);
+  const contract = new Contract(account, contractId);
 
   for (let i = 0; i < whitelist.length; i = i + atATime) {
-    let account_ids = whitelist.slice(i, i + atATime);
-    // console.log(account_ids)
+    let account_ids: string[] = whitelist.slice(i, i + atATime);
+    let invalid_account_ids = account_ids.filter(
+      (id) => !valid_account_id.test(id)
+    );
+    if (invalid_account_ids.length > 0) {
+      console.log(`invalid Ids ${invalid_account_ids}`);
+    }
+    account_ids = account_ids.filter((id) => valid_account_id.test(id));
     let notWhitelisted = await Promise.all(
       account_ids.map(async (account_id) =>
-        !(await isWhitelisted(contract, account_id))
-          ? account_id
-          : undefined
+        !(await isWhitelisted(contract, account_id)) ? account_id : undefined
       )
     );
     const accounts = notWhitelisted.filter((account) => account != undefined);
     const gas = Gas.parse("60 Tgas");
     if (accounts.length > 0) {
       try {
-          await contract.add_whitelist_accounts({accounts, allowance}, {gas})
-      } catch (e) {}
+        await contract.add_whitelist_accounts({ accounts, allowance }, { gas });
+      } catch (e) {
         console.log(`Failed ${accounts}`);
-      // return;
-    } else {
-      console.log(`Added ${accounts}`);
+        continue;
+      }
+        console.log(`Added ${accounts}`);
     }
   }
 }

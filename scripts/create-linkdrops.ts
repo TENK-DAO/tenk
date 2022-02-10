@@ -1,6 +1,6 @@
 import { NEAR, Gas } from "near-units";
 import { readFile } from "fs/promises";
-import { init } from "..";
+import { Contract } from "..";
 
 export async function main({ account, argv }) {
   if (argv.length < 2) {
@@ -9,7 +9,7 @@ export async function main({ account, argv }) {
   }
 
   const [file, contractId] = argv;
-  const contract = init(account, contractId);
+  const contract = new Contract(account, contractId);
   let keys = JSON.parse(await readFile(file, "utf8"));
 
   for (let i = 0; i < keys.length; i++) {
