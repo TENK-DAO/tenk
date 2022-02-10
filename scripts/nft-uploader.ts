@@ -20,11 +20,12 @@ async function getInfo(
   rootDir: string
 ): Promise<{ id: string; info: any }> {
   const [dir, file] = [path.dirname(fullPath), path.basename(fullPath)];
+  let first_bit = file.split(".")[0];
   const { id } = file.match(id_regex).groups;
   if (!id) {
     console.error(`Failed to find the id in ${fullPath}`);
   }
-  const infoFiles = await glob(`${rootDir}/**/${id}.json`);
+  const infoFiles = await glob(`${rootDir}/**/${first_bit}.json`);
   if (infoFiles.length == 0) {
     throw new Error(`Can't find metadata for ${fullPath}`);
   }
@@ -38,21 +39,23 @@ async function getInfo(
   }
   const info = await fs.readFile(infoFiles[0], { encoding: "utf8" });
   return {
-    id,
+    id: parseInt(id).toString(),
     info,
   };
 }
 
 async function parseFiles(
   directory: string,
-  asset_extension = ".png"
+  asset_extension: string,
+  num: number
 ): Promise<typeof File[]> {
-  const directoryFiles = await glob(`${directory}/**/*${asset_extension}`);
+  const directoryFiles = await (await glob(`${directory}/**/*${asset_extension}`)).slice(num);
   const total = directoryFiles.length;
   console.log(`about to load ${total} files with extension: ${asset_extension}`);
   const twentieth = Math.floor(total / 20);
+  let length = directory.length;
+  let id_set = new Set(Array.from({ length }).map((_, i) => `${i}`));
   let finished = 0;
-
   const files = [];
 
   for (let file of directoryFiles) {
@@ -61,11 +64,17 @@ async function parseFiles(
       console.log(`Read ${Math.floor((finished / total) * 100)}%`);
     }
     const { id, info } = await getInfo(file, directory);
+    id_set.delete(id);
     let res = [
       new File([await fs.readFile(file)], `${id}${asset_extension}`),
       new File([info], `${id}.json`),
     ];
     files.push(...res);
+  }
+  if (id_set.size > 0) {
+    throw new Error(
+      `The following ids are missing: ${Array.from(id_set).join(", ")}`
+    );
   }
 
   return files.flat();
@@ -76,19 +85,22 @@ function makeLink(s: string): string {
 }
 
 async function main() {
-  const [directory, asset_extension] = process.argv.slice(2);
+  const [directory, asset_extension, count] = process.argv.slice(2);
   if (!directory) {
     console.error("Upload NFT assets to nft.storage");
-    console.error("Usage: <directory> <assetExtension>?");
+    console.error("Usage: <directory> <assetExtension>? <count?>");
     console.error(
       "directory where images and metadata that are numbered starting at zero.\n\t\t\t\t e.g. '0.png', '0.json'"
     );
     console.error("assetExtension is optional (default: '.png')");
     process.exit(1);
   }
-  const initialFiles = await parseFiles(directory, asset_extension);
-  // console.log(initialFiles)
-  // return;
+  let num = parseInt(count ?? "0");
+  const initialFiles = await parseFiles(directory, asset_extension ?? ".png", -num);
+  if (num !=  0) {
+    console.log(initialFiles)
+    return;
+  }
   if (!API_TOKEN) {
     console.error("Environment variable `NFT_STORAGE_API_TOKEN` is not set");
     return;
