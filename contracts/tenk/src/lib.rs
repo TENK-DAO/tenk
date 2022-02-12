@@ -409,7 +409,7 @@ impl Contract {
         0u128.into()
     }
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens - 722
+        self.raffle.len() as u32 - self.pending_tokens - 872
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {
@@ -477,8 +477,8 @@ impl Contract {
 
     fn assert_can_mint(&mut self, account_id: &AccountId, num: u32) -> u32 {
         require!(
-            num as u128 + self.nft_total_supply().0 <= 1500,
-            "Total supply capped to 1500"
+            num as u128 + self.nft_total_supply().0 <= 1350,
+            "Total supply capped to 1350"
         );
         let mut num = num;
         // Check quantity
