@@ -1,4 +1,4 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.8.0) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.0.1) 
 
 
 ///  Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
@@ -42,9 +42,7 @@ record nft-contract-metadata {
 }
 
 type public-key = string
-type basis-point = u16
 
-type batch-promise = tuple<>
 
 ///  change
 update-allowance: function(allowance: u32)
@@ -185,6 +183,8 @@ nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadat
 ///  view
 nft-token: function(token-id: token-id) -> option<token>
 
+
+type basis-point = u16
 
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price-structure: price-structure, sale: option<sale>)

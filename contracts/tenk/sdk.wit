@@ -40,6 +40,3 @@ record nft-contract-metadata {
 }
 
 type public-key = string
-type basis-point = u16
-
-type batch-promise = tuple<>

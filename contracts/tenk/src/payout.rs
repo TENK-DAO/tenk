@@ -83,6 +83,7 @@ impl Payouts for Contract {
     }
 }
 
+#[near_sdk::witgen]
 type BasisPoint = u16;
 
 const ONE_HUNDRED_PERCENT_IN_BPS: BasisPoint = 10_000;

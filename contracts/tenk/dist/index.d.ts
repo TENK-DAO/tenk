@@ -53,8 +53,6 @@ export interface NftContractMetadata {
     reference_hash?: Base64VecU8;
 }
 export declare type PublicKey = string;
-export declare type BasisPoint = number;
-export declare type BatchPromise = [];
 export interface InitialMetadata {
     name: string;
     symbol: string;
@@ -71,6 +69,7 @@ export interface Sale {
     is_premint_over?: boolean;
     allowance?: number;
 }
+export declare type BasisPoint = number;
 /**
 * Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 * A mapping of NEAR accounts to the amount each should be paid out, in
