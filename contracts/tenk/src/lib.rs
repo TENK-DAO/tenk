@@ -54,7 +54,6 @@ pub struct Contract {
     allowance: Option<u32>,
 }
 const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
-const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
 const GAS_REQUIRED_TO_CREATE_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
@@ -442,6 +441,14 @@ impl Contract {
         self.allowance = Some(allowance);
     }
 
+    pub fn update_uri(&mut self, uri: String) {
+      self.assert_owner();
+      let mut metadata = self.metadata.get().unwrap();
+      log!("New URI: {}", &uri);
+      metadata.base_uri = Some(uri);
+      self.metadata.set(&metadata);
+    }
+
     // Contract private methods
 
     #[private]
@@ -599,15 +606,14 @@ fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
     }
     .emit()
 }
-const fn to_near(num: u32) -> Balance {
-    (num as Balance * 10u128.pow(24)) as Balance
-}
+
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 mod tests {
     use super::*;
-    const TEN: u128 = to_near(10);
-    const ONE: u128 = to_near(1);
+    use near_units::parse_near;
+    const TEN: u128 = parse_near!("10 N");
+    const ONE: u128 = parse_near!("1 N");
 
     fn account() -> AccountId {
         AccountId::new_unchecked("alice.near".to_string())
