@@ -24,4 +24,4 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Run tests
-        run: yarn && yarn test:ci
+        run: npm i && npm run test:ci
