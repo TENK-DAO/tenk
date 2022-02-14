@@ -1,0 +1,42 @@
+
+///  Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
+type token-id = string
+type account-id = string
+type base64-vec-u8 = string
+type u128 = string
+
+record token {
+    token-id: token-id,
+	owner-id: account-id,
+	metadata: option<token-metadata>,
+	approved-account-ids: option<list<tuple<account-id,u64>>>
+}
+
+///  Metadata on the individual token level.
+record token-metadata {
+    title: option<string>,
+	description: option<string>,
+	media: option<string>,
+	media-hash: option<base64-vec-u8>,
+	copies: option<u64>,
+	issued-at: option<string>,
+	expires-at: option<string>,
+	starts-at: option<string>,
+	updated-at: option<string>,
+	extra: option<string>,
+	reference: option<string>,
+	reference-hash: option<base64-vec-u8>
+}
+
+///  Metadata for the NFT contract itself.
+record nft-contract-metadata {
+    spec: string,
+	name: string,
+	symbol: string,
+	icon: option<string>,
+	base-uri: option<string>,
+	reference: option<string>,
+	reference-hash: option<base64-vec-u8>
+}
+
+type public-key = string

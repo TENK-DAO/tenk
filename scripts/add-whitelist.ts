@@ -1,12 +1,15 @@
 import { Gas } from "near-units";
 import { readFile } from "fs/promises";
 import { Context } from "near-cli/context";
+import { Contract } from "..";
+import { valid_account_id } from "./utils";
 
-async function isWhitelisted(account, contractId, account_id) {
+async function isWhitelisted(
+  contract: Contract,
+  account_id: string
+): Promise<boolean> {
   try {
-    return await account.viewFunction(contractId, "whitelisted", {
-      account_id,
-    });
+    return contract.whitelisted({ account_id });
   } catch (e) {
     console.log(e);
     console.log(`Problem with ${account_id}`);
@@ -14,43 +17,43 @@ async function isWhitelisted(account, contractId, account_id) {
   }
 }
 
-export async function main({ account, near, nearAPI, argv }: Context) {
-  if (argv.length < 2) {
-    console.error("Help:\n<input file> <contractId>");
+export async function main({ account, argv }: Context) {
+  if (argv.length < 3) {
+    console.error(
+      "Help:\n<input file> <contractId> <allowance> <amount per tx? (default 100)>"
+    );
     process.exit(1);
   }
-  const [file, contractId, number] = argv;
+  const [file, contractId, allowance_str, number] = argv;
+  const allowance = parseInt(allowance_str);
   let atATime = number ? parseInt(number) : 100;
   let whitelist = JSON.parse(await readFile(file, "utf8"));
+  const contract = new Contract(account, contractId);
 
   for (let i = 0; i < whitelist.length; i = i + atATime) {
-    let account_ids = whitelist.slice(i, i + atATime);
-    // console.log(account_ids)
+    let account_ids: string[] = whitelist.slice(i, i + atATime);
+    let invalid_account_ids = account_ids.filter(
+      (id) => !valid_account_id.test(id)
+    );
+    if (invalid_account_ids.length > 0) {
+      console.log(`invalid Ids ${invalid_account_ids}`);
+    }
+    account_ids = account_ids.filter((id) => valid_account_id.test(id));
     let notWhitelisted = await Promise.all(
       account_ids.map(async (account_id) =>
-        !(await isWhitelisted(account, contractId, account_id))
-          ? account_id
-          : undefined
+        !(await isWhitelisted(contract, account_id)) ? account_id : undefined
       )
     );
     const accounts = notWhitelisted.filter((account) => account != undefined);
-    console.log(accounts)
+    const gas = Gas.parse("60 Tgas");
     if (accounts.length > 0) {
       try {
-        console.log(await account.functionCall({
-          contractId,
-          methodName: "add_whitelist_accounts",
-          args: { accounts, allowance: 3 },
-          gas: Gas.parse("60 Tgas"),
-          // attachedDeposit: NEAR.parse("36mN"),
-        }));
-      } catch (e) {}
-      console.log(accounts)
-      // return;
+        await contract.add_whitelist_accounts({ accounts, allowance }, { gas });
+      } catch (e) {
+        console.log(`Failed ${accounts}`);
+        continue;
+      }
+        console.log(`Added ${accounts}`);
     }
-    
-    // } catch (e) {
-    //   console.error(`Problem with ${account_id}`);
-    // }
   }
 }
