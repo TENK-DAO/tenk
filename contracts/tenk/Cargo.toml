@@ -10,8 +10,8 @@ crate-type = ["cdylib"]
 [dependencies]
 # near-sdk = { path = "../../../near-sdk-rs/near-sdk"}
 # near-contract-standards = { path = "../../../near-sdk-rs/near-contract-standards" }
-near-sdk = { git = "https://github.com/ahalabs/near-sdk-rs", rev = "5f1f979f956308896e2aaccd56256e52857020df"}
-near-contract-standards = { git = "https://github.com/ahalabs/near-sdk-rs", rev = "5f1f979f956308896e2aaccd56256e52857020df" }
+near-sdk = { git = "https://github.com/ahalabs/near-sdk-rs", rev = "bb53f6227970ca7e3e5f56993bf26dd4e4f8d898"}
+near-contract-standards = { git = "https://github.com/ahalabs/near-sdk-rs", rev = "bb53f6227970ca7e3e5f56993bf26dd4e4f8d898" }
 serde = "1.0.0"
 near-units = "0.2.0"
 serde_with = "1.0.0"
