@@ -25,9 +25,10 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'
-    - run: yarn install --frozen-lockfile
-    - uses: sterlingwes/gh-pages-deploy-action@v1.1
-      with:
-        access-token: ${{ secrets.ACCESS_TOKEN }}
-        source-directory: docs
-        build-command: yarn docs
+    - run: npm i && npm run docs
+    - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: docs # The folder the action should deploy.
