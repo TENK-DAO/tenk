@@ -31,20 +31,17 @@ export async function main({ account, argv }: Context) {
   const contract = new Contract(account, contractId);
 
   for (let i = 0; i < whitelist.length; i = i + atATime) {
-    let account_ids: string[] = whitelist.slice(i, i + atATime);
-    let invalid_account_ids = account_ids.filter(
-      (id) => !valid_account_id.test(id)
-    );
-    if (invalid_account_ids.length > 0) {
-      console.log(`invalid Ids ${invalid_account_ids}`);
-    }
-    account_ids = account_ids.filter((id) => valid_account_id.test(id));
-    let notWhitelisted = await Promise.all(
-      account_ids.map(async (account_id) =>
-        !(await isWhitelisted(contract, account_id)) ? account_id : undefined
+    let account_ids = filter_accounts(whitelist.slice(i, i + atATime));
+    let notInWl = new Set<string>();
+    await Promise.all(
+      account_ids.map(async (account_id) => {
+        if (!(await isWhitelisted(contract, account_id))) {
+          notInWl.add(account_id);
+        }
+      }
       )
     );
-    const accounts = notWhitelisted.filter((account) => account != undefined);
+    const accounts = Array.from(notInWl);
     const gas = Gas.parse("60 Tgas");
     if (accounts.length > 0) {
       try {
@@ -53,7 +50,17 @@ export async function main({ account, argv }: Context) {
         console.log(`Failed ${accounts}`);
         continue;
       }
-        console.log(`Added ${accounts}`);
+      console.log(`Added ${accounts}`);
     }
   }
+}
+
+function filter_accounts(account_ids: string[]): string[] {
+  let invalid_account_ids = account_ids.filter(
+    (id) => !valid_account_id.test(id)
+  );
+  if (invalid_account_ids.length > 0) {
+    console.log(`invalid Ids ${invalid_account_ids}`);
+  }
+  return account_ids.filter((id) => valid_account_id.test(id));
 }

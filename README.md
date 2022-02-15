@@ -16,15 +16,12 @@ For example,
 
 Currently this project wraps its own linkdrop-proxy, but in the future it this will be its own contract that any contract use for the same ability to add a callback to be used when the linkdrop is claimed. When a linkdrop is created it reserves a raffle draw to be made when claiming. This allows the token to be a surprise (unless it's the last one).
 
-## Development
-
-This project also aims to highlight the newest way to test smart contracts on near using [`near-workspaces`](https://github.com/near/workspaces-js).  See example tests in `__tests__`
 
 ## API
 
-Docs are located: `./docs`
+TypeScript docs are found at [https://tenk-dao.github.io/tenk/](https://tenk-dao.github.io/tenk/).
 
-Currently there is no standard format to describe the types of a contract. On proposal is to use the (`wit` format)[https://github.com/bytecodealliance/wit-bindgen/blob/main/WIT.md],
+Currently there is no standard format to describe the types of a contract. On proposal is to use the [`wit` format](https://github.com/bytecodealliance/wit-bindgen/blob/main/WIT.md),
 which while intended as a tool to generate bindings that act as polyfill for [`WebAssembly Interface Types`](https://github.com/WebAssembly/interface-types), it provides a language agnostic
 way to describe types for the API of a Wasm Binary.
 
@@ -33,21 +30,25 @@ from a `.wit` document.  The generated TS file also includes a `Contract` class 
 
 For example, `nft_transfer` generates the following three functions:
 
-```ts
+```typescript
 
-// will throw if there is an error and parse result if it exist.
+// Will throw if there is an error and parse result if it exist.
 nft_transfer(args: {
     receiver_id: AccountId;
     token_id: TokenId;
     approval_id?: u64;
     memo?: string;
 }, options?: ChangeMethodOptions): Promise<void>;
+
+// Will return the response from the server regardless of it succeeded
 nft_transferRaw(args: {
     receiver_id: AccountId;
     token_id: TokenId;
     approval_id?: u64;
     memo?: string;
 }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+
+// Creates a function call action that can be added to a transaction
 nft_transferTx(args: {
     receiver_id: AccountId;
     token_id: TokenId;
@@ -56,12 +57,27 @@ nft_transferTx(args: {
 }, options?: ChangeMethodOptions): transactions.Action;
 ```
 
+Having the types mean that your contract calls will be type check and failed transactions or view calls from missing arguments.
+
+View calls also generate a function.
+
+```typescript
+/// makes a view call and parses the result
+nft_payout(args: {
+    token_id: string;
+    balance: U128;
+    max_len_payout?: number;
+}, options?: ViewFunctionOptions): Promise<Payout>;
+
+nft_token(args: { token_id: TokenId;}, options?: ViewFunctionOptions): Promise<Token | null>;
+```
+
+
 ### Using the contract's types
 
 The generated typescript can then be compiled to allow for other projects to use.  The main file and types of this package are found `./contracts/tenk/dist/*`
 and specified in the `package.json`. These
 
-#### Example
 
 From another TS project:
 
@@ -70,12 +86,52 @@ import { Contract } from "tenk-nft"
 
 ...
 
-const contract = new Contract(account, "tenkv0.testnet.tenk");
 
-async function metadata() {
-  const metadata = await contract.nft_metadata();
+async function main({account}) {
+  const contract = new Contract(account, "tenkv0.testnet.tenk");
+
+  await contract.nft_transfer({receiver_id: "eve.testnet", token_id: "0"});
+  const token = await contract.nft_token({token_id: "0"})
+  console.log(`token ${token}`);
 }
 ```
+
+## Using scripts with `near-cli`
+
+A recent update to `near-cli` allows passing a script the current context of the current `near` environment. This includes the account that is signing the transactions, access to the same `near-api-js` that the cli is using, and an array of arguments passed to the script.
+
+For example, from the script [`update_royalties.ts`](./scripts/update_royalties.ts):
+
+```typescript
+import {Context} from "near-cli/context";
+
+export async function main({ account, argv }: Context) {
+  let [contractId] = argv;
+  if (contractId === null) {
+    console.error("need to supply contract's accountId")
+    console.error("... -- <contractId>")
+  }
+  let contract = new Contract(account, contractId);
+  const royalties = {
+    percent: 690,
+    accounts: {
+      "tenk.sputnik-dao.near": 2500,
+      "bob.near": 7500,
+    }
+  };
+  let res = await contract.update_royalties({ royalties });
+  console.log(`old payout ${res}`);
+}
+```
+
+Run the script with `near-cil`'s `repl` command using the option `-s` to pass a script.  Other arguments of near-cli can be passed 
+and any arguments after the `--` are collected in the passed `argv`.
+
+```bash
+near repl -s ./scripts/update_royalties.ts --accountId owner.testnet -- contract.testnet
+```
+
+This makes it easy to create your own near scripts, while still getting the benefit of type checking parameters.
 
 ## Aspects of Near that prevents hacks on this method of minting
 
@@ -89,7 +145,9 @@ The key aspect that this hack and others like it on Ethereum rely on is that a s
 For more information about the API provided by the NFT standard see [nomicon.io](https://nomicon.io/Standards/NonFungibleToken).
 
 
-## Developing
+## Development
+
+This project also aims to highlight the newest way to test smart contracts on near using [`near-workspaces`](https://github.com/near/workspaces-js).  See example tests in [`__test__`](./__test__).
 
 Node must be installed. And Rust must be install see [Getting Started in near-sdk.io](https://www.near-sdk.io/).
 
