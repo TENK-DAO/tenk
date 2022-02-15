@@ -1,18 +1,69 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.0.1) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.1.0) 
 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.0.2) 
 
-///  Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
-type token-id = string
-type account-id = string
+///  StorageUsage is used to count the amount of storage used by a contract.
+type storage-usage = u64
+
+///  Balance is a type for storing amounts of tokens, specified in yoctoNEAR.
+type balance = u128
+
+///  Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
+type gas = u64
+
+///  base64 string.
 type base64-vec-u8 = string
+
+///  Raw type for duration in nanoseconds
+type duration = u64
+
 type u128 = string
 
+///  Public key in a binary format with base58 string serialization with human-readable curve.
+///  The key types currently supported are `secp256k1` and `ed25519`.
+/// 
+///  Ed25519 public keys accepted are 32 bytes and secp256k1 keys are the uncompressed 64 format.
+type public-key = string
+
+type account-id = string
+
+///  Raw type for timestamp in nanoseconds
+type timestamp = u64
+
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.0.2) 
+
+record storage-balance-bounds {
+    min: u128,
+	max: option<u128>
+}
+
+record fungible-token-metadata {
+    spec: string,
+	name: string,
+	symbol: string,
+	icon: option<string>,
+	reference: option<string>,
+	reference-hash: option<base64-vec-u8>,
+	decimals: u8
+}
+
+///  In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
 record token {
     token-id: token-id,
 	owner-id: account-id,
 	metadata: option<token-metadata>,
 	approved-account-ids: option<list<tuple<account-id,u64>>>
 }
+
+///  Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
+type token-id = string
+
+record storage-balance {
+    total: u128,
+	available: u128
+}
+
+type wrapped-duration = string
 
 ///  Metadata on the individual token level.
 record token-metadata {
@@ -41,25 +92,32 @@ record nft-contract-metadata {
 	reference-hash: option<base64-vec-u8>
 }
 
-type public-key = string
+check-key: function(public-key: public-key) -> bool
 
 
 ///  change
 update-allowance: function(allowance: u32)
 
-///  change
-transfer-ownership: function(new-owner: account-id)
-
-///  change
-nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
-
-///  view
 whitelisted: function(account-id: account-id) -> bool
 
 
-///  view
-total-cost: function(num: u32, minter: account-id) -> u128
+remaining-allowance: function(account-id: account-id) -> u32
 
+
+///  change
+transfer-ownership: function(new-owner: account-id)
+
+nft-total-supply: function() -> u128
+
+
+nft-tokens: function(from-index: option<u128>, limit: option<u64>) -> list<token>
+
+
+nft-token: function(token-id: token-id) -> option<token>
+
+
+///  change
+nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
 
 ///  change
 nft-mint-many: function(num: u32) -> list<token>
@@ -68,19 +126,18 @@ nft-mint-many: function(num: u32) -> list<token>
 ///  change
 start-premint: function(duration: u64)
 
-///  view
-nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
-
-
 ///  change
 nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>, msg: string)
+
+nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
+
 
 ///  change
 nft-transfer-payout: function(receiver-id: account-id, token-id: string, approval-id: option<u64>, memo: option<string>, balance: u128, max-len-payout: option<u32>) -> payout
 
 
-///  view
-token-storage-cost: function() -> u128
+///  Returns the balance associated with given key.
+get-key-balance: function() -> u128
 
 
 record initial-metadata {
@@ -97,16 +154,8 @@ record initial-metadata {
 ///  change
 create-linkdrop: function(public-key: public-key)
 
-///  view
-remaining-allowance: function(account-id: account-id) -> u32
-
-
 ///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
-
-///  view
-tokens-left: function() -> u32
-
 
 record sale {
     royalties: option<royalties>,
@@ -119,20 +168,7 @@ record sale {
 ///  change
 end-premint: function(base-cost: u128, min-cost: u128, percent-off: option<u8>)
 
-///  view
-check-key: function(public-key: public-key) -> bool
-
-
-///  view
-discount: function(num: u32) -> u128
-
-
-///  view
-nft-total-supply: function() -> u128
-
-
-///  view
-nft-supply-for-owner: function(account-id: account-id) -> u128
+token-storage-cost: function() -> u128
 
 
 ///  change
@@ -145,52 +181,47 @@ nft-revoke-all: function(token-id: token-id)
 update-royalties: function(royalties: royalties) -> option<royalties>
 
 
-///  view
-cost-per-token: function(num: u32, minter: account-id) -> u128
-
-
-///  view
-nft-metadata: function() -> nft-contract-metadata
+cost-of-linkdrop: function(minter: account-id) -> u128
 
 
 ///  change
 new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, price-structure: price-structure, sale: sale)
 
-///  Returns the balance associated with given key.
-///  view
-get-key-balance: function() -> u128
+total-cost: function(num: u32, minter: account-id) -> u128
+
+
+get-linkdrop-contract: function() -> account-id
 
 
 ///  change
 nft-revoke: function(token-id: token-id, account-id: account-id)
 
-///  view
+nft-metadata: function() -> nft-contract-metadata
+
+
 nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
-
-
-///  view
-get-linkdrop-contract: function() -> account-id
-
-
-///  view
-cost-of-linkdrop: function(minter: account-id) -> u128
 
 
 ///  change
 nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadata: token-metadata) -> token
 
 
-///  view
-nft-token: function(token-id: token-id) -> option<token>
-
-
 type basis-point = u16
+
+cost-per-token: function(num: u32, minter: account-id) -> u128
+
 
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price-structure: price-structure, sale: option<sale>)
 
+nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>, limit: option<u64>) -> list<token>
+
+
 ///  change
 add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
+
+discount: function(num: u32) -> u128
+
 
 ///  Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 ///  A mapping of NEAR accounts to the amount each should be paid out, in
@@ -208,6 +239,12 @@ record price-structure {
 	min-cost: option<u128>,
 	percent-off: option<u8>
 }
+
+tokens-left: function() -> u32
+
+
+nft-supply-for-owner: function(account-id: account-id) -> u128
+
 
 ///  change
 nft-mint-one: function() -> token
