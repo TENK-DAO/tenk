@@ -1,6 +1,6 @@
 # Tenk NFT
 
-The main idea of this contract is creating a set of items upfront, for example 10,000, hence tenk.  Then each time a token is minted it is randomly chosen from the remaining tokens. The core mechanism for this is a `Raffle` collection type, which allows randomly picking from a range without replacement. This contract also introduces the idea of using a linkdrop proxy to allow the owner or a normal user to "pre-mint" an item.
+This contract publishes collections of NFT for example 10,000, hence TenK.  Each time a token is minted it is randomly chosen from the remaining tokens. The core mechanism for this is a `Raffle` collection type, which allows randomly picking from a range without replacement. This contract also introduces the idea of using a linkdrop proxy to allow the owner or a normal user to "pre-mint" an item.
 
 ## Details
 
@@ -10,7 +10,7 @@ For example,
 
 - [https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link](https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link)
 - [https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/42.png](https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/42.png)
-- [https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/42.json](https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/42.json))
+- [https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/42.json](https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/42.json)
 
 ## Linkdrop proxy
 
@@ -57,7 +57,7 @@ nft_transferTx(args: {
 }, options?: ChangeMethodOptions): transactions.Action;
 ```
 
-Having the types mean that your contract calls will be type check and failed transactions or view calls from missing arguments.
+Having the types mean that your contract calls will be type checked and prevent failed transactions from missing or malformed arguments.
 
 View calls also generate a function.
 
@@ -104,6 +104,7 @@ For example, from the script [`update_royalties.ts`](./scripts/update_royalties.
 
 ```typescript
 import {Context} from "near-cli/context";
+import {Contract} from "..";
 
 export async function main({ account, argv }: Context) {
   let [contractId] = argv;
