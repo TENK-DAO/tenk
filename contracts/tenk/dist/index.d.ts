@@ -10,19 +10,72 @@ export interface ViewFunctionOptions {
     parse?: (response: Uint8Array) => any;
     stringify?: (input: any) => any;
 }
+/** 64 bit unsigned integer less than 2^53 -1 */
+declare type u64 = number;
 /**
-* Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
+* StorageUsage is used to count the amount of storage used by a contract.
 */
-export declare type TokenId = string;
-export declare type AccountId = string;
+export declare type StorageUsage = u64;
+/**
+* Balance is a type for storing amounts of tokens, specified in yoctoNEAR.
+*/
+export declare type Balance = U128;
+/**
+* Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
+*/
+export declare type Gas = u64;
+/**
+* base64 string.
+*/
 export declare type Base64VecU8 = string;
+/**
+* Raw type for duration in nanoseconds
+*/
+export declare type Duration = u64;
 export declare type U128 = string;
+/**
+* Public key in a binary format with base58 string serialization with human-readable curve.
+* The key types currently supported are `secp256k1` and `ed25519`.
+*
+* Ed25519 public keys accepted are 32 bytes and secp256k1 keys are the uncompressed 64 format.
+*/
+export declare type PublicKey = string;
+export declare type AccountId = string;
+/**
+* Raw type for timestamp in nanoseconds
+*/
+export declare type Timestamp = u64;
+export interface StorageBalanceBounds {
+    min: U128;
+    max?: U128;
+}
+export interface FungibleTokenMetadata {
+    spec: string;
+    name: string;
+    symbol: string;
+    icon?: string;
+    reference?: string;
+    reference_hash?: Base64VecU8;
+    decimals: number;
+}
+/**
+* In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
+*/
 export interface Token {
     token_id: TokenId;
     owner_id: AccountId;
     metadata?: TokenMetadata;
-    approved_account_ids?: Record<AccountId, bigint>;
+    approved_account_ids?: Record<AccountId, u64>;
 }
+/**
+* Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
+*/
+export declare type TokenId = string;
+export interface StorageBalance {
+    total: U128;
+    available: U128;
+}
+export declare type WrappedDuration = string;
 /**
 * Metadata on the individual token level.
 */
@@ -31,7 +84,7 @@ export interface TokenMetadata {
     description?: string;
     media?: string;
     media_hash?: Base64VecU8;
-    copies?: bigint;
+    copies?: u64;
     issued_at?: string;
     expires_at?: string;
     starts_at?: string;
@@ -52,7 +105,6 @@ export interface NftContractMetadata {
     reference?: string;
     reference_hash?: Base64VecU8;
 }
-export declare type PublicKey = string;
 export interface InitialMetadata {
     name: string;
     symbol: string;
@@ -95,6 +147,9 @@ export declare class Contract {
     account: Account;
     readonly contractId: string;
     constructor(account: Account, contractId: string);
+    check_key(args: {
+        public_key: PublicKey;
+    }, options?: ViewFunctionOptions): Promise<boolean>;
     update_allowance(args: {
         allowance: number;
     }, options?: ChangeMethodOptions): Promise<void>;
@@ -104,6 +159,12 @@ export declare class Contract {
     update_allowanceTx(args: {
         allowance: number;
     }, options?: ChangeMethodOptions): transactions.Action;
+    whitelisted(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<boolean>;
+    remaining_allowance(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<number>;
     transfer_ownership(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): Promise<void>;
@@ -113,6 +174,14 @@ export declare class Contract {
     transfer_ownershipTx(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): transactions.Action;
+    nft_total_supply(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    nft_tokens(args: {
+        from_index?: U128;
+        limit?: u64;
+    }, options?: ViewFunctionOptions): Promise<Token[]>;
+    nft_token(args: {
+        token_id: TokenId;
+    }, options?: ViewFunctionOptions): Promise<Token | null>;
     nft_approve(args: {
         token_id: TokenId;
         account_id: AccountId;
@@ -128,13 +197,6 @@ export declare class Contract {
         account_id: AccountId;
         msg?: string;
     }, options?: ChangeMethodOptions): transactions.Action;
-    whitelisted(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<boolean>;
-    total_cost(args: {
-        num: number;
-        minter: AccountId;
-    }, options?: ViewFunctionOptions): Promise<U128>;
     nft_mint_many(args: {
         num: number;
     }, options?: ChangeMethodOptions): Promise<Token[]>;
@@ -145,44 +207,44 @@ export declare class Contract {
         num: number;
     }, options?: ChangeMethodOptions): transactions.Action;
     start_premint(args: {
-        duration: bigint;
+        duration: u64;
     }, options?: ChangeMethodOptions): Promise<void>;
     start_premintRaw(args: {
-        duration: bigint;
+        duration: u64;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     start_premintTx(args: {
-        duration: bigint;
+        duration: u64;
     }, options?: ChangeMethodOptions): transactions.Action;
-    nft_payout(args: {
-        token_id: string;
-        balance: U128;
-        max_len_payout?: number;
-    }, options?: ViewFunctionOptions): Promise<Payout>;
     nft_transfer_call(args: {
         receiver_id: AccountId;
         token_id: TokenId;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
         msg: string;
     }, options?: ChangeMethodOptions): Promise<void>;
     nft_transfer_callRaw(args: {
         receiver_id: AccountId;
         token_id: TokenId;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
         msg: string;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_transfer_callTx(args: {
         receiver_id: AccountId;
         token_id: TokenId;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
         msg: string;
     }, options?: ChangeMethodOptions): transactions.Action;
+    nft_payout(args: {
+        token_id: string;
+        balance: U128;
+        max_len_payout?: number;
+    }, options?: ViewFunctionOptions): Promise<Payout>;
     nft_transfer_payout(args: {
         receiver_id: AccountId;
         token_id: string;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
         balance: U128;
         max_len_payout?: number;
@@ -190,7 +252,7 @@ export declare class Contract {
     nft_transfer_payoutRaw(args: {
         receiver_id: AccountId;
         token_id: string;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
         balance: U128;
         max_len_payout?: number;
@@ -198,12 +260,15 @@ export declare class Contract {
     nft_transfer_payoutTx(args: {
         receiver_id: AccountId;
         token_id: string;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
         balance: U128;
         max_len_payout?: number;
     }, options?: ChangeMethodOptions): transactions.Action;
-    token_storage_cost(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    /**
+    * Returns the balance associated with given key.
+    */
+    get_key_balance(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
     /**
     * Create a pending token that can be claimed with corresponding private key
     */
@@ -222,9 +287,6 @@ export declare class Contract {
     create_linkdropTx(args: {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): transactions.Action;
-    remaining_allowance(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<number>;
     add_whitelist_accounts(args: {
         accounts: AccountId[];
         allowance?: number;
@@ -237,7 +299,6 @@ export declare class Contract {
         accounts: AccountId[];
         allowance?: number;
     }, options?: ChangeMethodOptions): transactions.Action;
-    tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<number>;
     end_premint(args: {
         base_cost: U128;
         min_cost: U128;
@@ -253,32 +314,23 @@ export declare class Contract {
         min_cost: U128;
         percent_off?: number;
     }, options?: ChangeMethodOptions): transactions.Action;
-    check_key(args: {
-        public_key: PublicKey;
-    }, options?: ViewFunctionOptions): Promise<boolean>;
-    discount(args: {
-        num: number;
-    }, options?: ViewFunctionOptions): Promise<U128>;
-    nft_total_supply(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
-    nft_supply_for_owner(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<U128>;
+    token_storage_cost(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
     nft_transfer(args: {
         receiver_id: AccountId;
         token_id: TokenId;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
     }, options?: ChangeMethodOptions): Promise<void>;
     nft_transferRaw(args: {
         receiver_id: AccountId;
         token_id: TokenId;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_transferTx(args: {
         receiver_id: AccountId;
         token_id: TokenId;
-        approval_id?: bigint;
+        approval_id?: u64;
         memo?: string;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_revoke_all(args: {
@@ -299,11 +351,9 @@ export declare class Contract {
     update_royaltiesTx(args: {
         royalties: Royalties;
     }, options?: ChangeMethodOptions): transactions.Action;
-    cost_per_token(args: {
-        num: number;
+    cost_of_linkdrop(args: {
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
-    nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
     new(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
@@ -325,10 +375,11 @@ export declare class Contract {
         price_structure: PriceStructure;
         sale: Sale;
     }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Returns the balance associated with given key.
-    */
-    get_key_balance(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    total_cost(args: {
+        num: number;
+        minter: AccountId;
+    }, options?: ViewFunctionOptions): Promise<U128>;
+    get_linkdrop_contract(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
     nft_revoke(args: {
         token_id: TokenId;
         account_id: AccountId;
@@ -341,15 +392,12 @@ export declare class Contract {
         token_id: TokenId;
         account_id: AccountId;
     }, options?: ChangeMethodOptions): transactions.Action;
+    nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
     nft_is_approved(args: {
         token_id: TokenId;
         approved_account_id: AccountId;
-        approval_id?: bigint;
+        approval_id?: u64;
     }, options?: ViewFunctionOptions): Promise<boolean>;
-    get_linkdrop_contract(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
-    cost_of_linkdrop(args: {
-        minter: AccountId;
-    }, options?: ViewFunctionOptions): Promise<U128>;
     nft_mint(args: {
         token_id: TokenId;
         token_owner_id: AccountId;
@@ -365,9 +413,10 @@ export declare class Contract {
         token_owner_id: AccountId;
         token_metadata: TokenMetadata;
     }, options?: ChangeMethodOptions): transactions.Action;
-    nft_token(args: {
-        token_id: TokenId;
-    }, options?: ViewFunctionOptions): Promise<Token | null>;
+    cost_per_token(args: {
+        num: number;
+        minter: AccountId;
+    }, options?: ViewFunctionOptions): Promise<U128>;
     new_default_meta(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
@@ -389,6 +438,11 @@ export declare class Contract {
         price_structure: PriceStructure;
         sale?: Sale;
     }, options?: ChangeMethodOptions): transactions.Action;
+    nft_tokens_for_owner(args: {
+        account_id: AccountId;
+        from_index?: U128;
+        limit?: u64;
+    }, options?: ViewFunctionOptions): Promise<Token[]>;
     add_whitelist_account_ungaurded(args: {
         account_id: AccountId;
         allowance: number;
@@ -401,7 +455,15 @@ export declare class Contract {
         account_id: AccountId;
         allowance: number;
     }, options?: ChangeMethodOptions): transactions.Action;
+    discount(args: {
+        num: number;
+    }, options?: ViewFunctionOptions): Promise<U128>;
+    tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<number>;
+    nft_supply_for_owner(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<U128>;
     nft_mint_one(args?: {}, options?: ChangeMethodOptions): Promise<Token>;
     nft_mint_oneRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_mint_oneTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
 }
+export {};

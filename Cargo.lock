@@ -594,7 +594,7 @@ dependencies = [
 [[package]]
 name = "near-contract-standards"
 version = "4.0.0-pre.7"
-source = "git+https://github.com/ahalabs/near-sdk-rs?rev=bb53f6227970ca7e3e5f56993bf26dd4e4f8d898#bb53f6227970ca7e3e5f56993bf26dd4e4f8d898"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
 dependencies = [
  "near-sdk",
  "serde",
@@ -707,7 +707,7 @@ dependencies = [
 [[package]]
 name = "near-sdk"
 version = "4.0.0-pre.7"
-source = "git+https://github.com/ahalabs/near-sdk-rs?rev=bb53f6227970ca7e3e5f56993bf26dd4e4f8d898#bb53f6227970ca7e3e5f56993bf26dd4e4f8d898"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
 dependencies = [
  "base64 0.13.0",
  "borsh",
@@ -725,7 +725,7 @@ dependencies = [
 [[package]]
 name = "near-sdk-macros"
 version = "4.0.0-pre.7"
-source = "git+https://github.com/ahalabs/near-sdk-rs?rev=bb53f6227970ca7e3e5f56993bf26dd4e4f8d898#bb53f6227970ca7e3e5f56993bf26dd4e4f8d898"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -737,7 +737,7 @@ dependencies = [
 [[package]]
 name = "near-sys"
 version = "0.1.0"
-source = "git+https://github.com/ahalabs/near-sdk-rs?rev=bb53f6227970ca7e3e5f56993bf26dd4e4f8d898#bb53f6227970ca7e3e5f56993bf26dd4e4f8d898"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
 
 [[package]]
 name = "near-units"

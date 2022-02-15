@@ -21,7 +21,8 @@
     "test:unit": "cargo test",
     "test:ci": "yarn test:unit && yarn test",
     "lint": "yarn eslint . --ext .ts",
-    "wit": "(cd contracts/tenk; ./build.sh)"
+    "wit": "(cd contracts/tenk; witme wit -t ts/ --standards && tsc)",
+    "docs": "yarn wit && typedoc contracts/tenk/ts/index.ts --tsconfig contracts/tenk/tsconfig.json"
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
@@ -37,6 +38,7 @@
     "near-willem-workspaces-ava": "^1.0.3-alpha.0",
     "nft.storage": "^5.0.0",
     "ts-node": "^10.4.0",
+    "typedoc": "^0.22.11",
     "typescript": "^4.5.5"
   }
 }

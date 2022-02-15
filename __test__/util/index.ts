@@ -38,7 +38,7 @@ export function deploy(
       metadata: {
         name: "TENK NFT",
         symbol: "TENK",
-        uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+        uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
       },
       size: 100,
       price_structure: {
