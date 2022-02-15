@@ -15,11 +15,13 @@ jobs:
     steps:
     
     - uses: actions/checkout@v2
-    - name: "${{ matrix.toolchain }} with rustfmt, and wasm32"
-      uses: actions-rs/toolchain@v1
+    - uses: actions-rs/toolchain@v1
       with:
-        profile: minimal
-    - run: cargo install witme --version 0.1.0
+          toolchain: stable
+    - uses: actions-rs/cargo@v1
+      with:
+        command: install
+        args: witme --version 0.1.0
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'
