@@ -168,9 +168,6 @@ export class Contract {
   whitelisted(args: {account_id: AccountId}, options?: ViewFunctionOptions): Promise<boolean> {
     return this.account.viewFunction(this.contractId, "whitelisted", args, options);
   }
-  remaining_allowance(args: {account_id: AccountId}, options?: ViewFunctionOptions): Promise<number> {
-    return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
-  }
   async transfer_ownership(args: {new_owner: AccountId}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.transfer_ownershipRaw(args, options));
   }
@@ -215,6 +212,15 @@ export class Contract {
   }
   start_premintTx(args: {duration: u64}, options?: ChangeMethodOptions):  transactions.Action {
     return transactions.functionCall("start_premint", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  async update_uri(args: {uri: string}, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_uriRaw(args, options));
+  }
+  update_uriRaw(args: {uri: string}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_uri", args, ...options});
+  }
+  update_uriTx(args: {uri: string}, options?: ChangeMethodOptions):  transactions.Action {
+    return transactions.functionCall("update_uri", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async nft_transfer_call(args: {receiver_id: AccountId, token_id: TokenId, approval_id?: u64, memo?: string, msg: string}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.nft_transfer_callRaw(args, options));
@@ -341,6 +347,9 @@ export class Contract {
   }
   nft_is_approved(args: {token_id: TokenId, approved_account_id: AccountId, approval_id?: u64}, options?: ViewFunctionOptions): Promise<boolean> {
     return this.account.viewFunction(this.contractId, "nft_is_approved", args, options);
+  }
+  remaining_allowance(args: {account_id: AccountId}, options?: ViewFunctionOptions): Promise<number | null> {
+    return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
   }
   async nft_mint(args: {token_id: TokenId, token_owner_id: AccountId, token_metadata: TokenMetadata}, options?: ChangeMethodOptions): Promise<Token> {
     return providers.getTransactionLastResult(await this.nft_mintRaw(args, options));

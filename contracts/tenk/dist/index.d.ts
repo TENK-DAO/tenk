@@ -162,9 +162,6 @@ export declare class Contract {
     whitelisted(args: {
         account_id: AccountId;
     }, options?: ViewFunctionOptions): Promise<boolean>;
-    remaining_allowance(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<number>;
     transfer_ownership(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): Promise<void>;
@@ -214,6 +211,15 @@ export declare class Contract {
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     start_premintTx(args: {
         duration: u64;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    update_uri(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    update_uriRaw(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_uriTx(args: {
+        uri: string;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_transfer_call(args: {
         receiver_id: AccountId;
@@ -398,6 +404,9 @@ export declare class Contract {
         approved_account_id: AccountId;
         approval_id?: u64;
     }, options?: ViewFunctionOptions): Promise<boolean>;
+    remaining_allowance(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<number | null>;
     nft_mint(args: {
         token_id: TokenId;
         token_owner_id: AccountId;

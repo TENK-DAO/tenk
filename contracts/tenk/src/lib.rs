@@ -1,10 +1,8 @@
 use linkdrop::LINKDROP_DEPOSIT;
-use near_contract_standards::{
-    non_fungible_token::{
-        events::NftMint,
-        metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
-        refund_deposit_to_account, NonFungibleToken, Token, TokenId,
-    },
+use near_contract_standards::non_fungible_token::{
+    events::NftMint,
+    metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
+    refund_deposit_to_account, NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -410,8 +408,12 @@ impl Contract {
         self.metadata.get().unwrap()
     }
 
-    pub fn remaining_allowance(&self, account_id: &AccountId) -> u32 {
-        self.whitelist.get(account_id).unwrap_or(0)
+    pub fn remaining_allowance(&self, account_id: &AccountId) -> Option<u32> {
+        if self.is_premint {
+            self.whitelist.get(account_id)
+        } else {
+            None
+        }
     }
 
     // Owner private methods
@@ -437,11 +439,11 @@ impl Contract {
     }
 
     pub fn update_uri(&mut self, uri: String) {
-      self.assert_owner();
-      let mut metadata = self.metadata.get().unwrap();
-      log!("New URI: {}", &uri);
-      metadata.base_uri = Some(uri);
-      self.metadata.set(&metadata);
+        self.assert_owner();
+        let mut metadata = self.metadata.get().unwrap();
+        log!("New URI: {}", &uri);
+        metadata.base_uri = Some(uri);
+        self.metadata.set(&metadata);
     }
 
     // Contract private methods
@@ -586,8 +588,16 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
 fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
-    let token_ids = &tokens.iter().map(|t| t.token_id.as_str()).collect::<Vec<&str>>();
-    NftMint {owner_id, token_ids, memo: None }.emit()
+    let token_ids = &tokens
+        .iter()
+        .map(|t| t.token_id.as_str())
+        .collect::<Vec<&str>>();
+    NftMint {
+        owner_id,
+        token_ids,
+        memo: None,
+    }
+    .emit()
 }
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance

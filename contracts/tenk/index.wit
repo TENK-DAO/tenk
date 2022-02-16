@@ -101,9 +101,6 @@ update-allowance: function(allowance: u32)
 whitelisted: function(account-id: account-id) -> bool
 
 
-remaining-allowance: function(account-id: account-id) -> u32
-
-
 ///  change
 transfer-ownership: function(new-owner: account-id)
 
@@ -125,6 +122,9 @@ nft-mint-many: function(num: u32) -> list<token>
 
 ///  change
 start-premint: function(duration: u64)
+
+///  change
+update-uri: function(uri: string)
 
 ///  change
 nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>, msg: string)
@@ -200,6 +200,9 @@ nft-metadata: function() -> nft-contract-metadata
 
 
 nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
+
+
+remaining-allowance: function(account-id: account-id) -> option<u32>
 
 
 ///  change
