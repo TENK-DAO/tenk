@@ -1,20 +1,21 @@
 import { Context } from "near-cli/context";
 import { Contract } from "..";
 
-const royalties = {
-  percent: 690,
-  accounts: {
-    "tenk.sputnik-dao.near": 2500,
-    "kokumo.near": 2900,
-    "clownpoop.near": 2300,
-    "supermariorpg.near": 2300,
+
+export async function main({ account, argv }: Context) {
+  let [contractId] = argv;
+  if (contractId === null) {
+    console.error("need to supply contract's accountId")
+    console.error("... -- <contractId>")
   }
-};
-
-export async function main({ account }: Context) {
-
-  const contractId = account.accountId
   let contract = new Contract(account, contractId);
+  const royalties = {
+    percent: 690,
+    accounts: {
+      "tenk.sputnik-dao.near": 2500,
+      "bob.near": 7500,
+    }
+  };
   let res = await contract.update_royalties({ royalties });
   console.log("Old royalties");
   console.log(res);
