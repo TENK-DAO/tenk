@@ -5,33 +5,30 @@ import * as tenk from "..";
 import { binPath } from "./utils";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
-  name: "TENK NFT",
-  symbol: "TENK",
+  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
+  name: "Tora City",
+  symbol: "TOC",
 };
  
 const price_structure: tenk.PriceStructure =  {
-  base_cost: NEAR.parse("1 N").toJSON(),
+  base_cost: NEAR.parse("6.5 N").toJSON(),
 }
 
 const sale: tenk.Sale = {
-  is_premint_over: true,
-  // initial_royalties: {
-  //   percent: 10_000,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 1_500,
-  //     "kokumo.near": 8_500,
-  //   },
-  // },
-  // royalties: {
-  //   percent: 690,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 2500,
-  //     "kukumo.near": 2900,
-  //     "clownpoop.near": 2300,
-  //     "supermariorpg.near": 2300,
-  //   },
-  // },
+  initial_royalties: {
+    percent: 10_000,
+    accounts: {
+      "tenk.sputnik-dao.near": 2_500,
+      "tora-tenk-near.sputnik-dao.near": 7_500,
+    },
+  },
+  royalties: {
+    percent: 700,
+    accounts: {
+      "tenk.sputnik-dao.near": 2_000,
+      "tora-tenk-near.sputnik-dao.near": 8_000,
+    },
+  },
 };
 
 
@@ -46,11 +43,13 @@ export async function main({ account, nearAPI, argv, near }: Context) {
   const isTestnet = contractId.endsWith("testnet");
   if (isTestnet) {
     sale.initial_royalties = null;
+    sale.is_premint_over = true;
+    price_structure.base_cost = NEAR.parse("8.5 N").toJSON();
   }
   const initialArgs = {
     owner_id: account.accountId,
     metadata,
-    size: 100,
+    size: 2222,
     sale,
     price_structure,
   };
