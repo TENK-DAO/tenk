@@ -17,32 +17,34 @@ async function isWhitelisted(
   }
 }
 
+const DEFAULT_PER_TX = 200;
+
 export async function main({ account, argv }: Context) {
   if (argv.length < 3) {
     console.error(
-      "Help:\n<input file> <contractId> <allowance> <amount per tx? (default 100)>"
+      `Help:\n<input file> <contractId> <allowance> <amount per tx? (default ${DEFAULT_PER_TX})>`
     );
     process.exit(1);
   }
   const [file, contractId, allowance_str, number] = argv;
+  let whitelist = filter_accounts(JSON.parse(await readFile(file, "utf8")));
+
   const allowance = parseInt(allowance_str);
-  let atATime = number ? parseInt(number) : 100;
-  let whitelist = JSON.parse(await readFile(file, "utf8"));
+  let atATime = number ? parseInt(number) : DEFAULT_PER_TX;
   const contract = new Contract(account, contractId);
 
   for (let i = 0; i < whitelist.length; i = i + atATime) {
-    let account_ids = filter_accounts(whitelist.slice(i, i + atATime));
+    let account_ids = whitelist.slice(i, i + atATime);
     let notInWl = new Set<string>();
     await Promise.all(
       account_ids.map(async (account_id) => {
         if (!(await isWhitelisted(contract, account_id))) {
           notInWl.add(account_id);
         }
-      }
-      )
+      })
     );
     const accounts = Array.from(notInWl);
-    const gas = Gas.parse("60 Tgas");
+    const gas = Gas.parse("250 Tgas");
     if (accounts.length > 0) {
       try {
         await contract.add_whitelist_accounts({ accounts, allowance }, { gas });
