@@ -5,7 +5,7 @@ import * as tenk from "..";
 import { binPath } from "./utils";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
+  uri: "https://bafybeibr7wlt2myo6dvftbrtzu4zzo5fcp2qfrizcg62lyuc4vskdkz2by.ipfs.dweb.link",
   name: "Tora City",
   symbol: "TOC",
 };
@@ -18,8 +18,8 @@ const sale: tenk.Sale = {
   initial_royalties: {
     percent: 10_000,
     accounts: {
-      "tenk.sputnik-dao.near": 2_500,
-      "tora-tenk-near.sputnik-dao.near": 7_500,
+      "tenk.sputnik-dao.near": 3_000,
+      "tora-tenk-near.sputnik-dao.near": 7_000,
     },
   },
   royalties: {
@@ -43,8 +43,6 @@ export async function main({ account, nearAPI, argv, near }: Context) {
   const isTestnet = contractId.endsWith("testnet");
   if (isTestnet) {
     sale.initial_royalties = null;
-    sale.is_premint_over = true;
-    price_structure.base_cost = NEAR.parse("8.5 N").toJSON();
   }
   const initialArgs = {
     owner_id: account.accountId,
