@@ -327,16 +327,6 @@ impl Contract {
     //     promises
     // }
 
-    pub fn mint_special_tokens(&mut self) {
-        self.assert_owner();
-        let owner_id = env::current_account_id();
-        let tokens = vec![
-            self.internal_mint("1684".to_string(), owner_id.clone(), None),
-            self.internal_mint("1157".to_string(), owner_id.clone(), None),
-        ];
-        log_mint(&owner_id, &tokens);
-    }
-
     #[payable]
     pub fn nft_mint_one(&mut self) -> Token {
         self.nft_mint_many(1)[0].clone()
