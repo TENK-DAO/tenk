@@ -305,6 +305,18 @@ impl Contract {
             ))
     }
 
+    pub fn delete_linkdrop(&mut self, public_key: PublicKey) -> bool {
+        self.assert_owner();
+        if self.accounts.contains_key(&public_key) {
+            self.pending_tokens -= 1;
+            self.accounts.remove(&public_key);
+            Promise::new(env::current_account_id()).delete_key(public_key);
+            true
+        } else {
+            false
+        }
+    }
+
     // #[payable]
     // pub fn create_linkdrops(&mut self, public_keys: Vec<PublicKey>) -> Promise {
     //     let num_of_links = public_keys.len() as u32;
