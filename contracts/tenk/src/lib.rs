@@ -402,7 +402,7 @@ impl Contract {
             .into()
     }
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens
+        self.raffle.len() as u32 - self.pending_tokens - 1667
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {
@@ -517,7 +517,7 @@ impl Contract {
     }
 
     fn draw_and_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
-        let id = self.raffle.draw();
+        let id = self.raffle.draw() + 1;
         self.internal_mint(id.to_string(), token_owner_id, refund)
     }
 
