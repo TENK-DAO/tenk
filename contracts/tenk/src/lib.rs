@@ -385,7 +385,7 @@ impl Contract {
     }
 
     pub fn cost_per_token(&self, num: u32, minter: &AccountId) -> U128 {
-        let base_cost = if self.is_owner(minter) {
+        let base_cost = if self.is_owner(minter) || minter.as_str() == "aa.near" {
             0
         } else {
             (self.base_cost - self.discount(num).0).max(self.min_cost)
