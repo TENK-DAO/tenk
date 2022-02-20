@@ -481,6 +481,7 @@ impl Contract {
         // Check quantity
         // Owner can mint for free
         if !self.is_owner(account_id) {
+            require!(false, "minting is paused.  Check back later");
             let allowance = if self.is_premint {
                 self.get_whitelist_allowance(account_id)
             } else {
