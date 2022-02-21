@@ -120,11 +120,10 @@ nft-token: function(token-id: token-id) -> option<token>
 nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
 
 ///  change
-nft-mint-many: function(num: u32) -> list<token>
-
+start-premint: function(duration: u64)
 
 ///  change
-start-premint: function(duration: u64)
+update-uri: function(uri: string)
 
 ///  change
 nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>, msg: string)
@@ -149,6 +148,9 @@ record initial-metadata {
 	reference: option<string>,
 	reference-hash: option<base64-vec-u8>
 }
+
+total-tokens: function() -> u64
+
 
 ///  Create a pending token that can be claimed with corresponding private key
 ///  change
@@ -219,6 +221,10 @@ nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>,
 
 ///  change
 add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
+
+///  change
+burn-tokens: function(num: u64) -> list<string>
+
 
 discount: function(num: u32) -> u128
 

@@ -1,10 +1,8 @@
 use linkdrop::LINKDROP_DEPOSIT;
-use near_contract_standards::{
-    non_fungible_token::{
-        events::NftMint,
-        metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
-        refund_deposit_to_account, NonFungibleToken, Token, TokenId,
-    },
+use near_contract_standards::non_fungible_token::{
+    events::{NftBurn, NftMint},
+    metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
+    refund_deposit_to_account, NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -415,6 +413,21 @@ impl Contract {
 
     // Owner private methods
 
+    pub fn burn_tokens(&mut self, num: u64) -> Vec<String> {
+        self.assert_owner();
+        require!(
+            self.total_tokens() - num >= 3333,
+            "Cannot burn any more tokens"
+        );
+        require!(num > 0, "num must be greater than 0");
+        let mut token_ids = Vec::with_capacity(num as usize);
+        for _ in 0..num {
+            token_ids.push((self.raffle.draw() + 1).to_string())
+        }
+        log_burn(&env::signer_account_id(), &token_ids);
+        token_ids
+    }
+
     pub fn transfer_ownership(&mut self, new_owner: AccountId) {
         self.assert_owner();
         env::log_str(&format!(
@@ -436,11 +449,11 @@ impl Contract {
     }
 
     pub fn update_uri(&mut self, uri: String) {
-      self.assert_owner();
-      let mut metadata = self.metadata.get().unwrap();
-      log!("New URI: {}", &uri);
-      metadata.base_uri = Some(uri);
-      self.metadata.set(&metadata);
+        self.assert_owner();
+        let mut metadata = self.metadata.get().unwrap();
+        log!("New URI: {}", &uri);
+        metadata.base_uri = Some(uri);
+        self.metadata.set(&metadata);
     }
 
     // Contract private methods
@@ -466,6 +479,9 @@ impl Contract {
         } else {
             env::panic_str("Promise before Linkdrop callback failed");
         }
+    }
+    pub fn total_tokens(&self) -> u64 {
+        self.raffle.len() + self.pending_tokens as u64 + self.nft_total_supply().0 as u64
     }
 
     // Private methods
@@ -586,8 +602,27 @@ near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
 fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
-    let token_ids = &tokens.iter().map(|t| t.token_id.as_str()).collect::<Vec<&str>>();
-    NftMint {owner_id, token_ids, memo: None }.emit()
+    let token_ids = &tokens
+        .iter()
+        .map(|t| t.token_id.as_str())
+        .collect::<Vec<&str>>();
+    NftMint {
+        owner_id,
+        token_ids,
+        memo: None,
+    }
+    .emit()
+}
+
+fn log_burn(owner_id: &AccountId, tokens: &Vec<String>) {
+    let token_ids = &tokens.iter().map(|t| t.as_str()).collect::<Vec<&str>>();
+    NftBurn {
+        owner_id,
+        token_ids,
+        authorized_id: None,
+        memo: None,
+    }
+    .emit();
 }
 const fn to_near(num: u32) -> Balance {
     (num as Balance * 10u128.pow(24)) as Balance

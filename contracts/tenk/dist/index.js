@@ -137,26 +137,6 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return near_api_js_1.transactions.functionCall("nft_approve", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
     };
-    Contract.prototype.nft_mint_many = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.nft_mint_manyRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.nft_mint_manyRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "nft_mint_many", args: args }, options));
-    };
-    Contract.prototype.nft_mint_manyTx = function (args, options) {
-        var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_mint_many", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
-    };
     Contract.prototype.start_premint = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -176,6 +156,26 @@ var Contract = /** @class */ (function () {
     Contract.prototype.start_premintTx = function (args, options) {
         var _a, _b;
         return near_api_js_1.transactions.functionCall("start_premint", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+    };
+    Contract.prototype.update_uri = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_uriRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.update_uriRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_uri", args: args }, options));
+    };
+    Contract.prototype.update_uriTx = function (args, options) {
+        var _a, _b;
+        return near_api_js_1.transactions.functionCall("update_uri", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
     };
     Contract.prototype.nft_transfer_call = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -226,6 +226,10 @@ var Contract = /** @class */ (function () {
     Contract.prototype.get_key_balance = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "get_key_balance", args, options);
+    };
+    Contract.prototype.total_tokens = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "total_tokens", args, options);
     };
     /**
     * Create a pending token that can be claimed with corresponding private key
@@ -482,6 +486,26 @@ var Contract = /** @class */ (function () {
     Contract.prototype.add_whitelist_account_ungaurdedTx = function (args, options) {
         var _a, _b;
         return near_api_js_1.transactions.functionCall("add_whitelist_account_ungaurded", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+    };
+    Contract.prototype.burn_tokens = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.burn_tokensRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.burn_tokensRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "burn_tokens", args: args }, options));
+    };
+    Contract.prototype.burn_tokensTx = function (args, options) {
+        var _a, _b;
+        return near_api_js_1.transactions.functionCall("burn_tokens", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
     };
     Contract.prototype.discount = function (args, options) {
         return this.account.viewFunction(this.contractId, "discount", args, options);

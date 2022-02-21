@@ -198,15 +198,6 @@ export class Contract {
   nft_approveTx(args: {token_id: TokenId, account_id: AccountId, msg?: string}, options?: ChangeMethodOptions):  transactions.Action {
     return transactions.functionCall("nft_approve", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async nft_mint_many(args: {num: number}, options?: ChangeMethodOptions): Promise<Token[]> {
-    return providers.getTransactionLastResult(await this.nft_mint_manyRaw(args, options));
-  }
-  nft_mint_manyRaw(args: {num: number}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "nft_mint_many", args, ...options});
-  }
-  nft_mint_manyTx(args: {num: number}, options?: ChangeMethodOptions):  transactions.Action {
-    return transactions.functionCall("nft_mint_many", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
   async start_premint(args: {duration: u64}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.start_premintRaw(args, options));
   }
@@ -215,6 +206,15 @@ export class Contract {
   }
   start_premintTx(args: {duration: u64}, options?: ChangeMethodOptions):  transactions.Action {
     return transactions.functionCall("start_premint", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  async update_uri(args: {uri: string}, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_uriRaw(args, options));
+  }
+  update_uriRaw(args: {uri: string}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_uri", args, ...options});
+  }
+  update_uriTx(args: {uri: string}, options?: ChangeMethodOptions):  transactions.Action {
+    return transactions.functionCall("update_uri", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async nft_transfer_call(args: {receiver_id: AccountId, token_id: TokenId, approval_id?: u64, memo?: string, msg: string}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.nft_transfer_callRaw(args, options));
@@ -242,6 +242,9 @@ export class Contract {
   */
   get_key_balance(args: {} = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "get_key_balance", args, options);
+  }
+  total_tokens(args: {} = {}, options?: ViewFunctionOptions): Promise<u64> {
+    return this.account.viewFunction(this.contractId, "total_tokens", args, options);
   }
   /**
   * Create a pending token that can be claimed with corresponding private key
@@ -374,6 +377,15 @@ export class Contract {
   }
   add_whitelist_account_ungaurdedTx(args: {account_id: AccountId, allowance: number}, options?: ChangeMethodOptions):  transactions.Action {
     return transactions.functionCall("add_whitelist_account_ungaurded", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  async burn_tokens(args: {num: u64}, options?: ChangeMethodOptions): Promise<string[]> {
+    return providers.getTransactionLastResult(await this.burn_tokensRaw(args, options));
+  }
+  burn_tokensRaw(args: {num: u64}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "burn_tokens", args, ...options});
+  }
+  burn_tokensTx(args: {num: u64}, options?: ChangeMethodOptions):  transactions.Action {
+    return transactions.functionCall("burn_tokens", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   discount(args: {num: number}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "discount", args, options);

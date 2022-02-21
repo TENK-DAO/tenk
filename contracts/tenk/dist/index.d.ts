@@ -197,15 +197,6 @@ export declare class Contract {
         account_id: AccountId;
         msg?: string;
     }, options?: ChangeMethodOptions): transactions.Action;
-    nft_mint_many(args: {
-        num: number;
-    }, options?: ChangeMethodOptions): Promise<Token[]>;
-    nft_mint_manyRaw(args: {
-        num: number;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    nft_mint_manyTx(args: {
-        num: number;
-    }, options?: ChangeMethodOptions): transactions.Action;
     start_premint(args: {
         duration: u64;
     }, options?: ChangeMethodOptions): Promise<void>;
@@ -214,6 +205,15 @@ export declare class Contract {
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     start_premintTx(args: {
         duration: u64;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    update_uri(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    update_uriRaw(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_uriTx(args: {
+        uri: string;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_transfer_call(args: {
         receiver_id: AccountId;
@@ -269,6 +269,7 @@ export declare class Contract {
     * Returns the balance associated with given key.
     */
     get_key_balance(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    total_tokens(args?: {}, options?: ViewFunctionOptions): Promise<u64>;
     /**
     * Create a pending token that can be claimed with corresponding private key
     */
@@ -454,6 +455,15 @@ export declare class Contract {
     add_whitelist_account_ungaurdedTx(args: {
         account_id: AccountId;
         allowance: number;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    burn_tokens(args: {
+        num: u64;
+    }, options?: ChangeMethodOptions): Promise<string[]>;
+    burn_tokensRaw(args: {
+        num: u64;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    burn_tokensTx(args: {
+        num: u64;
     }, options?: ChangeMethodOptions): transactions.Action;
     discount(args: {
         num: number;
