@@ -400,7 +400,7 @@ impl Contract {
             .into()
     }
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens - 1667
+        self.raffle.len() as u32 - self.pending_tokens
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {
@@ -415,11 +415,11 @@ impl Contract {
 
     pub fn burn_tokens(&mut self, num: u64) -> Vec<String> {
         self.assert_owner();
+        require!(num > 0, "num must be greater than 0");
         require!(
-            self.total_tokens() - (num + self.pending_tokens as u64) >= 3333,
+            self.total_tokens() - num  >= 3333,
             "Cannot burn any more tokens"
         );
-        require!(num > 0, "num must be greater than 0");
         let mut token_ids = Vec::with_capacity(num as usize);
         for _ in 0..num {
             token_ids.push((self.raffle.draw() + 1).to_string())
