@@ -416,7 +416,7 @@ impl Contract {
     pub fn burn_tokens(&mut self, num: u64) -> Vec<String> {
         self.assert_owner();
         require!(
-            self.total_tokens() - num >= 3333,
+            self.total_tokens() - (num + self.pending_tokens as u64) >= 3333,
             "Cannot burn any more tokens"
         );
         require!(num > 0, "num must be greater than 0");
@@ -481,7 +481,11 @@ impl Contract {
         }
     }
     pub fn total_tokens(&self) -> u64 {
-        self.raffle.len() + self.pending_tokens as u64 + self.nft_total_supply().0 as u64
+        self.raffle.len() + self.nft_total_supply().0 as u64
+    }
+
+    pub fn pending_tokens(&self) -> u32 {
+        self.pending_tokens
     }
 
     // Private methods
