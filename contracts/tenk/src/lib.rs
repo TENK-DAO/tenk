@@ -334,8 +334,7 @@ impl Contract {
         self.nft_mint_many(1)[0].clone()
     }
 
-    #[payable]
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+    fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
