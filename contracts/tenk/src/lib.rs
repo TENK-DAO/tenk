@@ -209,6 +209,7 @@ impl Contract {
         sale: Sale,
     ) -> Self {
         metadata.assert_valid();
+        sale.validate();
         Self {
             tokens: NonFungibleToken::new(
                 StorageKey::NonFungibleToken,
@@ -239,10 +240,6 @@ impl Contract {
 
     pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) {
         self.assert_owner();
-        require!(
-            accounts.len() <= 10,
-            "Can't add more than ten accounts at a time"
-        );
         let allowance = allowance.unwrap_or_else(|| self.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
@@ -438,6 +435,14 @@ impl Contract {
     pub fn update_allowance(&mut self, allowance: u32) {
         self.assert_owner();
         self.allowance = Some(allowance);
+    }
+
+    pub fn update_uri(&mut self, uri: String) {
+      self.assert_owner();
+      let mut metadata = self.metadata.get().unwrap();
+      log!("New URI: {}", &uri);
+      metadata.base_uri = Some(uri);
+      self.metadata.set(&metadata);
     }
 
     // Contract private methods
