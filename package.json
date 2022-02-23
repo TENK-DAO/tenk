@@ -5,10 +5,10 @@
   "main": "./contracts/tenk/dist/index.js",
   "types": "./contracts/tenk/dist/index.d.ts",
   "scripts": {
-    "pretest": "yarn build && yarn lint",
+    "pretest": "yarn build:testnet && yarn lint",
     "upload:nft": "ts-node ./scripts/nft-uploader.ts",
-    "build": "cargo build --target wasm32-unknown-unknown --release",
-    "build:mainnet": "yarn build --features mainnet",
+    "build:testnet": "cargo build --target wasm32-unknown-unknown --release",
+    "build": "yarn build --features mainnet",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
     "test:linkdrop": "yarn test:testnet '*/link*'",

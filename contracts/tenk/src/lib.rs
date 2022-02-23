@@ -222,7 +222,7 @@ impl Contract {
         self.whitelist.contains_key(&account_id)
     }
 
-    #[cfg(not(feature = "mainnet"))]
+    #[cfg(feature = "testnet")]
     pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId, allowance: u32) {
         self.whitelist.insert(&account_id, &allowance);
     }

@@ -124,9 +124,6 @@ nft-mint-many: function(num: u32) -> list<token>
 
 
 ///  change
-start-premint: function(duration: u64)
-
-///  change
 update-uri: function(uri: string)
 
 ///  change
@@ -158,6 +155,9 @@ record initial-metadata {
 create-linkdrop: function(public-key: public-key)
 
 ///  change
+new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price: balance, sale: option<sale>)
+
+///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
 record sale {
@@ -169,7 +169,7 @@ record sale {
 }
 
 ///  change
-end-premint: function(base-cost: u128, min-cost: u128, percent-off: option<u8>)
+end-premint: function(price: option<balance>)
 
 token-storage-cost: function() -> u128
 
@@ -186,9 +186,6 @@ update-royalties: function(royalties: royalties) -> option<royalties>
 
 cost-of-linkdrop: function(minter: account-id) -> u128
 
-
-///  change
-new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, price-structure: price-structure, sale: sale)
 
 total-cost: function(num: u32, minter: account-id) -> u128
 
@@ -211,11 +208,11 @@ nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadat
 
 type basis-point = u16
 
+///  change
+start-premint: function()
+
 cost-per-token: function(num: u32, minter: account-id) -> u128
 
-
-///  change
-new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price-structure: price-structure, sale: option<sale>)
 
 nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>, limit: option<u64>) -> list<token>
 
@@ -223,8 +220,8 @@ nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>,
 ///  change
 add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
 
-discount: function(num: u32) -> u128
-
+///  change
+new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, price: balance, sale: sale)
 
 ///  Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 ///  A mapping of NEAR accounts to the amount each should be paid out, in
@@ -235,12 +232,6 @@ discount: function(num: u32) -> u128
 ///  This currently deviates from the standard but is in the process of updating to use this type
 record payout {
     payout: list<tuple<account-id,u128>>
-}
-
-record price-structure {
-    base-cost: u128,
-	min-cost: option<u128>,
-	percent-off: option<u8>
 }
 
 tokens-left: function() -> u32

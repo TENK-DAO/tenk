@@ -94,10 +94,10 @@ impl Contract {
 
     pub fn get_linkdrop_contract(&self) -> AccountId {
         AccountId::new_unchecked(
-            (if cfg!(feature = "mainnet") {
-                "near"
-            } else {
+            (if cfg!(feature = "testnet") {
                 "testnet"
+            } else {
+                "near"
             })
             .to_string(),
         )
