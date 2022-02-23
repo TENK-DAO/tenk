@@ -13,6 +13,7 @@ use near_sdk::{
     json_types::{Base64VecU8, U128},
     log, near_bindgen, require, witgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault,
     Promise, PromiseOrValue, PublicKey,
+    Duration,
 };
 use near_units::{parse_gas, parse_near};
 
@@ -50,8 +51,8 @@ pub struct Contract {
     // Whitelist
     whitelist: LookupMap<AccountId, u32>,
     
-    is_premint: bool,
-    is_premint_over: bool,
+    pre_sale_start: Option<Duration>,
+    public_sale_start: Option<Duration>,
     allowance: Option<u32>,
 }
 
@@ -132,8 +133,8 @@ impl From<InitialMetadata> for NFTContractMetadata {
 pub struct Sale {
     royalties: Option<Royalties>,
     initial_royalties: Option<Royalties>,
-    is_premint: Option<bool>,
-    is_premint_over: Option<bool>,
+    pre_sale_start: Option<Duration>,
+    public_sale_start: Option<Duration>,
     allowance: Option<u32>,
 }
 
@@ -147,13 +148,6 @@ impl Sale {
         }
     }
 
-    pub fn is_premint(&self) -> bool {
-        self.is_premint.unwrap_or(false)
-    }
-
-    pub fn is_premint_over(&self) -> bool {
-        self.is_premint_over.unwrap_or(false)
-    }
 }
 
 #[near_bindgen]
@@ -204,8 +198,8 @@ impl Contract {
                 sale.initial_royalties.as_ref(),
             ),
             whitelist: LookupMap::new(StorageKey::Whitelist),
-            is_premint: sale.is_premint(),
-            is_premint_over: sale.is_premint_over(),
+            pre_sale_start: sale.pre_sale_start,
+            public_sale_start: sale.public_sale_start,
             allowance: sale.allowance,
         }
     }
@@ -227,23 +221,16 @@ impl Contract {
         self.whitelist.insert(&account_id, &allowance);
     }
 
-    pub fn start_premint(&mut self) {
+    pub fn start_premint(&mut self, public_sale_start: Option<Duration>) {
         self.assert_owner();
-        require!(!self.is_premint, "premint has already started");
-        require!(!self.is_premint_over, "premint has already been done");
-        self.is_premint = true;
+        let current_time = current_time_ms();
+        self.pre_sale_start = Some(current_time);
+        self.public_sale_start = public_sale_start;
     }
 
-    pub fn end_premint(&mut self, price: Option<U128>) {
+    pub fn end_premint(&mut self) {
         self.assert_owner();
-        require!(self.is_premint, "premint must have started");
-        require!(!self.is_premint_over, "premint has already been done");
-        
-        self.is_premint = false;
-        self.is_premint_over = true;
-        if let Some(price) =  price {
-          self.price = price.into();
-        }
+        self.public_sale_start = Some(current_time_ms());
     }
 
     #[payable]
@@ -409,6 +396,23 @@ impl Contract {
       self.metadata.set(&metadata);
     }
 
+    pub fn get_sale_info(&self) -> SaleInfo {
+      SaleInfo {
+        status: self.get_status(),
+        pre_sale_start: self.pre_sale_start,
+        sale_start: self.public_sale_start,
+        tokens: TokenCount {
+            initial: self.initial(),
+            remaining: self.raffle.len(),
+            pending: self.pending_tokens as u64,
+        }
+      }
+    }
+
+    fn initial(&self) -> u64 {
+      self.raffle.len() + self.nft_total_supply().0 as u64
+    }
+
     // Contract private methods
 
     #[private]
@@ -447,11 +451,10 @@ impl Contract {
         // Check quantity
         // Owner can mint for free
         if !self.is_owner(account_id) {
-            let allowance = if self.is_premint {
-                self.get_whitelist_allowance(account_id)
-            } else {
-                require!(self.is_premint_over, "Premint period must be over");
-                self.get_or_add_whitelist_allowance(account_id, num)
+            let allowance = match self.get_status() {
+              Status::Closed => { env::panic_str("Contract currently closed")},
+              Status::Presale => self.get_whitelist_allowance(account_id),
+              Status::Open => self.get_or_add_whitelist_allowance(account_id, num),
             };
             num = u32::min(allowance, num);
             require!(num > 0, "Account has no more allowance left");
@@ -542,8 +545,53 @@ impl Contract {
         })
     }
     fn has_allowance(&self) -> bool {
-        self.allowance.is_some() || self.is_premint
+        self.allowance.is_some() || self.is_premint()
     }
+
+    fn is_premint(&self) -> bool {
+      matches!(self.get_status(), Status::Presale)
+    }
+
+    fn get_status(&self) -> Status {
+      let current_time = current_time_ms();
+      match (self.pre_sale_start, self.public_sale_start) {
+        (_, Some(public)) if  public < current_time => Status::Open,
+        (Some(pre), _) if pre < current_time => Status::Presale,
+        (_, _) => Status::Closed,
+      }
+    }
+
+
+}
+
+
+
+fn current_time_ms() -> Duration {
+  env::block_timestamp() / 1_000_000
+}
+
+#[witgen]
+enum Status {
+  Closed,
+  Presale,
+  Open,
+}
+
+#[allow(dead_code)]
+#[witgen]
+pub struct SaleInfo {
+  status: Status,
+  pre_sale_start: Option<Duration>,
+  sale_start: Option<Duration>,
+  tokens: TokenCount 
+}
+
+#[allow(dead_code)]
+#[witgen]
+pub struct TokenCount {
+  initial: u64,
+  remaining: u64,
+  pending: u64,
 }
 
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
