@@ -114,8 +114,8 @@ impl Royalties {
             total += percent;
         });
         require!(
-            total <= ONE_HUNDRED_PERCENT_IN_BPS,
-            "total percent of each royalty split must be less than 10,000"
+            total == ONE_HUNDRED_PERCENT_IN_BPS,
+            "total percent of each royalty split must equal 10,000"
         )
     }
     pub(crate) fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {

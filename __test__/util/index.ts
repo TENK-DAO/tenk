@@ -26,14 +26,14 @@ export async function deployEmpty(account: NearAccount): Promise<void> {
   await account.createTransaction(account).deployContract(bytes).signAndSend();
 }
 
-export function deploy(
+export async function deploy(
   owner: NearAccount,
   name = "tenk",
   args = {}
 ): Promise<NearAccount> {
-  return owner.createAndDeploy(name, binPath(name), {
-    method: "new_default_meta",
-    args: {
+  const account =  await  owner.createAndDeploy(name, binPath("tenk"));
+  await owner.call(account, "new_default_meta",
+    {
       owner_id: owner,
       metadata: {
         name: "TENK NFT",
@@ -41,16 +41,14 @@ export function deploy(
         uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
       },
       size: 100,
-      price_structure: {
-        base_cost: NEAR.parse("1 N"),
-        min_cost: NEAR.parse("1 N"),
-      },
+      price: NEAR.parse("1 N"),
       sale: {
         is_premint_over: true,
       },
       ...args,
     },
-  });
+  );
+  return account;
 }
 
 export async function nftTokensForOwner(

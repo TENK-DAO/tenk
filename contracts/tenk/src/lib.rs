@@ -40,9 +40,8 @@ pub struct Contract {
     pending_tokens: u32,
     // Linkdrop fields will be removed once proxy contract is deployed
     pub accounts: LookupMap<PublicKey, bool>,
-    pub base_cost: Balance,
-    pub min_cost: Balance,
-    pub percent_off: u8,
+    pub price: Balance,
+
     // Royalties
     royalties: LazyOption<Royalties>,
     // Initial Royalties
@@ -50,13 +49,11 @@ pub struct Contract {
 
     // Whitelist
     whitelist: LookupMap<AccountId, u32>,
+    
     is_premint: bool,
     is_premint_over: bool,
-    premint_deadline_at: u64,
     allowance: Option<u32>,
 }
-const DEFAULT_SUPPLY_FATOR_NUMERATOR: u8 = 20;
-const DEFAULT_SUPPLY_FATOR_DENOMENTOR: Balance = 100;
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
 const GAS_REQUIRED_TO_CREATE_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
@@ -131,28 +128,6 @@ impl From<InitialMetadata> for NFTContractMetadata {
 }
 
 #[witgen]
-#[derive(Deserialize, Serialize)]
-pub struct PriceStructure {
-    base_cost: U128,
-    min_cost: Option<U128>,
-    percent_off: Option<u8>,
-}
-
-impl PriceStructure {
-    pub(crate) fn min_cost(&self) -> Balance {
-        self.min_cost.unwrap_or(self.base_cost).into()
-    }
-
-    pub fn percent_off(&self) -> u8 {
-        self.percent_off.unwrap_or(DEFAULT_SUPPLY_FATOR_NUMERATOR)
-    }
-
-    pub fn base_cost(&self) -> Balance {
-        self.base_cost.into()
-    }
-}
-
-#[witgen]
 #[derive(Deserialize, Serialize, Default)]
 pub struct Sale {
     royalties: Option<Royalties>,
@@ -188,14 +163,14 @@ impl Contract {
         owner_id: AccountId,
         metadata: InitialMetadata,
         size: u32,
-        price_structure: PriceStructure,
+        price: U128,
         sale: Option<Sale>,
     ) -> Self {
         Self::new(
             owner_id,
             metadata.into(),
             size,
-            price_structure,
+            price,
             sale.unwrap_or_default(),
         )
     }
@@ -205,7 +180,7 @@ impl Contract {
         owner_id: AccountId,
         metadata: NFTContractMetadata,
         size: u32,
-        price_structure: PriceStructure,
+        price: U128,
         sale: Sale,
     ) -> Self {
         metadata.assert_valid();
@@ -222,9 +197,7 @@ impl Contract {
             raffle: Raffle::new(StorageKey::Ids, size as u64),
             pending_tokens: 0,
             accounts: LookupMap::new(StorageKey::LinkdropKeys),
-            base_cost: price_structure.base_cost(),
-            min_cost: price_structure.min_cost(),
-            percent_off: price_structure.percent_off(),
+            price: price.into(),
             royalties: LazyOption::new(StorageKey::Royalties, sale.royalties.as_ref()),
             initial_royalties: LazyOption::new(
                 StorageKey::InitialRoyalties,
@@ -233,7 +206,6 @@ impl Contract {
             whitelist: LookupMap::new(StorageKey::Whitelist),
             is_premint: sale.is_premint(),
             is_premint_over: sale.is_premint_over(),
-            premint_deadline_at: 0,
             allowance: sale.allowance,
         }
     }
@@ -255,27 +227,23 @@ impl Contract {
         self.whitelist.insert(&account_id, &allowance);
     }
 
-    pub fn start_premint(&mut self, duration: u64) {
+    pub fn start_premint(&mut self) {
         self.assert_owner();
         require!(!self.is_premint, "premint has already started");
         require!(!self.is_premint_over, "premint has already been done");
         self.is_premint = true;
-        self.premint_deadline_at = env::block_height() + duration;
     }
 
-    pub fn end_premint(&mut self, base_cost: U128, min_cost: U128, percent_off: Option<u8>) {
+    pub fn end_premint(&mut self, price: Option<U128>) {
         self.assert_owner();
         require!(self.is_premint, "premint must have started");
         require!(!self.is_premint_over, "premint has already been done");
-        require!(
-            self.premint_deadline_at < env::block_height(),
-            "premint is still in process"
-        );
+        
         self.is_premint = false;
         self.is_premint_over = true;
-        self.percent_off = percent_off.unwrap_or(0);
-        self.base_cost = base_cost.into();
-        self.min_cost = min_cost.into();
+        if let Some(price) =  price {
+          self.price = price.into();
+        }
     }
 
     #[payable]
@@ -383,14 +351,14 @@ impl Contract {
     }
 
     pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
-        (num as Balance * self.cost_per_token(num, minter).0).into()
+        (num as Balance * self.cost_per_token(minter).0).into()
     }
 
-    pub fn cost_per_token(&self, num: u32, minter: &AccountId) -> U128 {
+    pub fn cost_per_token(&self,minter: &AccountId) -> U128 {
         let base_cost = if self.is_owner(minter) {
             0
         } else {
-            (self.base_cost - self.discount(num).0).max(self.min_cost)
+            self.price
         };
         (base_cost + self.token_storage_cost().0).into()
     }
@@ -398,11 +366,7 @@ impl Contract {
     pub fn token_storage_cost(&self) -> U128 {
         (env::storage_byte_cost() * self.tokens.extra_storage_in_bytes_per_token as Balance).into()
     }
-    pub fn discount(&self, num: u32) -> U128 {
-        ((to_near(num - 1) * self.percent_off as Balance) / DEFAULT_SUPPLY_FATOR_DENOMENTOR)
-            .min(self.base_cost)
-            .into()
-    }
+
     pub fn tokens_left(&self) -> u32 {
         self.raffle.len() as u32 - self.pending_tokens
     }
@@ -586,19 +550,17 @@ near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
 
-fn log_mint(owner_id: &AccountId, tokens: &Vec<Token>) {
+fn log_mint(owner_id: &AccountId, tokens: &[Token]) {
     let token_ids = &tokens.iter().map(|t| t.token_id.as_str()).collect::<Vec<&str>>();
     NftMint {owner_id, token_ids, memo: None }.emit()
 }
-const fn to_near(num: u32) -> Balance {
-    (num as Balance * 10u128.pow(24)) as Balance
-}
+
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 mod tests {
     use super::*;
-    const TEN: u128 = to_near(10);
-    const ONE: u128 = to_near(1);
+    use near_units::parse_near;
+    const TEN: u128 = parse_near!("10 N");
 
     fn account() -> AccountId {
         AccountId::new_unchecked("alice.near".to_string())
@@ -618,11 +580,7 @@ mod tests {
             AccountId::new_unchecked("root".to_string()),
             initial_metadata(),
             10_000,
-            PriceStructure {
-                base_cost: TEN.into(),
-                min_cost: Some(ONE.into()),
-                percent_off: None,
-            },
+            TEN.into(),
             None,
         )
     }
@@ -631,27 +589,8 @@ mod tests {
     fn check_price() {
         let contract = new_contract();
         assert_eq!(
-            contract.cost_per_token(1, &account()).0,
+            contract.cost_per_token(&account()).0,
             TEN + contract.token_storage_cost().0
-        );
-        assert_eq!(
-            contract.cost_per_token(2, &account()).0,
-            TEN + contract.token_storage_cost().0 - contract.discount(2).0
-        );
-        println!(
-            "{}, {}, {}",
-            contract.discount(1).0,
-            contract.discount(2).0,
-            contract.discount(10).0,
-        );
-        println!(
-            "{}",
-            (contract.base_cost - contract.discount(10).0).max(contract.min_cost)
-        );
-        println!(
-            "{}, {}",
-            contract.cost_per_token(24, &account()).0,
-            contract.cost_per_token(10, &account()).0
         );
     }
 }

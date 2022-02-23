@@ -31,11 +31,7 @@ if (Workspace.networkIsSandbox()) {
           royalties,
           initial_royalties: royalties,
           is_premint_over: true,
-        },
-        price_structure: {
-          base_cost: NEAR.parse("5 N"),
-          min_cost: NEAR.parse("5 N"),
-        },
+        }
       });
       return { tenk, bob, alice, eve };
     }
@@ -100,11 +96,7 @@ if (Workspace.networkIsSandbox()) {
           sale: {
             royalties: bad_royalties,
             is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          }
         }),
       null,
       "too little"
@@ -119,11 +111,7 @@ if (Workspace.networkIsSandbox()) {
             royalties,
             initial_royalties: bad_royalties,
             is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          }
         }),
       null,
       "too little initial"
@@ -144,11 +132,7 @@ if (Workspace.networkIsSandbox()) {
           sale: {
             royalties: bad_royalties,
             is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          }
         }),
       null,
       "secondary"
@@ -163,11 +147,7 @@ if (Workspace.networkIsSandbox()) {
             royalties,
             initial_royalties: bad_royalties,
             is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          }
         }),
       null,
       "initial"

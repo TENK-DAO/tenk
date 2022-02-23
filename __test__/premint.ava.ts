@@ -11,7 +11,7 @@ import {
   totalCost,
 } from "./util";
 
-const sale_price = NEAR.parse("0.8 N");
+const price = NEAR.parse("0.8 N");
 const allowance = 2;
 
 const runner = Workspace.init(
@@ -19,10 +19,7 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      price_structure: {
-        base_cost: sale_price,
-        min_cost: sale_price,
-      },
+      price,
       sale: {
         is_premint_over: false,
         allowance,
@@ -33,15 +30,14 @@ const runner = Workspace.init(
 );
 
 async function premint_period<T>(
-  { tenk, root, duration, base_cost },
+  { tenk, root, duration, price },
   fn: () => Promise<T>
 ): Promise<T> {
   await root.call(tenk, "start_premint", { duration });
   const sleepTimer = sleep(1000 * duration);
   const res = await fn();
   await sleepTimer;
-  let min_cost = base_cost;
-  await root.call(tenk, "end_premint", { base_cost, min_cost });
+  await root.call(tenk, "end_premint", { price });
   return res;
 }
 
@@ -51,15 +47,14 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
   const duration = 20;
   const linkkeys = await createLinkdrop(t, tenk, root);
   await claim(t, tenk, alice, linkkeys);
-  const base_cost = ONE_NEAR;
 
-  await premint_period({ tenk, root, duration, base_cost }, async () => {
-    await t.throwsAsync(
-      root.call(tenk, "end_premint", {
-        base_cost,
-        min_cost: base_cost,
-      })
-    );
+  await premint_period({ tenk, root, duration, price: ONE_NEAR }, async () => {
+    // await t.throwsAsync(
+    //   root.call(tenk, "end_premint", {
+    //     base_cost,
+    //     min_cost: base_cost,
+    //   })
+    // );
 
     let initial_try = await mint_raw(tenk, alice, cost);
     t.assert(initial_try.failed);

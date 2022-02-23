@@ -134,11 +134,6 @@ export declare type BasisPoint = number;
 export interface Payout {
     payout: Record<AccountId, U128>;
 }
-export interface PriceStructure {
-    base_cost: U128;
-    min_cost?: U128;
-    percent_off?: number;
-}
 export interface Royalties {
     accounts: Record<AccountId, BasisPoint>;
     percent: BasisPoint;
@@ -205,15 +200,6 @@ export declare class Contract {
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_mint_manyTx(args: {
         num: number;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    start_premint(args: {
-        duration: u64;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    start_premintRaw(args: {
-        duration: u64;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    start_premintTx(args: {
-        duration: u64;
     }, options?: ChangeMethodOptions): transactions.Action;
     update_uri(args: {
         uri: string;
@@ -296,6 +282,27 @@ export declare class Contract {
     create_linkdropTx(args: {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): transactions.Action;
+    new_default_meta(args: {
+        owner_id: AccountId;
+        metadata: InitialMetadata;
+        size: number;
+        price: Balance;
+        sale?: Sale;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    new_default_metaRaw(args: {
+        owner_id: AccountId;
+        metadata: InitialMetadata;
+        size: number;
+        price: Balance;
+        sale?: Sale;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    new_default_metaTx(args: {
+        owner_id: AccountId;
+        metadata: InitialMetadata;
+        size: number;
+        price: Balance;
+        sale?: Sale;
+    }, options?: ChangeMethodOptions): transactions.Action;
     add_whitelist_accounts(args: {
         accounts: AccountId[];
         allowance?: number;
@@ -309,19 +316,13 @@ export declare class Contract {
         allowance?: number;
     }, options?: ChangeMethodOptions): transactions.Action;
     end_premint(args: {
-        base_cost: U128;
-        min_cost: U128;
-        percent_off?: number;
+        price?: Balance;
     }, options?: ChangeMethodOptions): Promise<void>;
     end_premintRaw(args: {
-        base_cost: U128;
-        min_cost: U128;
-        percent_off?: number;
+        price?: Balance;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     end_premintTx(args: {
-        base_cost: U128;
-        min_cost: U128;
-        percent_off?: number;
+        price?: Balance;
     }, options?: ChangeMethodOptions): transactions.Action;
     token_storage_cost(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
     nft_transfer(args: {
@@ -363,27 +364,6 @@ export declare class Contract {
     cost_of_linkdrop(args: {
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
-    new(args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: number;
-        price_structure: PriceStructure;
-        sale: Sale;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    newRaw(args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: number;
-        price_structure: PriceStructure;
-        sale: Sale;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    newTx(args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: number;
-        price_structure: PriceStructure;
-        sale: Sale;
-    }, options?: ChangeMethodOptions): transactions.Action;
     total_cost(args: {
         num: number;
         minter: AccountId;
@@ -422,31 +402,13 @@ export declare class Contract {
         token_owner_id: AccountId;
         token_metadata: TokenMetadata;
     }, options?: ChangeMethodOptions): transactions.Action;
+    start_premint(args?: {}, options?: ChangeMethodOptions): Promise<void>;
+    start_premintRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    start_premintTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
     cost_per_token(args: {
         num: number;
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
-    new_default_meta(args: {
-        owner_id: AccountId;
-        metadata: InitialMetadata;
-        size: number;
-        price_structure: PriceStructure;
-        sale?: Sale;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    new_default_metaRaw(args: {
-        owner_id: AccountId;
-        metadata: InitialMetadata;
-        size: number;
-        price_structure: PriceStructure;
-        sale?: Sale;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    new_default_metaTx(args: {
-        owner_id: AccountId;
-        metadata: InitialMetadata;
-        size: number;
-        price_structure: PriceStructure;
-        sale?: Sale;
-    }, options?: ChangeMethodOptions): transactions.Action;
     nft_tokens_for_owner(args: {
         account_id: AccountId;
         from_index?: U128;
@@ -464,9 +426,27 @@ export declare class Contract {
         account_id: AccountId;
         allowance: number;
     }, options?: ChangeMethodOptions): transactions.Action;
-    discount(args: {
-        num: number;
-    }, options?: ViewFunctionOptions): Promise<U128>;
+    new(args: {
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: number;
+        price: Balance;
+        sale: Sale;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    newRaw(args: {
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: number;
+        price: Balance;
+        sale: Sale;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    newTx(args: {
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: number;
+        price: Balance;
+        sale: Sale;
+    }, options?: ChangeMethodOptions): transactions.Action;
     tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<number>;
     nft_supply_for_owner(args: {
         account_id: AccountId;
