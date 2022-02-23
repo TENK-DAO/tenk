@@ -216,6 +216,15 @@ export class Contract {
   start_premintTx(args: {duration: u64}, options?: ChangeMethodOptions):  transactions.Action {
     return transactions.functionCall("start_premint", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  async update_uri(args: {uri: string}, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_uriRaw(args, options));
+  }
+  update_uriRaw(args: {uri: string}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_uri", args, ...options});
+  }
+  update_uriTx(args: {uri: string}, options?: ChangeMethodOptions):  transactions.Action {
+    return transactions.functionCall("update_uri", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   async nft_transfer_call(args: {receiver_id: AccountId, token_id: TokenId, approval_id?: u64, memo?: string, msg: string}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.nft_transfer_callRaw(args, options));
   }

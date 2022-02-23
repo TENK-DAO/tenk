@@ -215,6 +215,15 @@ export declare class Contract {
     start_premintTx(args: {
         duration: u64;
     }, options?: ChangeMethodOptions): transactions.Action;
+    update_uri(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    update_uriRaw(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_uriTx(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): transactions.Action;
     nft_transfer_call(args: {
         receiver_id: AccountId;
         token_id: TokenId;

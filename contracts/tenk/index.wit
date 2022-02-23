@@ -127,6 +127,9 @@ nft-mint-many: function(num: u32) -> list<token>
 start-premint: function(duration: u64)
 
 ///  change
+update-uri: function(uri: string)
+
+///  change
 nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>, msg: string)
 
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
