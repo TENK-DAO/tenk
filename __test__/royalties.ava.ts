@@ -86,4 +86,91 @@ if (Workspace.networkIsSandbox()) {
       cost.mul(NEAR.from(1)).div(NEAR.from(5)).toHuman()
     );
   });
+
+  runner.test("bad initial payout", async (t, { root }) => {
+    let bad_royalties = {
+      precent: 10000,
+      accounts: {
+        bob: 10,
+      },
+    };
+    await t.throwsAsync(
+      () =>
+        deploy(root, "tenk1", {
+          sale: {
+            royalties: bad_royalties,
+            is_premint_over: true,
+          },
+          price_structure: {
+            base_cost: NEAR.parse("5 N"),
+            min_cost: NEAR.parse("5 N"),
+          },
+        }),
+      null,
+      "too little"
+    );
+    const [bob, alice, eve] = await subaccounts(root);
+    const royalties = createRoyalties({ root, bob, alice, eve });
+
+    await t.throwsAsync(
+      () =>
+        deploy(root, "tenk2", {
+          sale: {
+            royalties,
+            initial_royalties: bad_royalties,
+            is_premint_over: true,
+          },
+          price_structure: {
+            base_cost: NEAR.parse("5 N"),
+            min_cost: NEAR.parse("5 N"),
+          },
+        }),
+      null,
+      "too little initial"
+    );
+  });
+
+  runner.test("too much", async (t, { root }) => {
+    let bad_royalties = {
+      precent: 10_000,
+      accounts: {
+        bob: 9_000,
+        alice: 1_100,
+      },
+    };
+    await t.throwsAsync(
+      () =>
+        deploy(root, "tenk1", {
+          sale: {
+            royalties: bad_royalties,
+            is_premint_over: true,
+          },
+          price_structure: {
+            base_cost: NEAR.parse("5 N"),
+            min_cost: NEAR.parse("5 N"),
+          },
+        }),
+      null,
+      "secondary"
+    );
+    const [bob, alice, eve] = await subaccounts(root);
+    const royalties = createRoyalties({ root, bob, alice, eve });
+
+    await t.throwsAsync(
+      () =>
+        deploy(root, "tenk2", {
+          sale: {
+            royalties,
+            initial_royalties: bad_royalties,
+            is_premint_over: true,
+          },
+          price_structure: {
+            base_cost: NEAR.parse("5 N"),
+            min_cost: NEAR.parse("5 N"),
+          },
+        }),
+      null,
+      "initial"
+    );
+  });
 }

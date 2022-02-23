@@ -57,7 +57,8 @@ export async function main({ account, argv }: Context) {
   }
 }
 
-function filter_accounts(account_ids: string[]): string[] {
+function filter_accounts(raw_account_ids: string[]): string[] {
+  const account_ids = raw_account_ids.map(s => s.trim().toLowerCase());
   let invalid_account_ids = account_ids.filter(
     (id) => !valid_account_id.test(id)
   );

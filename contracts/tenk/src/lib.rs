@@ -209,6 +209,7 @@ impl Contract {
         sale: Sale,
     ) -> Self {
         metadata.assert_valid();
+        sale.validate();
         Self {
             tokens: NonFungibleToken::new(
                 StorageKey::NonFungibleToken,
