@@ -18,7 +18,7 @@ import {Contract} from "../..";
 let c: Contract;
 type f = typeof c.new_default_meta;
 type NewfuncArgs = Parameters<f>;
-type InitArgs = NewfuncArgs[0];
+export type InitArgs = NewfuncArgs[0];
 
 export type start_presale_args = Parameters<typeof c.start_presale>[0];
 

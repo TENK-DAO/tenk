@@ -7,8 +7,9 @@ import {
   MINT_ONE_GAS,
   nftTokensForOwner,
   deployEmpty,
-  deploy,
+  InitArgs,
   binPath,
+  DEFAULT_SALE,
 } from "./util";
 
 const price = NEAR.parse("1 N");
@@ -18,20 +19,17 @@ const runner = Workspace.init(
   { initialBalance: NEAR.parse("15 N").toString() },
   async ({ root }) => {
     let tenk = await root.createAndDeploy("tenk", binPath("tenk"));
-
-    await root.call(tenk, "new_default_meta", {
-      owner_id: root,
+    let args: InitArgs = {
+      owner_id: root.accountId,
       metadata: {
         name: "TENK NFT",
         symbol: "TENK",
         uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
       },
       size: 100,
-      price: NEAR.parse("1 N"),
-      sale: {
-        is_premint_over: true,
-      },
-    });
+      sale: DEFAULT_SALE,
+    };
+    await root.call(tenk, "new_default_meta", args);
     return { tenk };
   }
 );
