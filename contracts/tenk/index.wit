@@ -101,7 +101,10 @@ update-allowance: function(allowance: u32)
 whitelisted: function(account-id: account-id) -> bool
 
 
-remaining-allowance: function(account-id: account-id) -> u32
+get-sale-info: function() -> sale-info
+
+
+cost-per-token: function(minter: account-id) -> u128
 
 
 ///  change
@@ -110,11 +113,32 @@ transfer-ownership: function(new-owner: account-id)
 nft-total-supply: function() -> u128
 
 
+///  Current state of contract
+variant status {
+    ///  Not open for any sales
+	closed,
+	///  VIP accounts can mint
+	presale,
+	///  Any account can mint
+	open,
+	///  No more tokens to be minted
+	sold-out,
+}
+
+///  change
+start-presale: function(public-sale-start: option<duration>)
+
 nft-tokens: function(from-index: option<u128>, limit: option<u64>) -> list<token>
 
 
+///  change
+new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, price: u128, sale: sale)
+
 nft-token: function(token-id: token-id) -> option<token>
 
+
+///  change
+close-contract: function()
 
 ///  change
 nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
@@ -150,26 +174,32 @@ record initial-metadata {
 	reference-hash: option<base64-vec-u8>
 }
 
+///  Information about the current sale
+record sale-info {
+    ///  Current state of contract
+	status: status,
+	///  Start of the VIP sale
+	pre-sale-start: option<duration>,
+	///  Start of public sale
+	sale-start: option<duration>,
+	///  Total tokens that could be minted
+	token-final-supply: u64,
+	///  Current price for one token
+	price: u128
+}
+
 ///  Create a pending token that can be claimed with corresponding private key
 ///  change
 create-linkdrop: function(public-key: public-key)
 
 ///  change
-new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price: balance, sale: option<sale>)
-
-///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
-record sale {
-    royalties: option<royalties>,
-	initial-royalties: option<royalties>,
-	is-premint: option<bool>,
-	is-premint-over: option<bool>,
-	allowance: option<u32>
-}
+///  change
+new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price: u128, sale: option<sale>)
 
 ///  change
-end-premint: function(price: option<balance>)
+start-sale: function()
 
 token-storage-cost: function() -> u128
 
@@ -202,17 +232,17 @@ nft-metadata: function() -> nft-contract-metadata
 nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
 
 
+remaining-allowance: function(account-id: account-id) -> option<u32>
+
+
 ///  change
 nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadata: token-metadata) -> token
 
 
+get-user-sale-info: function(account-id: account-id) -> user-sale-info
+
+
 type basis-point = u16
-
-///  change
-start-premint: function()
-
-cost-per-token: function(num: u32, minter: account-id) -> u128
-
 
 nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>, limit: option<u64>) -> list<token>
 
@@ -220,8 +250,20 @@ nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>,
 ///  change
 add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
 
-///  change
-new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, price: balance, sale: sale)
+record sale {
+    royalties: option<royalties>,
+	initial-royalties: option<royalties>,
+	pre-sale-start: option<duration>,
+	public-sale-start: option<duration>,
+	allowance: option<u32>
+}
+
+///  Information about the current sale from user perspective
+record user-sale-info {
+    sale-info: sale-info,
+	is-vip: bool,
+	remaining-allowance: option<u32>
+}
 
 ///  Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 ///  A mapping of NEAR accounts to the amount each should be paid out, in

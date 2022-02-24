@@ -10,12 +10,10 @@ const metadata: tenk.InitialMetadata = {
   symbol: "TENK",
 };
  
-const price_structure: tenk.PriceStructure =  {
-  base_cost: NEAR.parse("1 N").toJSON(),
-}
+const price = NEAR.parse("1 N").toJSON();
 
 const sale: tenk.Sale = {
-  is_premint_over: true,
+  // is_premint_over: true,
   // initial_royalties: {
   //   percent: 10_000,
   //   accounts: {
@@ -52,7 +50,7 @@ export async function main({ account, nearAPI, argv, near }: Context) {
     metadata,
     size: 100,
     sale,
-    price_structure,
+    price,
   };
 
   const contract = new tenk.Contract(account, contractId);
