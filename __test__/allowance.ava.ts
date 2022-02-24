@@ -1,10 +1,12 @@
 import { Workspace } from "near-willem-workspaces-ava";
 import { NEAR } from "near-units";
 import {
+  DEFAULT_SALE,
   deploy,
   getTokens,
   mint,
   mint_raw,
+  now,
   totalCost,
 } from "./util";
 
@@ -16,9 +18,9 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      price,
       sale: {
-        is_premint_over: true,
+        ...DEFAULT_SALE,
+        price: price.toJSON(),
         allowance,
       }
     });

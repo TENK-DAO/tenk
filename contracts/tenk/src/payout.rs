@@ -61,8 +61,9 @@ impl Payouts for Contract {
             .owner_by_id
             .get(&token_id)
             .expect("No such token_id");
-        self.royalties
-            .get()
+        self.sale
+            .royalties
+            .as_ref()
             .map_or(Payout::default(), |r| r.create_payout(balance.0, &owner_id))
     }
 

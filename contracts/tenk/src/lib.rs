@@ -14,13 +14,9 @@ use near_sdk::{
 };
 use near_units::{parse_gas, parse_near};
 
-#[cfg(feature = "airdrop")]
-mod airdrop;
 pub mod linkdrop;
 pub mod payout;
 mod raffle;
-#[cfg(feature = "airdrop")]
-mod raffle_collection;
 mod util;
 
 use payout::*;
@@ -38,19 +34,10 @@ pub struct Contract {
     pending_tokens: u32,
     // Linkdrop fields will be removed once proxy contract is deployed
     pub accounts: LookupMap<PublicKey, bool>,
-    pub price: Balance,
-
-    // Royalties
-    royalties: LazyOption<Royalties>,
-    // Initial Royalties
-    initial_royalties: LazyOption<Royalties>,
-
     // Whitelist
     whitelist: LookupMap<AccountId, u32>,
 
-    presale_start: Option<Duration>,
-    public_sale_start: Option<Duration>,
-    allowance: Option<u32>,
+    sale: Sale,
 }
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
@@ -80,15 +67,9 @@ enum StorageKey {
     TokenMetadata,
     Enumeration,
     Approval,
-    Ids,
-    Royalties,
+    Raffle,
     LinkdropKeys,
-    InitialRoyalties,
     Whitelist,
-    #[cfg(feature = "airdrop")]
-    AirdropLazyKey,
-    #[cfg(feature = "airdrop")]
-    AirdropRaffleKey,
 }
 
 #[witgen]
@@ -127,13 +108,30 @@ impl From<InitialMetadata> for NFTContractMetadata {
 }
 
 #[witgen]
-#[derive(Deserialize, Serialize, Default)]
+#[derive(Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 pub struct Sale {
     royalties: Option<Royalties>,
     initial_royalties: Option<Royalties>,
     presale_start: Option<Duration>,
     public_sale_start: Option<Duration>,
     allowance: Option<u32>,
+    presale_price: Option<U128>,
+    price: U128,
+}
+
+impl Default for Sale {
+    fn default() -> Self {
+        Self {
+            price: U128(0),
+            // ..Default::default()
+            royalties: Default::default(),
+            initial_royalties: Default::default(),
+            presale_start: Default::default(),
+            public_sale_start: Default::default(),
+            allowance: Default::default(),
+            presale_price: Default::default(),
+        }
+    }
 }
 
 impl Sale {
@@ -154,26 +152,13 @@ impl Contract {
         owner_id: AccountId,
         metadata: InitialMetadata,
         size: u32,
-        price: U128,
         sale: Option<Sale>,
     ) -> Self {
-        Self::new(
-            owner_id,
-            metadata.into(),
-            size,
-            price,
-            sale.unwrap_or_default(),
-        )
+        Self::new(owner_id, metadata.into(), size, sale.unwrap_or_default())
     }
 
     #[init]
-    pub fn new(
-        owner_id: AccountId,
-        metadata: NFTContractMetadata,
-        size: u32,
-        price: U128,
-        sale: Sale,
-    ) -> Self {
+    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, size: u32, sale: Sale) -> Self {
         metadata.assert_valid();
         sale.validate();
         Self {
@@ -185,25 +170,17 @@ impl Contract {
                 Some(StorageKey::Approval),
             ),
             metadata: LazyOption::new(StorageKey::Metadata, Some(&metadata)),
-            raffle: Raffle::new(StorageKey::Ids, size as u64),
+            raffle: Raffle::new(StorageKey::Raffle, size as u64),
             pending_tokens: 0,
             accounts: LookupMap::new(StorageKey::LinkdropKeys),
-            price: price.into(),
-            royalties: LazyOption::new(StorageKey::Royalties, sale.royalties.as_ref()),
-            initial_royalties: LazyOption::new(
-                StorageKey::InitialRoyalties,
-                sale.initial_royalties.as_ref(),
-            ),
             whitelist: LookupMap::new(StorageKey::Whitelist),
-            presale_start: sale.presale_start,
-            public_sale_start: sale.public_sale_start,
-            allowance: sale.allowance,
+            sale,
         }
     }
 
     pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) {
         self.assert_owner();
-        let allowance = allowance.unwrap_or_else(|| self.allowance.unwrap_or(0));
+        let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
             self.whitelist.insert(account_id, &allowance);
         });
@@ -221,22 +198,32 @@ impl Contract {
     pub fn close_contract(&mut self) {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner();
-        self.presale_start = None;
-        self.public_sale_start = None;
+        self.sale.presale_start = None;
+        self.sale.public_sale_start = None;
     }
 
-    pub fn start_presale(&mut self, public_sale_start: Option<Duration>) {
+    pub fn start_presale(
+        &mut self,
+        public_sale_start: Option<Duration>,
+        presale_price: Option<U128>,
+    ) {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner();
         let current_time = current_time_ms();
-        self.presale_start = Some(current_time);
-        self.public_sale_start = public_sale_start;
+        self.sale.presale_start = Some(current_time);
+        self.sale.public_sale_start = public_sale_start;
+        if presale_price.is_some() {
+            self.sale.presale_price = presale_price;
+        }
     }
 
-    pub fn start_sale(&mut self) {
+    pub fn start_sale(&mut self, price: Option<U128>) {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner();
-        self.public_sale_start = Some(current_time_ms());
+        self.sale.public_sale_start = Some(current_time_ms());
+        if let Some(price) = price {
+            self.sale.price = price
+        }
     }
 
     #[payable]
@@ -324,7 +311,7 @@ impl Contract {
 
         if !mint_for_free {
             let storage_used = env::storage_usage() - initial_storage_usage;
-            if let Some(royalties) = self.initial_royalties.get() {
+            if let Some(royalties) = &self.sale.initial_royalties {
                 // Keep enough funds to cover storage and split the rest as royalties
                 let storage_cost = env::storage_byte_cost() * storage_used as Balance;
                 let left_over_funds = env::attached_deposit() - storage_cost;
@@ -348,7 +335,11 @@ impl Contract {
     }
 
     pub fn cost_per_token(&self, minter: &AccountId) -> U128 {
-        let base_cost = if self.is_owner(minter) { 0 } else { self.price };
+        let base_cost = if self.is_owner(minter) {
+            0
+        } else {
+            self.price()
+        };
         (base_cost + self.token_storage_cost().0).into()
     }
 
@@ -379,15 +370,15 @@ impl Contract {
         self.tokens.owner_id = new_owner;
     }
 
-    pub fn update_royalties(&mut self, royalties: Royalties) -> Option<Royalties> {
+    pub fn update_royalties(&mut self, royalties: Royalties) {
         self.assert_owner();
         royalties.validate();
-        self.royalties.replace(&royalties)
+        self.sale.royalties = Some(royalties);
     }
 
     pub fn update_allowance(&mut self, allowance: u32) {
         self.assert_owner();
-        self.allowance = Some(allowance);
+        self.sale.allowance = Some(allowance);
     }
 
     pub fn update_uri(&mut self, uri: String) {
@@ -401,25 +392,24 @@ impl Contract {
     pub fn get_sale_info(&self) -> SaleInfo {
         SaleInfo {
             status: self.get_status(),
-            presale_start: self.presale_start.unwrap_or(MAX_DATE),
-            sale_start: self.public_sale_start.unwrap_or(MAX_DATE),
+            presale_start: self.sale.presale_start.unwrap_or(MAX_DATE),
+            sale_start: self.sale.public_sale_start.unwrap_or(MAX_DATE),
             token_final_supply: self.initial(),
-            price: self.price.into(),
+            price: self.price().into(),
         }
     }
 
     pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
         let sale_info = self.get_sale_info();
-        let remaining_allowance = if self.is_presale() || self.allowance.is_some() {
+        let remaining_allowance = if self.is_presale() || self.sale.allowance.is_some() {
             self.remaining_allowance(account_id)
         } else {
             None
         };
-        let is_vip = self.whitelisted(&account_id);
         UserSaleInfo {
             sale_info,
             remaining_allowance,
-            is_vip
+            is_vip: self.whitelisted(account_id),
         }
     }
 
@@ -522,16 +512,16 @@ impl Contract {
         let title = Some(token_id.to_string());
         TokenMetadata {
             title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
-            description: None, // free-form description
             media, // URL to associated media, preferably to decentralized, content-addressed storage
+            issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
+            reference,   // URL to an off-chain JSON file with more info.
+            description: None, // free-form description
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
-            issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
             expires_at: None,     // ISO 8601 datetime when token expires
             starts_at: None,      // ISO 8601 datetime when token starts being valid
             updated_at: None,     // ISO 8601 datetime when token was last updated
             extra: None, // anything extra the NFT wants to store on-chain. Can be stringified JSON.
-            reference,   // URL to an off-chain JSON file with more info.
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
         }
     }
@@ -552,7 +542,7 @@ impl Contract {
 
     fn get_or_add_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) -> u32 {
         // return num if allowance isn't set
-        self.allowance.map_or(num, |allowance| {
+        self.sale.allowance.map_or(num, |allowance| {
             self.whitelist.get(account_id).unwrap_or_else(|| {
                 self.whitelist.insert(account_id, &allowance);
                 allowance
@@ -560,7 +550,7 @@ impl Contract {
         })
     }
     fn has_allowance(&self) -> bool {
-        self.allowance.is_some() || self.is_presale()
+        self.sale.allowance.is_some() || self.is_presale()
     }
 
     fn is_presale(&self) -> bool {
@@ -572,11 +562,19 @@ impl Contract {
             return Status::SoldOut;
         }
         let current_time = current_time_ms();
-        match (self.presale_start, self.public_sale_start) {
+        match (self.sale.presale_start, self.sale.public_sale_start) {
             (_, Some(public)) if public < current_time => Status::Open,
             (Some(pre), _) if pre < current_time => Status::Presale,
             (_, _) => Status::Closed,
         }
+    }
+
+    fn price(&self) -> u128 {
+        match self.get_status() {
+            Status::Presale | Status::Closed => self.sale.presale_price.unwrap_or(self.sale.price),
+            Status::Open | Status::SoldOut => self.sale.price,
+        }
+        .into()
     }
 }
 
@@ -667,8 +665,10 @@ mod tests {
             AccountId::new_unchecked("root".to_string()),
             initial_metadata(),
             10_000,
-            TEN.into(),
-            None,
+            Some(Sale {
+                price: TEN.into(),
+                ..Default::default()
+            }),
         )
     }
 

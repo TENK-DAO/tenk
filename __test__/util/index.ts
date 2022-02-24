@@ -13,6 +13,14 @@ import {
 import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
 import { binPath } from "./bin";
 import { BalanceDelta, getDelta } from "./delta";
+import {Contract} from "../..";
+
+let c: Contract;
+type f = typeof c.new_default_meta;
+type NewfuncArgs = Parameters<f>;
+type InitArgs = NewfuncArgs[0];
+
+export type start_presale_args = Parameters<typeof c.start_presale>[0];
 
 export * from "./bin";
 
@@ -26,28 +34,32 @@ export async function deployEmpty(account: NearAccount): Promise<void> {
   await account.createTransaction(account).deployContract(bytes).signAndSend();
 }
 
+export function now() {
+  return Date.now();
+}
+export const DEFAULT_SALE = {
+  price: NEAR.parse("1 N").toJSON(),
+  public_sale_start: now(),
+}
+
 export async function deploy(
   owner: NearAccount,
   name = "tenk",
-  args = {}
+  args: Partial<InitArgs> = {}
 ): Promise<NearAccount> {
   const account =  await  owner.createAndDeploy(name, binPath("tenk"));
-  await owner.call(account, "new_default_meta",
-    {
-      owner_id: owner,
-      metadata: {
-        name: "TENK NFT",
-        symbol: "TENK",
-        uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
-      },
-      size: 100,
-      price: NEAR.parse("1 N"),
-      sale: {
-        is_premint_over: true,
-      },
-      ...args,
+  let passed_args: InitArgs = {
+    owner_id: owner.accountId,
+    metadata: {
+      name: "TENK NFT",
+      symbol: "TENK",
+      uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
     },
-  );
+    size: 100,
+    sale: DEFAULT_SALE,
+    ...args,
+  };
+  await owner.call(account, "new_default_meta", passed_args);
   return account;
 }
 

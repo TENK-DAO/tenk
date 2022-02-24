@@ -7,11 +7,13 @@ import {
   getTokens,
   mint,
   mint_raw,
+  now,
   sleep,
+  start_presale_args,
   totalCost,
 } from "./util";
 
-const price = NEAR.parse("0.8 N");
+const presale_price = NEAR.parse("0.8 N").toJSON();
 const allowance = 2;
 
 const runner = Workspace.init(
@@ -19,10 +21,10 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      price,
       sale: {
-        is_premint_over: false,
         allowance,
+        price: ONE_NEAR.toJSON(),
+        presale_price,
       },
     });
     return { tenk, alice };
@@ -30,14 +32,15 @@ const runner = Workspace.init(
 );
 
 async function premint_period<T>(
-  { tenk, root, duration, price },
+  { tenk, root, duration },
   fn: () => Promise<T>
 ): Promise<T> {
-  await root.call(tenk, "start_premint", { duration });
+  const public_sale_start = now() + duration * 1_000;
+  const args: start_presale_args = { public_sale_start };
+  await root.call(tenk, "start_presale", args);
   const sleepTimer = sleep(1000 * duration);
   const res = await fn();
   await sleepTimer;
-  await root.call(tenk, "end_premint", { price });
   return res;
 }
 
@@ -48,7 +51,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
   const linkkeys = await createLinkdrop(t, tenk, root);
   await claim(t, tenk, alice, linkkeys);
 
-  await premint_period({ tenk, root, duration, price: ONE_NEAR }, async () => {
+  await premint_period({ tenk, root, duration }, async () => {
     // await t.throwsAsync(
     //   root.call(tenk, "end_premint", {
     //     base_cost,
@@ -73,6 +76,7 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
     const tokens = await getTokens(tenk, alice);
     t.assert(tokens.length == 3);
   });
+  t.log(await tenk.view("get_sale_info"));
   const sale_price = await totalCost(tenk, 1, alice.accountId);
   t.log(sale_price.toHuman(), cost.toHuman());
   t.assert(sale_price.gt(cost), "actual sale price has increased");

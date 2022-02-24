@@ -17,28 +17,26 @@ const price = NEAR.parse("1 N");
 const runner = Workspace.init(
   { initialBalance: NEAR.parse("15 N").toString() },
   async ({ root }) => {
-    return {  };
+    let tenk = await root.createAndDeploy("tenk", binPath("tenk"));
+
+    await root.call(tenk, "new_default_meta", {
+      owner_id: root,
+      metadata: {
+        name: "TENK NFT",
+        symbol: "TENK",
+        uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
+      },
+      size: 100,
+      price: NEAR.parse("1 N"),
+      sale: {
+        is_premint_over: true,
+      },
+    });
+    return { tenk };
   }
 );
 
-runner.test("can get cost per token", async (t, { root }) => {
-  let tenk =  await root.createAndDeploy("tenk", binPath("tenk"));
-
-  await root.call(tenk, "new_default_meta",
-  {
-    owner_id: root,
-    metadata: {
-      name: "TENK NFT",
-      symbol: "TENK",
-      uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link",
-    },
-    size: 100,
-    price: NEAR.parse("1 N"),
-    sale: {
-      is_premint_over: true,
-    }
-  });
-
+runner.test("can get cost per token", async (t, { root, tenk }) => {
   const cost = await costPerToken(tenk, 1);
   const storageCost = await tokenStorageCost(tenk);
   t.log(
@@ -53,8 +51,6 @@ runner.test("can get cost per token", async (t, { root }) => {
   //   t.assert(cost.gt(await costPerToken(tenk, 24)));
   // }
 });
-
-/*
 
 async function assertXTokens(t, root: NearAccount, tenk, num) {
   const method = num == 1 ? "nft_mint_one" : "nft_mint_many";
@@ -81,5 +77,3 @@ async function assertXTokens(t, root: NearAccount, tenk, num) {
     await assertXTokens(t, root, tenk, x);
   });
 });
-
-*/

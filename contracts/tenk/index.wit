@@ -104,6 +104,16 @@ whitelisted: function(account-id: account-id) -> bool
 get-sale-info: function() -> sale-info
 
 
+record sale {
+    royalties: option<royalties>,
+	initial-royalties: option<royalties>,
+	presale-start: option<duration>,
+	public-sale-start: option<duration>,
+	allowance: option<u32>,
+	presale-price: option<u128>,
+	price: u128
+}
+
 cost-per-token: function(minter: account-id) -> u128
 
 
@@ -125,14 +135,8 @@ variant status {
 	sold-out,
 }
 
-///  change
-start-presale: function(public-sale-start: option<duration>)
-
 nft-tokens: function(from-index: option<u128>, limit: option<u64>) -> list<token>
 
-
-///  change
-new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, price: u128, sale: sale)
 
 nft-token: function(token-id: token-id) -> option<token>
 
@@ -142,6 +146,9 @@ close-contract: function()
 
 ///  change
 nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
+
+///  change
+start-sale: function(price: option<u128>)
 
 ///  change
 nft-mint-many: function(num: u32) -> list<token>
@@ -163,14 +170,6 @@ nft-transfer-payout: function(receiver-id: account-id, token-id: string, approva
 ///  Returns the balance associated with given key.
 get-key-balance: function() -> u128
 
-
-record sale {
-    royalties: option<royalties>,
-	initial-royalties: option<royalties>,
-	presale-start: option<duration>,
-	public-sale-start: option<duration>,
-	allowance: option<u32>
-}
 
 record initial-metadata {
     name: string,
@@ -204,10 +203,10 @@ record sale-info {
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
 ///  change
-new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, price: u128, sale: option<sale>)
+new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale)
 
 ///  change
-start-sale: function()
+start-presale: function(public-sale-start: option<duration>, presale-price: option<u128>)
 
 token-storage-cost: function() -> u128
 
@@ -218,10 +217,6 @@ nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id:
 ///  change
 nft-revoke-all: function(token-id: token-id)
 
-///  change
-update-royalties: function(royalties: royalties) -> option<royalties>
-
-
 cost-of-linkdrop: function(minter: account-id) -> u128
 
 
@@ -230,6 +225,9 @@ total-cost: function(num: u32, minter: account-id) -> u128
 
 get-linkdrop-contract: function() -> account-id
 
+
+///  change
+new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)
 
 ///  change
 nft-revoke: function(token-id: token-id, account-id: account-id)
@@ -281,6 +279,9 @@ tokens-left: function() -> u32
 
 nft-supply-for-owner: function(account-id: account-id) -> u128
 
+
+///  change
+update-royalties: function(royalties: royalties)
 
 ///  change
 nft-mint-one: function() -> token
