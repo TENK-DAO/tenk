@@ -110,9 +110,6 @@ var Contract = /** @class */ (function () {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
     };
-    Contract.prototype.remaining_allowance = function (args, options) {
-        return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
-    };
     Contract.prototype.cost_per_token = function (args, options) {
         return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
     };
@@ -512,6 +509,9 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_is_approved = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_is_approved", args, options);
     };
+    Contract.prototype.remaining_allowance = function (args, options) {
+        return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
+    };
     Contract.prototype.nft_mint = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -531,6 +531,9 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_mintTx = function (args, options) {
         var _a, _b;
         return near_api_js_1.transactions.functionCall("nft_mint", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+    };
+    Contract.prototype.get_user_sale_info = function (args, options) {
+        return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
     };
     Contract.prototype.nft_tokens_for_owner = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_tokens_for_owner", args, options);

@@ -48,7 +48,7 @@ pub struct Contract {
     // Whitelist
     whitelist: LookupMap<AccountId, u32>,
 
-    pre_sale_start: Option<Duration>,
+    presale_start: Option<Duration>,
     public_sale_start: Option<Duration>,
     allowance: Option<u32>,
 }
@@ -56,6 +56,7 @@ pub struct Contract {
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
 const GAS_REQUIRED_TO_CREATE_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
 const TECH_BACKUP_OWNER: &str = "willem.near";
+const MAX_DATE: u64 = 8640000000000000;
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
 #[ext_contract(ext_self)]
@@ -130,7 +131,7 @@ impl From<InitialMetadata> for NFTContractMetadata {
 pub struct Sale {
     royalties: Option<Royalties>,
     initial_royalties: Option<Royalties>,
-    pre_sale_start: Option<Duration>,
+    presale_start: Option<Duration>,
     public_sale_start: Option<Duration>,
     allowance: Option<u32>,
 }
@@ -194,7 +195,7 @@ impl Contract {
                 sale.initial_royalties.as_ref(),
             ),
             whitelist: LookupMap::new(StorageKey::Whitelist),
-            pre_sale_start: sale.pre_sale_start,
+            presale_start: sale.presale_start,
             public_sale_start: sale.public_sale_start,
             allowance: sale.allowance,
         }
@@ -220,7 +221,7 @@ impl Contract {
     pub fn close_contract(&mut self) {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner();
-        self.pre_sale_start = None;
+        self.presale_start = None;
         self.public_sale_start = None;
     }
 
@@ -228,7 +229,7 @@ impl Contract {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner();
         let current_time = current_time_ms();
-        self.pre_sale_start = Some(current_time);
+        self.presale_start = Some(current_time);
         self.public_sale_start = public_sale_start;
     }
 
@@ -400,21 +401,15 @@ impl Contract {
     pub fn get_sale_info(&self) -> SaleInfo {
         SaleInfo {
             status: self.get_status(),
-            pre_sale_start: self.pre_sale_start,
-            sale_start: self.public_sale_start,
+            presale_start: self.presale_start.unwrap_or(MAX_DATE),
+            sale_start: self.public_sale_start.unwrap_or(MAX_DATE),
             token_final_supply: self.initial(),
             price: self.price.into(),
         }
     }
 
     pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
-        let sale_info = SaleInfo {
-            status: self.get_status(),
-            pre_sale_start: self.pre_sale_start,
-            sale_start: self.public_sale_start,
-            token_final_supply: self.initial(),
-            price: self.price.into(),
-        };
+        let sale_info = self.get_sale_info();
         let remaining_allowance = if self.is_presale() || self.allowance.is_some() {
             self.remaining_allowance(account_id)
         } else {
@@ -577,7 +572,7 @@ impl Contract {
             return Status::SoldOut;
         }
         let current_time = current_time_ms();
-        match (self.pre_sale_start, self.public_sale_start) {
+        match (self.presale_start, self.public_sale_start) {
             (_, Some(public)) if public < current_time => Status::Open,
             (Some(pre), _) if pre < current_time => Status::Presale,
             (_, _) => Status::Closed,
@@ -621,9 +616,9 @@ pub struct SaleInfo {
     /// Current state of contract
     status: Status,
     /// Start of the VIP sale
-    pre_sale_start: Option<Duration>,
+    presale_start: Duration,
     /// Start of public sale
-    sale_start: Option<Duration>,
+    sale_start: Duration,
     /// Total tokens that could be minted
     token_final_supply: u64,
     /// Current price for one token

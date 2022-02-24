@@ -164,6 +164,14 @@ nft-transfer-payout: function(receiver-id: account-id, token-id: string, approva
 get-key-balance: function() -> u128
 
 
+record sale {
+    royalties: option<royalties>,
+	initial-royalties: option<royalties>,
+	presale-start: option<duration>,
+	public-sale-start: option<duration>,
+	allowance: option<u32>
+}
+
 record initial-metadata {
     name: string,
 	symbol: string,
@@ -174,23 +182,23 @@ record initial-metadata {
 	reference-hash: option<base64-vec-u8>
 }
 
+///  Create a pending token that can be claimed with corresponding private key
+///  change
+create-linkdrop: function(public-key: public-key)
+
 ///  Information about the current sale
 record sale-info {
     ///  Current state of contract
 	status: status,
 	///  Start of the VIP sale
-	pre-sale-start: option<duration>,
+	presale-start: duration,
 	///  Start of public sale
-	sale-start: option<duration>,
+	sale-start: duration,
 	///  Total tokens that could be minted
 	token-final-supply: u64,
 	///  Current price for one token
 	price: u128
 }
-
-///  Create a pending token that can be claimed with corresponding private key
-///  change
-create-linkdrop: function(public-key: public-key)
 
 ///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
@@ -249,14 +257,6 @@ nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>,
 
 ///  change
 add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
-
-record sale {
-    royalties: option<royalties>,
-	initial-royalties: option<royalties>,
-	pre-sale-start: option<duration>,
-	public-sale-start: option<duration>,
-	allowance: option<u32>
-}
 
 ///  Information about the current sale from user perspective
 record user-sale-info {

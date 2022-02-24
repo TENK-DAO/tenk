@@ -131,6 +131,13 @@ export enum Status {
   */
   SoldOut = 3,
 }
+export interface Sale {
+  royalties?: Royalties,
+  initial_royalties?: Royalties,
+  presale_start?: Duration,
+  public_sale_start?: Duration,
+  allowance?: number,
+}
 export interface InitialMetadata {
   name: string,
   symbol: string,
@@ -151,11 +158,11 @@ export interface SaleInfo {
   /**
   * Start of the VIP sale
   */
-  pre_sale_start?: Duration,
+  presale_start: Duration,
   /**
   * Start of public sale
   */
-  sale_start?: Duration,
+  sale_start: Duration,
   /**
   * Total tokens that could be minted
   */
@@ -166,13 +173,6 @@ export interface SaleInfo {
   price: U128,
 }
 export type BasisPoint = number;
-export interface Sale {
-  royalties?: Royalties,
-  initial_royalties?: Royalties,
-  pre_sale_start?: Duration,
-  public_sale_start?: Duration,
-  allowance?: number,
-}
 /**
 * Information about the current sale from user perspective
 */

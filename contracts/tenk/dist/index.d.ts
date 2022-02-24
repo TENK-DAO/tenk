@@ -126,6 +126,22 @@ export declare enum Status {
     */
     SoldOut = 3
 }
+export interface Sale {
+    royalties?: Royalties;
+    initial_royalties?: Royalties;
+    presale_start?: Duration;
+    public_sale_start?: Duration;
+    allowance?: number;
+}
+export interface InitialMetadata {
+    name: string;
+    symbol: string;
+    uri: string;
+    icon?: string;
+    spec?: string;
+    reference?: string;
+    reference_hash?: Base64VecU8;
+}
 /**
 * Information about the current sale
 */
@@ -137,32 +153,28 @@ export interface SaleInfo {
     /**
     * Start of the VIP sale
     */
-    pre_sale_start?: Duration;
+    presale_start: Duration;
     /**
     * Start of public sale
     */
-    sale_start?: Duration;
+    sale_start: Duration;
     /**
     * Total tokens that could be minted
     */
     token_final_supply: u64;
-}
-export interface InitialMetadata {
-    name: string;
-    symbol: string;
-    uri: string;
-    icon?: string;
-    spec?: string;
-    reference?: string;
-    reference_hash?: Base64VecU8;
+    /**
+    * Current price for one token
+    */
+    price: U128;
 }
 export declare type BasisPoint = number;
-export interface Sale {
-    royalties?: Royalties;
-    initial_royalties?: Royalties;
-    pre_sale_start?: Duration;
-    public_sale_start?: Duration;
-    allowance?: number;
+/**
+* Information about the current sale from user perspective
+*/
+export interface UserSaleInfo {
+    sale_info: SaleInfo;
+    is_vip: boolean;
+    remaining_allowance?: number;
 }
 /**
 * Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
@@ -200,9 +212,6 @@ export declare class Contract {
         account_id: AccountId;
     }, options?: ViewFunctionOptions): Promise<boolean>;
     get_sale_info(args?: {}, options?: ViewFunctionOptions): Promise<SaleInfo>;
-    remaining_allowance(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<number>;
     cost_per_token(args: {
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
@@ -460,6 +469,9 @@ export declare class Contract {
         approved_account_id: AccountId;
         approval_id?: u64;
     }, options?: ViewFunctionOptions): Promise<boolean>;
+    remaining_allowance(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<number | null>;
     nft_mint(args: {
         token_id: TokenId;
         token_owner_id: AccountId;
@@ -475,6 +487,9 @@ export declare class Contract {
         token_owner_id: AccountId;
         token_metadata: TokenMetadata;
     }, options?: ChangeMethodOptions): transactions.Action;
+    get_user_sale_info(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<UserSaleInfo>;
     nft_tokens_for_owner(args: {
         account_id: AccountId;
         from_index?: U128;
