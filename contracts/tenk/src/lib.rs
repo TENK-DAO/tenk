@@ -371,7 +371,8 @@ impl Contract {
             .into()
     }
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens
+        // Set supply to 222
+        self.raffle.len() as u32 - self.pending_tokens - 2001
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {
