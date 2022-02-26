@@ -10,9 +10,12 @@ const metadata: tenk.InitialMetadata = {
   symbol: "TENK",
 };
  
-const price = NEAR.parse("1 N").toJSON();
+const price = NEAR.parse("6.9 N").toJSON();
 
 const sale: tenk.Sale = {
+  price,
+  presale_start: Date.parse("01 March 2022 9:00 PM UTC"),
+  public_sale_start: Date.parse("01 March 2022 9:30 PM UTC"),
   // is_premint_over: true,
   // initial_royalties: {
   //   percent: 10_000,
