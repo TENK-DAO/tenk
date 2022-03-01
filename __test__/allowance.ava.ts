@@ -1,17 +1,16 @@
-import { ONE_NEAR, Workspace } from "near-willem-workspaces-ava";
+import { Workspace } from "near-willem-workspaces-ava";
 import { NEAR } from "near-units";
 import {
-  claim,
-  createLinkdrop,
+  DEFAULT_SALE,
   deploy,
   getTokens,
   mint,
   mint_raw,
-  sleep,
+  now,
   totalCost,
 } from "./util";
 
-const sale_price = NEAR.parse("0.8 N");
+const price = NEAR.parse("0.8 N");
 const allowance = 2;
 
 const runner = Workspace.init(
@@ -19,12 +18,9 @@ const runner = Workspace.init(
   async ({ root }) => {
     const alice = await root.createAccount("alice");
     const tenk = await deploy(root, "tenk", {
-      price_structure: {
-        base_cost: sale_price,
-      min_cost: sale_price,
-      },
       sale: {
-        is_premint_over: true,
+        ...DEFAULT_SALE,
+        price: price.toJSON(),
         allowance,
       }
     });

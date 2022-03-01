@@ -1,6 +1,7 @@
 import { Workspace, NearAccount } from "near-willem-workspaces-ava";
 import { NEAR } from "near-units";
-import { deploy, getDelta, mint, totalCost } from "./util";
+import { DEFAULT_SALE, deploy, getDelta, mint, now, totalCost } from "./util";
+import { Royalties, Sale } from "..";
 
 if (Workspace.networkIsSandbox()) {
   function createRoyalties({ root, alice, bob, eve }) {
@@ -28,14 +29,10 @@ if (Workspace.networkIsSandbox()) {
       const royalties = createRoyalties({ root, bob, alice, eve });
       const tenk = await deploy(root, "tenk", {
         sale: {
+          ...DEFAULT_SALE,
           royalties,
           initial_royalties: royalties,
-          is_premint_over: true,
-        },
-        price_structure: {
-          base_cost: NEAR.parse("5 N"),
-          min_cost: NEAR.parse("5 N"),
-        },
+        }
       });
       return { tenk, bob, alice, eve };
     }
@@ -87,9 +84,13 @@ if (Workspace.networkIsSandbox()) {
     );
   });
 
+  function sale(royalties: Royalties): Sale{
+    return {...DEFAULT_SALE, royalties}
+  }
+
   runner.test("bad initial payout", async (t, { root }) => {
-    let bad_royalties = {
-      precent: 10000,
+    let bad_royalties: Royalties = {
+      percent: 10000,
       accounts: {
         bob: 10,
       },
@@ -97,14 +98,7 @@ if (Workspace.networkIsSandbox()) {
     await t.throwsAsync(
       () =>
         deploy(root, "tenk1", {
-          sale: {
-            royalties: bad_royalties,
-            is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          sale: sale(bad_royalties)
         }),
       null,
       "too little"
@@ -116,14 +110,9 @@ if (Workspace.networkIsSandbox()) {
       () =>
         deploy(root, "tenk2", {
           sale: {
-            royalties,
+            ...DEFAULT_SALE,
             initial_royalties: bad_royalties,
-            is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          }
         }),
       null,
       "too little initial"
@@ -132,7 +121,7 @@ if (Workspace.networkIsSandbox()) {
 
   runner.test("too much", async (t, { root }) => {
     let bad_royalties = {
-      precent: 10_000,
+      percent: 10_000,
       accounts: {
         bob: 9_000,
         alice: 1_100,
@@ -141,14 +130,7 @@ if (Workspace.networkIsSandbox()) {
     await t.throwsAsync(
       () =>
         deploy(root, "tenk1", {
-          sale: {
-            royalties: bad_royalties,
-            is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          sale: sale(bad_royalties)
         }),
       null,
       "secondary"
@@ -160,14 +142,9 @@ if (Workspace.networkIsSandbox()) {
       () =>
         deploy(root, "tenk2", {
           sale: {
-            royalties,
+            ...DEFAULT_SALE,
             initial_royalties: bad_royalties,
-            is_premint_over: true,
-          },
-          price_structure: {
-            base_cost: NEAR.parse("5 N"),
-            min_cost: NEAR.parse("5 N"),
-          },
+          }
         }),
       null,
       "initial"

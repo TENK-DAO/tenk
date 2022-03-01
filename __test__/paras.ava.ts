@@ -1,6 +1,14 @@
 import { Workspace, NearAccount, ONE_NEAR } from "near-willem-workspaces-ava";
 import { NEAR, Gas } from "near-units";
-import { nftTokensForOwner, mint, BalanceDelta, deploy, totalCost } from "./util";
+import {
+  nftTokensForOwner,
+  mint,
+  BalanceDelta,
+  deploy,
+  totalCost,
+  now,
+  DEFAULT_SALE,
+} from "./util";
 
 function getRoyalties({ root, alice, eve }) {
   return {
@@ -42,7 +50,9 @@ const runner = Workspace.init(
     const bob = await root.createAccount("bob");
     const eve = await root.createAccount("eve");
     const royalties = getRoyalties({ root, alice, eve });
-    const tenk = await deploy(root, "tenk", {sale:{royalties, is_premint_over: true}});
+    const tenk = await deploy(root, "tenk", {
+      sale: { ...DEFAULT_SALE, royalties },
+    });
     const token_id = await mint(tenk, bob, await totalCost(tenk, 1));
 
     const paras = await delpoyParas(root, root, root, [tenk]);
@@ -105,7 +115,7 @@ runner.test("buy one", async (t, { root, tenk, paras, bob, eve }) => {
       attachedDeposit: ONE_NEAR,
     }
   );
-  
+
   await bob2Delta.log();
   await bob2Delta.isLessOrEqual(ONE_NEAR.neg());
   await bobDelta.isGreaterOrEqual(NEAR.parse("750 mN"));
