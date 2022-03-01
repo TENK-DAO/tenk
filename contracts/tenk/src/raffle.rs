@@ -54,7 +54,7 @@ impl Raffle {
     /// # Panics
     ///
     /// Panics if `index` is out of bounds.
-    fn swap_remove_raw(&mut self, index: u64) -> Vec<u8> {
+    pub fn swap_remove_raw(&mut self, index: u64) -> Vec<u8> {
         if index >= self.len {
             env::panic_str(ERR_INDEX_OUT_OF_BOUNDS)
         } else if index + 1 == self.len {

@@ -61,19 +61,19 @@ var Status;
     /**
     * Not open for any sales
     */
-    Status[Status["Closed"] = 0] = "Closed";
+    Status["Closed"] = "Closed";
     /**
     * VIP accounts can mint
     */
-    Status[Status["Presale"] = 1] = "Presale";
+    Status["Presale"] = "Presale";
     /**
     * Any account can mint
     */
-    Status[Status["Open"] = 2] = "Open";
+    Status["Open"] = "Open";
     /**
     * No more tokens to be minted
     */
-    Status[Status["SoldOut"] = 3] = "SoldOut";
+    Status["SoldOut"] = "SoldOut";
 })(Status = exports.Status || (exports.Status = {}));
 var Contract = /** @class */ (function () {
     function Contract(account, contractId) {
@@ -245,6 +245,29 @@ var Contract = /** @class */ (function () {
     Contract.prototype.update_uriTx = function (args, options) {
         var _a, _b;
         return near_api_js_1.transactions.functionCall("update_uri", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+    };
+    Contract.prototype.mint_special = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.mint_specialRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.mint_specialRaw = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "mint_special", args: args }, options));
+    };
+    Contract.prototype.mint_specialTx = function (args, options) {
+        var _a, _b;
+        if (args === void 0) { args = {}; }
+        return near_api_js_1.transactions.functionCall("mint_special", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
     };
     Contract.prototype.nft_transfer_call = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -511,6 +534,10 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.get_user_sale_info = function (args, options) {
         return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
+    };
+    Contract.prototype.initial = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "initial", args, options);
     };
     Contract.prototype.nft_tokens_for_owner = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_tokens_for_owner", args, options);

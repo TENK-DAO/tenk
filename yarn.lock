@@ -3451,7 +3451,7 @@ multiaddr@^10.0.0:
     uint8arrays "^3.0.0"
     varint "^6.0.0"
 
-multiformats@^9.0.4, multiformats@^9.4.13, multiformats@^9.4.2, multiformats@^9.4.5, multiformats@^9.4.7, multiformats@^9.5.4, multiformats@^9.6.3:
+multiformats@^9.0.4, multiformats@^9.4.13, multiformats@^9.4.2, multiformats@^9.4.5, multiformats@^9.4.7, multiformats@^9.5.4, multiformats@^9.6.3, multiformats@^9.6.4:
   version "9.6.4"
   resolved "https://registry.yarnpkg.com/multiformats/-/multiformats-9.6.4.tgz#5dce1f11a407dbb69aa612cb7e5076069bb759ca"
   integrity sha512-fCCB6XMrr6CqJiHNjfFNGT0v//dxOBMrOMqUIzpPc/mmITweLEyhvMpY9bF+jZ9z3vaMAau5E8B68DW77QMXkg==
@@ -3619,10 +3619,10 @@ near-willem-workspaces@^1.0.3-alpha.0:
     rimraf "^3.0.2"
     temp-dir "^2.0.0"
 
-nft.storage@^5.0.0:
-  version "5.2.5"
-  resolved "https://registry.yarnpkg.com/nft.storage/-/nft.storage-5.2.5.tgz#55c9f1b3cd40654cfeae006c3a4abb2da238049f"
-  integrity sha512-ITP9ETleKIZvSRsjpHi6JFFE/YVcp9jwwyi+Q1GtdNmFc5Xyu1g7it+yrk7m5+iSEMcOjSJGPQrktnUTe0qtAg==
+nft.storage@^6.0.1:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/nft.storage/-/nft.storage-6.0.1.tgz#370d653f1823bc5df35d7efd85818a0d3ddfdff4"
+  integrity sha512-xSJ5bbGcvZYToE5L1tjCO96rPr3xCYZ1uq1s+wMcCZX6PjwWk7184EIE23QHQBJqrYQuq9CSbBH6jL/QxqlEDw==
   dependencies:
     "@ipld/car" "^3.2.3"
     "@ipld/dag-cbor" "^6.0.13"
@@ -3632,7 +3632,7 @@ nft.storage@^5.0.0:
     "@web-std/form-data" "^3.0.0"
     carbites "^1.0.6"
     ipfs-car "^0.6.2"
-    multiformats "^9.6.3"
+    multiformats "^9.6.4"
     p-retry "^4.6.1"
     streaming-iterables "^6.0.0"
 
