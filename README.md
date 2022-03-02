@@ -21,12 +21,12 @@ Currently this project wraps its own linkdrop-proxy, but in the future it this w
 
 TypeScript docs are found at [https://tenk-dao.github.io/tenk/](https://tenk-dao.github.io/tenk/).
 
-Currently there is no standard format to describe the types of a contract. On proposal is to use the [`wit` format](https://github.com/bytecodealliance/wit-bindgen/blob/main/WIT.md),
+Currently there is no standard format to describe the types of a contract. One proposal is to use the [`wit` format](https://github.com/bytecodealliance/wit-bindgen/blob/main/WIT.md),
 which while intended as a tool to generate bindings that act as polyfill for [`WebAssembly Interface Types`](https://github.com/WebAssembly/interface-types), it provides a language agnostic
 way to describe types for the API of a Wasm Binary.
 
 This work has led to the creation of [`witme`](https://github.com/ahalabs/witme), a tool for both generating a `.wit` document describing a Rust smart contract and generating a TypeScript file
-from a `.wit` document.  The generated TS file also includes a `Contract` class which handles calling the corresponding method.
+from a `.wit` document.  The generated TS file also includes a `Contract` class which handles calling the corresponding methods.
 
 For example, `nft_transfer` generates the following three functions:
 
@@ -49,6 +49,7 @@ nft_transferRaw(args: {
 }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
 
 // Creates a function call action that can be added to a transaction
+// See the `./scripts/deploy.ts` for how this can be used
 nft_transferTx(args: {
     receiver_id: AccountId;
     token_id: TokenId;
@@ -75,7 +76,7 @@ nft_token(args: { token_id: TokenId;}, options?: ViewFunctionOptions): Promise<T
 
 ### Using the contract's types
 
-The generated typescript can then be compiled to allow for other projects to use.  The main file and types of this package are found `./contracts/tenk/dist/*`
+The main file and types of this package are found `./contracts/tenk/dist/*`
 and specified in the `package.json`. These
 
 
@@ -121,7 +122,6 @@ export async function main({ account, argv }: Context) {
     }
   };
   let res = await contract.update_royalties({ royalties });
-  console.log(`old payout ${res}`);
 }
 ```
 
