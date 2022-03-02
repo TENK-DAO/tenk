@@ -3,35 +3,42 @@ import { readFile } from "fs/promises";
 import { Context } from "near-cli/context";
 import * as tenk from "..";
 import { binPath } from "./utils";
+import { icon } from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
-  name: "TENK NFT",
-  symbol: "TENK",
+  uri,
+  name: "NEAR Extinct Heroes",
+  symbol: "extinctheroes",
+  icon,
 };
- 
-const price = NEAR.parse("1 N").toJSON();
+
+const size = 2000;
 
 const sale: tenk.Sale = {
-  // is_premint_over: true,
-  // initial_royalties: {
-  //   percent: 10_000,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 1_500,
-  //     "kokumo.near": 8_500,
-  //   },
-  // },
-  // royalties: {
-  //   percent: 690,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 2500,
-  //     "kukumo.near": 2900,
-  //     "clownpoop.near": 2300,
-  //     "supermariorpg.near": 2300,
-  //   },
-  // },
-};
+  presale_start: Date.parse("03 Mar 2022 18:00 UTC"),
+  public_sale_start: Date.parse("04 Mar 2022 17:00 UTC"),
+  price: NEAR.parse("5 N").toJSON(),
 
+  // is_premint_over: true,
+  initial_royalties: {
+    percent: 10_000,
+    accounts: {
+      "tenk.sputnik-dao.near": 2_000,
+      "neh.sputnik-dao.near": 5_000,
+      "anthonypacheco.near": 2_000,
+      "isaacwilson.near": 1_000,
+    },
+  },
+  royalties: {
+    percent: 800,
+    accounts: {
+      "tenk.sputnik-dao.near": 2_000,
+      "neh.sputnik-dao.near": 5_000,
+      "anthonypacheco.near": 2_000,
+      "isaacwilson.near": 1_000,
+    },
+  },
+};
 
 export async function main({ account, nearAPI, argv, near }: Context) {
   let { Account } = nearAPI;
@@ -48,9 +55,8 @@ export async function main({ account, nearAPI, argv, near }: Context) {
   const initialArgs = {
     owner_id: account.accountId,
     metadata,
-    size: 100,
+    size,
     sale,
-    price,
   };
 
   const contract = new tenk.Contract(account, contractId);

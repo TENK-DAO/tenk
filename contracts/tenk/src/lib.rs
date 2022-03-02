@@ -287,8 +287,7 @@ impl Contract {
         self.nft_mint_many(1)[0].clone()
     }
 
-    #[payable]
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+    fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -405,7 +404,7 @@ impl Contract {
 
     pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
         let sale_info = self.get_sale_info();
-        let remaining_allowance = if self.is_presale() || self.sale.allowance.is_some() {
+        let remaining_allowance = if self.has_allowance() {
             self.remaining_allowance(account_id)
         } else {
             None
