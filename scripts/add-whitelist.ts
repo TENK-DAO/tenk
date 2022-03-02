@@ -38,8 +38,13 @@ export async function main({ account, argv }: Context) {
     let notInWl = new Set<string>();
     await Promise.all(
       account_ids.map(async (account_id) => {
-        if (!(await isWhitelisted(contract, account_id))) {
-          notInWl.add(account_id);
+        try {
+          if (!(await isWhitelisted(contract, account_id))) {
+            notInWl.add(account_id);
+          }
+
+        }catch(e) {
+          console.error(`issue with account: ${account_id}`);
         }
       })
     );
@@ -63,7 +68,7 @@ function filter_accounts(raw_account_ids: string[]): string[] {
     (id) => !valid_account_id.test(id)
   );
   if (invalid_account_ids.length > 0) {
-    console.log(`invalid Ids ${invalid_account_ids}`);
+    console.log(`invalid Ids "${invalid_account_ids}"`);
   }
   return account_ids.filter((id) => valid_account_id.test(id));
 }
