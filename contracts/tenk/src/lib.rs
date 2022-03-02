@@ -9,10 +9,14 @@ use near_sdk::{
     collections::{LazyOption, LookupMap},
     env, ext_contract,
     json_types::{Base64VecU8, U128},
-    log, near_bindgen, require, witgen, AccountId, Balance, BorshStorageKey, Duration, Gas,
+    log, near_bindgen, require, witgen, AccountId, Balance, BorshStorageKey, Gas,
     PanicOnDefault, Promise, PromiseOrValue, PublicKey,
 };
 use near_units::{parse_gas, parse_near};
+
+/// milliseconds elapsed since the UNIX epoch
+#[witgen]
+type TimestampMs = u64;
 
 pub mod linkdrop;
 pub mod payout;
@@ -112,8 +116,8 @@ impl From<InitialMetadata> for NFTContractMetadata {
 pub struct Sale {
     royalties: Option<Royalties>,
     initial_royalties: Option<Royalties>,
-    presale_start: Option<Duration>,
-    public_sale_start: Option<Duration>,
+    presale_start: Option<TimestampMs>,
+    public_sale_start: Option<TimestampMs>,
     allowance: Option<u32>,
     presale_price: Option<U128>,
     price: U128,
@@ -204,7 +208,7 @@ impl Contract {
 
     pub fn start_presale(
         &mut self,
-        public_sale_start: Option<Duration>,
+        public_sale_start: Option<TimestampMs>,
         presale_price: Option<U128>,
     ) {
         #[cfg(not(feature = "testnet"))]
@@ -578,7 +582,7 @@ impl Contract {
     }
 }
 
-fn current_time_ms() -> Duration {
+fn current_time_ms() -> TimestampMs {
     env::block_timestamp() / 1_000_000
 }
 
@@ -614,9 +618,9 @@ pub struct SaleInfo {
     /// Current state of contract
     status: Status,
     /// Start of the VIP sale
-    presale_start: Duration,
+    presale_start: TimestampMs,
     /// Start of public sale
-    sale_start: Duration,
+    sale_start: TimestampMs,
     /// Total tokens that could be minted
     token_final_supply: u64,
     /// Current price for one token

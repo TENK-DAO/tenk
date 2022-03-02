@@ -140,6 +140,26 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_tokens = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_tokens", args, options);
     };
+    Contract.prototype.start_presale = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.start_presaleRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.start_presaleRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "start_presale", args: args }, options));
+    };
+    Contract.prototype.start_presaleTx = function (args, options) {
+        var _a, _b;
+        return near_api_js_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+    };
     Contract.prototype.nft_token = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_token", args, options);
     };
@@ -364,26 +384,6 @@ var Contract = /** @class */ (function () {
     Contract.prototype.newTx = function (args, options) {
         var _a, _b;
         return near_api_js_1.transactions.functionCall("new", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
-    };
-    Contract.prototype.start_presale = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.start_presaleRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.start_presaleRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "start_presale", args: args }, options));
-    };
-    Contract.prototype.start_presaleTx = function (args, options) {
-        var _a, _b;
-        return near_api_js_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
     };
     Contract.prototype.token_storage_cost = function (args, options) {
         if (args === void 0) { args = {}; }

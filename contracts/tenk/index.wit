@@ -17,7 +17,8 @@ type base64-vec-u8 = string
 ///  Raw type for duration in nanoseconds
 type duration = u64
 
-type u128 = string
+///  @pattern ^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$
+type account-id = string
 
 ///  Public key in a binary format with base58 string serialization with human-readable curve.
 ///  The key types currently supported are `secp256k1` and `ed25519`.
@@ -104,16 +105,6 @@ whitelisted: function(account-id: account-id) -> bool
 get-sale-info: function() -> sale-info
 
 
-record sale {
-    royalties: option<royalties>,
-	initial-royalties: option<royalties>,
-	presale-start: option<duration>,
-	public-sale-start: option<duration>,
-	allowance: option<u32>,
-	presale-price: option<u128>,
-	price: u128
-}
-
 cost-per-token: function(minter: account-id) -> u128
 
 
@@ -137,6 +128,9 @@ variant status {
 
 nft-tokens: function(from-index: option<u128>, limit: option<u64>) -> list<token>
 
+
+///  change
+start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>)
 
 nft-token: function(token-id: token-id) -> option<token>
 
@@ -163,6 +157,20 @@ nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approva
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
 
+///  Information about the current sale
+record sale-info {
+    ///  Current state of contract
+	status: status,
+	///  Start of the VIP sale
+	presale-start: timestamp-ms,
+	///  Start of public sale
+	sale-start: timestamp-ms,
+	///  Total tokens that could be minted
+	token-final-supply: u64,
+	///  Current price for one token
+	price: u128
+}
+
 ///  change
 nft-transfer-payout: function(receiver-id: account-id, token-id: string, approval-id: option<u64>, memo: option<string>, balance: u128, max-len-payout: option<u32>) -> payout
 
@@ -185,28 +193,14 @@ record initial-metadata {
 ///  change
 create-linkdrop: function(public-key: public-key)
 
-///  Information about the current sale
-record sale-info {
-    ///  Current state of contract
-	status: status,
-	///  Start of the VIP sale
-	presale-start: duration,
-	///  Start of public sale
-	sale-start: duration,
-	///  Total tokens that could be minted
-	token-final-supply: u64,
-	///  Current price for one token
-	price: u128
-}
-
 ///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
 ///  change
 new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale)
 
-///  change
-start-presale: function(public-sale-start: option<duration>, presale-price: option<u128>)
+///  milliseconds elapsed since the UNIX epoch
+type timestamp-ms = u64
 
 token-storage-cost: function() -> u128
 
@@ -234,6 +228,16 @@ nft-revoke: function(token-id: token-id, account-id: account-id)
 
 nft-metadata: function() -> nft-contract-metadata
 
+
+record sale {
+    royalties: option<royalties>,
+	initial-royalties: option<royalties>,
+	presale-start: option<timestamp-ms>,
+	public-sale-start: option<timestamp-ms>,
+	allowance: option<u32>,
+	presale-price: option<u128>,
+	price: u128
+}
 
 nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
 
