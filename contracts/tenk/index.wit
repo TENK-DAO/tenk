@@ -104,16 +104,6 @@ whitelisted: function(account-id: account-id) -> bool
 get-sale-info: function() -> sale-info
 
 
-record sale {
-    royalties: option<royalties>,
-	initial-royalties: option<royalties>,
-	presale-start: option<duration>,
-	public-sale-start: option<duration>,
-	allowance: option<u32>,
-	presale-price: option<u128>,
-	price: u128
-}
-
 cost-per-token: function(minter: account-id) -> u128
 
 
@@ -232,7 +222,21 @@ new-default-meta: function(owner-id: account-id, metadata: initial-metadata, siz
 ///  change
 nft-revoke: function(token-id: token-id, account-id: account-id)
 
+record sale {
+    royalties: option<royalties>,
+	initial-royalties: option<royalties>,
+	presale-start: option<duration>,
+	public-sale-start: option<duration>,
+	allowance: option<u32>,
+	presale-price: option<u128>,
+	price: u128,
+	mint-rate-limit: option<u32>
+}
+
 nft-metadata: function() -> nft-contract-metadata
+
+
+mint-rate-limit: function() -> option<u32>
 
 
 nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool

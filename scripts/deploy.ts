@@ -13,6 +13,10 @@ const metadata: tenk.InitialMetadata = {
 const price = NEAR.parse("1 N").toJSON();
 
 const sale: tenk.Sale = {
+  price,
+  mint_rate_limit: 3,
+  public_sale_start: Date.now(),
+  // public_sale_start: Date.now() + 1000 * 3600,
   // is_premint_over: true,
   // initial_royalties: {
   //   percent: 10_000,

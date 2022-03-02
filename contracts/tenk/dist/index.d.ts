@@ -105,15 +105,6 @@ export interface NftContractMetadata {
     reference?: string;
     reference_hash?: Base64VecU8;
 }
-export interface Sale {
-    royalties?: Royalties;
-    initial_royalties?: Royalties;
-    presale_start?: Duration;
-    public_sale_start?: Duration;
-    allowance?: number;
-    presale_price?: U128;
-    price: U128;
-}
 /**
 * Current state of contract
 */
@@ -121,19 +112,19 @@ export declare enum Status {
     /**
     * Not open for any sales
     */
-    Closed = 0,
+    Closed = "Closed",
     /**
     * VIP accounts can mint
     */
-    Presale = 1,
+    Presale = "Presale",
     /**
     * Any account can mint
     */
-    Open = 2,
+    Open = "Open",
     /**
     * No more tokens to be minted
     */
-    SoldOut = 3
+    SoldOut = "SoldOut"
 }
 export interface InitialMetadata {
     name: string;
@@ -168,6 +159,16 @@ export interface SaleInfo {
     * Current price for one token
     */
     price: U128;
+}
+export interface Sale {
+    royalties?: Royalties;
+    initial_royalties?: Royalties;
+    presale_start?: Duration;
+    public_sale_start?: Duration;
+    allowance?: number;
+    presale_price?: U128;
+    price: U128;
+    mint_rate_limit?: number;
 }
 export declare type BasisPoint = number;
 /**
@@ -460,6 +461,7 @@ export declare class Contract {
         account_id: AccountId;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
+    mint_rate_limit(args?: {}, options?: ViewFunctionOptions): Promise<number | null>;
     nft_is_approved(args: {
         token_id: TokenId;
         approved_account_id: AccountId;

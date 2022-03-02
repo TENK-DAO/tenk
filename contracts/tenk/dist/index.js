@@ -61,19 +61,19 @@ var Status;
     /**
     * Not open for any sales
     */
-    Status[Status["Closed"] = 0] = "Closed";
+    Status["Closed"] = "Closed";
     /**
     * VIP accounts can mint
     */
-    Status[Status["Presale"] = 1] = "Presale";
+    Status["Presale"] = "Presale";
     /**
     * Any account can mint
     */
-    Status[Status["Open"] = 2] = "Open";
+    Status["Open"] = "Open";
     /**
     * No more tokens to be minted
     */
-    Status[Status["SoldOut"] = 3] = "SoldOut";
+    Status["SoldOut"] = "SoldOut";
 })(Status = exports.Status || (exports.Status = {}));
 var Contract = /** @class */ (function () {
     function Contract(account, contractId) {
@@ -482,6 +482,10 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_metadata = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
+    };
+    Contract.prototype.mint_rate_limit = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
     };
     Contract.prototype.nft_is_approved = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_is_approved", args, options);
