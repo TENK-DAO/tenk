@@ -106,38 +106,56 @@ whitelisted: function(account-id: account-id) -> bool
 get-sale-info: function() -> sale-info
 
 
+///  Revoke all approved accounts for a specific token.
+/// 
+///  Requirements
+///  * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+///    purposes
+///  * If contract requires >1yN deposit on `nft_approve`, contract
+///    MUST refund all associated storage deposit when owner revokes approvals
+///  * Contract MUST panic if called by someone other than token owner
+/// 
+///  Arguments:
+///  * `token_id`: the token with approvals to revoke
+///  change
+nft-revoke-all: function(token-id: token-id)
+
 cost-per-token: function(minter: account-id) -> u128
 
 
 ///  change
 transfer-ownership: function(new-owner: account-id)
 
-nft-total-supply: function() -> u128
-
-
-///  Current state of contract
-variant status {
-    ///  Not open for any sales
-	closed,
-	///  VIP accounts can mint
-	presale,
-	///  Any account can mint
-	open,
-	///  No more tokens to be minted
-	sold-out,
-}
-
-nft-tokens: function(from-index: option<u128>, limit: option<u64>) -> list<token>
-
-
-nft-token: function(token-id: token-id) -> option<token>
-
+///  change
+start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>)
 
 ///  change
 close-contract: function()
 
+///  Simple transfer. Transfer a given `token_id` from current owner to
+///  `receiver_id`.
+/// 
+///  Requirements
+///  * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
+///  * Contract MUST panic if called by someone other than token owner or,
+///    if using Approval Management, one of the approved accounts
+///  * `approval_id` is for use with Approval Management,
+///    see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
+///  * If using Approval Management, contract MUST nullify approved accounts on
+///    successful transfer.
+///  * TODO: needed? Both accounts must be registered with the contract for transfer to
+///    succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
+/// 
+///  Arguments:
+///  * `receiver_id`: the valid NEAR account receiving the token
+///  * `token_id`: the token to transfer
+///  * `approval_id`: expected approval ID. A number smaller than
+///     2^53, and therefore representable as JSON. See Approval Management
+///     standard for full explanation.
+///  * `memo` (optional): for use cases that may benefit from indexing or
+///     providing information for a transfer
 ///  change
-nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
+nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>)
 
 ///  change
 start-sale: function(price: option<u128>)
@@ -146,68 +164,182 @@ start-sale: function(price: option<u128>)
 nft-mint-many: function(num: u32) -> list<token>
 
 
+///  Check if a token is approved for transfer by a given account, optionally
+///  checking an approval_id
+/// 
+///  Arguments:
+///  * `token_id`: the token for which to revoke an approval
+///  * `approved_account_id`: the account to check the existence of in `approvals`
+///  * `approval_id`: an optional approval ID to check against current approval ID for given account
+/// 
+///  Returns:
+///  if `approval_id` given, `true` if `approved_account_id` is approved with given `approval_id`
+///  otherwise, `true` if `approved_account_id` is in list of approved accounts
+nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
+
+
+///  Current state of contract
+enum status {
+    ///  Not open for any sales
+    closed,
+    ///  VIP accounts can mint
+    presale,
+    ///  Any account can mint
+    open,
+    ///  No more tokens to be minted
+    sold-out,
+}
+
+
 ///  change
 update-uri: function(uri: string)
 
-///  change
-nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>, msg: string)
-
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
+
+///  Get a list of all tokens
+/// 
+///  Arguments:
+///  * `from_index`: a string representing an unsigned 128-bit integer,
+///     representing the starting index of tokens to return. (default 0)
+///  * `limit`: the maximum number of tokens to return (default total supply)
+///             Could fail on gas
+/// 
+///  Returns an array of Token objects, as described in Core standard
+nft-tokens: function(from-index: option<u128>, limit: option<u64>) -> list<token>
+
+
+///  Transfer token and call a method on a receiver contract. A successful
+///  workflow will end in a success execution outcome to the callback on the NFT
+///  contract at the method `nft_resolve_transfer`.
+/// 
+///  You can think of this as being similar to attaching native NEAR tokens to a
+///  function call. It allows you to attach any Non-Fungible Token in a call to a
+///  receiver contract.
+/// 
+///  Requirements:
+///  * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+///    purposes
+///  * Contract MUST panic if called by someone other than token owner or,
+///    if using Approval Management, one of the approved accounts
+///  * The receiving contract must implement `ft_on_transfer` according to the
+///    standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
+///    with the resulting failed cross-contract call and roll back the transfer.
+///  * Contract MUST implement the behavior described in `ft_resolve_transfer`
+///  * `approval_id` is for use with Approval Management extension, see
+///    that document for full explanation.
+///  * If using Approval Management, contract MUST nullify approved accounts on
+///    successful transfer.
+/// 
+///  Arguments:
+///  * `receiver_id`: the valid NEAR account receiving the token.
+///  * `token_id`: the token to send.
+///  * `approval_id`: expected approval ID. A number smaller than
+///     2^53, and therefore representable as JSON. See Approval Management
+///     standard for full explanation.
+///  * `memo` (optional): for use cases that may benefit from indexing or
+///     providing information for a transfer.
+///  * `msg`: specifies information needed by the receiving contract in
+///     order to properly handle the transfer. Can indicate both a function to
+///     call and the parameters to pass to that function.
+///  change
+nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>, msg: string)
 
 ///  change
 nft-transfer-payout: function(receiver-id: account-id, token-id: string, approval-id: option<u64>, memo: option<string>, balance: u128, max-len-payout: option<u32>) -> payout
 
 
+///  Information about the current sale from user perspective
+record user-sale-info {
+    sale-info: sale-info,
+    is-vip: bool,
+    remaining-allowance: option<u32>
+}
+
 ///  Returns the balance associated with given key.
 get-key-balance: function() -> u128
 
 
-record initial-metadata {
-    name: string,
-	symbol: string,
-	uri: string,
-	icon: option<string>,
-	spec: option<string>,
-	reference: option<string>,
-	reference-hash: option<base64-vec-u8>
-}
+///  Revoke an approved account for a specific token.
+/// 
+///  Requirements
+///  * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+///    purposes
+///  * If contract requires >1yN deposit on `nft_approve`, contract
+///    MUST refund associated storage deposit when owner revokes approval
+///  * Contract MUST panic if called by someone other than token owner
+/// 
+///  Arguments:
+///  * `token_id`: the token for which to revoke an approval
+///  * `account_id`: the account to remove from `approvals`
+///  change
+nft-revoke: function(token-id: token-id, account-id: account-id)
 
 ///  Create a pending token that can be claimed with corresponding private key
 ///  change
 create-linkdrop: function(public-key: public-key)
 
-///  Information about the current sale
-record sale-info {
-    ///  Current state of contract
-	status: status,
-	///  Start of the VIP sale
-	presale-start: duration,
-	///  Start of public sale
-	sale-start: duration,
-	///  Total tokens that could be minted
-	token-final-supply: u64,
-	///  Current price for one token
-	price: u128
+record royalties {
+    accounts: list<tuple<account-id,basis-point>>,
+    percent: basis-point
 }
 
 ///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
+///  Returns the token with the given `token_id` or `null` if no such token.
+nft-token: function(token-id: token-id) -> option<token>
+
+
+record sale {
+    royalties: option<royalties>,
+    initial-royalties: option<royalties>,
+    presale-start: option<timestamp-ms>,
+    public-sale-start: option<timestamp-ms>,
+    allowance: option<u32>,
+    presale-price: option<u128>,
+    price: u128,
+    mint-rate-limit: option<u32>
+}
+
 ///  change
 new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale)
 
-///  change
-start-presale: function(public-sale-start: option<duration>, presale-price: option<u128>)
+///  Returns the total supply of non-fungible tokens as a string representing an
+///  unsigned 128-bit integer to avoid JSON number limit of 2^53.
+nft-total-supply: function() -> u128
+
+
+///  milliseconds elapsed since the UNIX epoch
+type timestamp-ms = u64
 
 token-storage-cost: function() -> u128
 
 
+///  Add an approved account for a specific token.
+/// 
+///  Requirements
+///  * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
+///    security purposes
+///  * Contract MAY require caller to attach larger deposit, to cover cost of
+///    storing approver data
+///  * Contract MUST panic if called by someone other than token owner
+///  * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
+///    single-block gas limit
+///  * Contract MUST increment approval ID even if re-approving an account
+///  * If successfully approved or if had already been approved, and if `msg` is
+///    present, contract MUST call `nft_on_approve` on `account_id`. See
+///    `nft_on_approve` description below for details.
+/// 
+///  Arguments:
+///  * `token_id`: the token for which to add an approval
+///  * `account_id`: the account to add to `approvals`
+///  * `msg`: optional string to be passed to `nft_on_approve`
+/// 
+///  Returns void, if no `msg` given. Otherwise, returns promise call to
+///  `nft_on_approve`, which can resolve with whatever it wants.
 ///  change
-nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>)
-
-///  change
-nft-revoke-all: function(token-id: token-id)
+nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
 
 cost-of-linkdrop: function(minter: account-id) -> u128
 
@@ -221,19 +353,16 @@ get-linkdrop-contract: function() -> account-id
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)
 
-///  change
-nft-revoke: function(token-id: token-id, account-id: account-id)
+///  Get number of tokens owned by a given account
+/// 
+///  Arguments:
+///  * `account_id`: a valid NEAR account
+/// 
+///  Returns the number of non-fungible tokens owned by given `account_id` as
+///  a string representing the value as an unsigned 128-bit integer to avoid JSON
+///  number limit of 2^53.
+nft-supply-for-owner: function(account-id: account-id) -> u128
 
-record sale {
-    royalties: option<royalties>,
-	initial-royalties: option<royalties>,
-	presale-start: option<duration>,
-	public-sale-start: option<duration>,
-	allowance: option<u32>,
-	presale-price: option<u128>,
-	price: u128,
-	mint-rate-limit: option<u32>
-}
 
 nft-metadata: function() -> nft-contract-metadata
 
@@ -241,10 +370,30 @@ nft-metadata: function() -> nft-contract-metadata
 mint-rate-limit: function() -> option<u32>
 
 
-nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
-
-
 remaining-allowance: function(account-id: account-id) -> option<u32>
+
+
+record initial-metadata {
+    name: string,
+    symbol: string,
+    uri: string,
+    icon: option<string>,
+    spec: option<string>,
+    reference: option<string>,
+    reference-hash: option<base64-vec-u8>
+}
+
+///  Get list of all tokens owned by a given account
+/// 
+///  Arguments:
+///  * `account_id`: a valid NEAR account
+///  * `from_index`: a string representing an unsigned 128-bit integer,
+///     representing the starting index of tokens to return. (default 0)
+///  * `limit`: the maximum number of tokens to return. (default unlimited)
+///             Could fail on gas
+/// 
+///  Returns a paginated list of all tokens owned by this account
+nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>, limit: option<u64>) -> list<token>
 
 
 ///  change
@@ -254,20 +403,27 @@ nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadat
 get-user-sale-info: function(account-id: account-id) -> user-sale-info
 
 
+initial: function() -> u64
+
+
 type basis-point = u16
 
-nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>, limit: option<u64>) -> list<token>
-
+///  Information about the current sale
+record sale-info {
+    ///  Current state of contract
+    status: status,
+    ///  Start of the VIP sale
+    presale-start: timestamp-ms,
+    ///  Start of public sale
+    sale-start: timestamp-ms,
+    ///  Total tokens that could be minted
+    token-final-supply: u64,
+    ///  Current price for one token
+    price: u128
+}
 
 ///  change
 add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
-
-///  Information about the current sale from user perspective
-record user-sale-info {
-    sale-info: sale-info,
-	is-vip: bool,
-	remaining-allowance: option<u32>
-}
 
 ///  Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 ///  A mapping of NEAR accounts to the amount each should be paid out, in
@@ -283,18 +439,10 @@ record payout {
 tokens-left: function() -> u32
 
 
-nft-supply-for-owner: function(account-id: account-id) -> u128
-
-
 ///  change
 update-royalties: function(royalties: royalties)
 
 ///  change
 nft-mint-one: function() -> token
 
-
-record royalties {
-    accounts: list<tuple<account-id,basis-point>>,
-	percent: basis-point
-}
 

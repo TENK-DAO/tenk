@@ -594,7 +594,7 @@ dependencies = [
 [[package]]
 name = "near-contract-standards"
 version = "4.0.0-pre.7"
-source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-3#16e7d11211eac57891e478fe3e2a32ac764695d5"
 dependencies = [
  "near-sdk",
  "serde",
@@ -707,7 +707,7 @@ dependencies = [
 [[package]]
 name = "near-sdk"
 version = "4.0.0-pre.7"
-source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-3#16e7d11211eac57891e478fe3e2a32ac764695d5"
 dependencies = [
  "base64 0.13.0",
  "borsh",
@@ -725,7 +725,7 @@ dependencies = [
 [[package]]
 name = "near-sdk-macros"
 version = "4.0.0-pre.7"
-source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-3#16e7d11211eac57891e478fe3e2a32ac764695d5"
 dependencies = [
  "Inflector",
  "proc-macro2",
@@ -737,7 +737,7 @@ dependencies = [
 [[package]]
 name = "near-sys"
 version = "0.1.0"
-source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-0#3a97b9d52fb2e0e0f3c32690431fe34b1db69f28"
+source = "git+https://github.com/ahalabs/near-sdk-rs?tag=v4.0.0-3#16e7d11211eac57891e478fe3e2a32ac764695d5"
 
 [[package]]
 name = "near-units"
@@ -1292,7 +1292,6 @@ dependencies = [
  "near-units",
  "rand 0.7.3",
  "rand_xorshift",
- "serde",
  "serde_with",
 ]
 
@@ -1477,18 +1476,18 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "witgen"
-version = "0.8.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fb6ea862a037f2defb41f102b8d0517dc62c01e6d67515b55ca2144776724efa"
+checksum = "e967df776cfc6310303833e71cc73cb20e32dea6dc8bcde2ac7b22d2146a02e6"
 dependencies = [
  "witgen_macro",
 ]
 
 [[package]]
 name = "witgen_macro"
-version = "0.8.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "39c3016f4812de9bb88543ea83eb1d5fef408536af5fb5afbfdea6c5dd6c1ae7"
+checksum = "49c8451e26458ad7f5586f897f4ac2163dafc7272ae4d9e2cdcaae5aab9e45f6"
 dependencies = [
  "anyhow",
  "once_cell",
@@ -1499,9 +1498,9 @@ dependencies = [
 
 [[package]]
 name = "witgen_macro_helper"
-version = "0.8.0"
+version = "0.11.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "589922be3f51356b42c4a74f8c24f6b6301229fb63b35dd7bfe06cbe89d667dd"
+checksum = "7da7073d93878632e47f9f56dbd41531c66180ad77439f8f32727c03d830c462"
 dependencies = [
  "anyhow",
  "cargo_metadata",
