@@ -134,6 +134,13 @@ near repl -s ./scripts/update_royalties.ts --accountId owner.testnet -- contract
 
 This makes it easy to create your own near scripts, while still getting the benefit of type checking parameters.
 
+## Uploading Assets
+
+1. Have `NFT_STORAGE_API_TOKEN` env var set to api key from https://nft.storage
+1. Have assets numbered `0-x` with matching names `0.png` `0.json` in all in the same directory. E.g. `dir/0.png` `dir/0.json`.
+1. Pack assets with `yarn pack-car --pack <dir> --output nfts.car`
+1. Upload to nft.storage with `yarn upload-car nfts.car`
+
 ## Aspects of Near that prevents hacks on this method of minting
 
 Here is [one example](https://cointelegraph.com/news/85-million-meebits-nft-project-exploited-attacker-nabs-700-000-collectible) of a "hack" that stole $85 million worth of nfts minted in a similar fasion. The "attacker" was able to map the NFT's id (our index) to its worth (its rarity). Then made a contract that made a cross contract call to mint an NFT, then canceling the transaction if it's not rare enough.  Though this cost the "attacker" $20K fees per hour, they were able to see the rare items and reap the reward.
