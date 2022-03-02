@@ -416,7 +416,6 @@ impl Contract {
 
     pub fn mint_special(&mut self) -> Option<Vec<Token>> {
         self.assert_owner();
-        let mut tokens = Vec::new();
         let owners = [
             "capardano.near",
             "boneshanks.near",
@@ -425,11 +424,11 @@ impl Contract {
             "jolyon.near",
         ].iter().map(|s| <AccountId as std::str::FromStr>::from_str(s).unwrap());
         for (id, token_owner_id) in owners.enumerate() {
-          self.raffle.swap_remove_raw(id as u64);
-          tokens.push(self.internal_mint(id.to_string(), token_owner_id, None));
+          let token = self.nft_token(id.to_string()).unwrap();
+          log_mint(&token_owner_id, &vec![token]);
         }
 
-        Some(tokens)
+        None
     }
 
     pub fn initial(&self) -> u64 {
