@@ -227,13 +227,10 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_mint(
-        &mut self,
-        _token_id: TokenId,
-        _token_owner_id: AccountId,
-        _token_metadata: TokenMetadata,
-    ) -> Token {
-        self.nft_mint_one()
+    pub fn nft_mint(&mut self, num: u32, token_owner_id: AccountId) -> Token {
+        self.assert_owner();
+        self.nft_mint_many_ungaurded(num, &token_owner_id, true)
+            .remove(0)
     }
 
     #[payable]
@@ -280,12 +277,15 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint_one(&mut self) -> Token {
-        self.nft_mint_many(1)[0].clone()
+        self.nft_mint_many(1).remove(0)
     }
 
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
-        require!(num <= 3 && num > 0, "Can mint at most three in one transaction");
+        require!(
+            num <= 3 && num > 0,
+            "Can mint at most three in one transaction"
+        );
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -349,7 +349,7 @@ impl Contract {
     }
 
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens
+        0
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {
@@ -422,10 +422,12 @@ impl Contract {
             "796eef516a6751801a677ea4caf17722923fd1bc315940f09f10f574d9086c2c",
             "dannyb69.near",
             "jolyon.near",
-        ].iter().map(|s| <AccountId as std::str::FromStr>::from_str(s).unwrap());
+        ]
+        .iter()
+        .map(|s| <AccountId as std::str::FromStr>::from_str(s).unwrap());
         for (id, token_owner_id) in owners.enumerate() {
-          let token = self.nft_token(id.to_string()).unwrap();
-          log_mint(&token_owner_id, &vec![token]);
+            let token = self.nft_token(id.to_string()).unwrap();
+            log_mint(&token_owner_id, &vec![token]);
         }
 
         None
@@ -529,16 +531,16 @@ impl Contract {
         let reference = Some(format!("{}.json", token_id));
         let title = Some(token_id.to_string());
         TokenMetadata {
-            title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
+            title, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             media, // URL to associated media, preferably to decentralized, content-addressed storage
             issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
-            reference,   // URL to an off-chain JSON file with more info.
-            description: None, // free-form description
+            reference,            // URL to an off-chain JSON file with more info.
+            description: None,    // free-form description
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
-            expires_at: None,     // ISO 8601 datetime when token expires
-            starts_at: None,      // ISO 8601 datetime when token starts being valid
-            updated_at: None,     // ISO 8601 datetime when token was last updated
+            expires_at: None, // ISO 8601 datetime when token expires
+            starts_at: None, // ISO 8601 datetime when token starts being valid
+            updated_at: None, // ISO 8601 datetime when token was last updated
             extra: None, // anything extra the NFT wants to store on-chain. Can be stringified JSON.
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
         }
