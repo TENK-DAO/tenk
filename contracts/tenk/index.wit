@@ -1,6 +1,9 @@
 // This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.1.0) 
 
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.0.2) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.9.0) 
+
+///  @pattern ^[0-9]+$
+type u128 = string
 
 ///  StorageUsage is used to count the amount of storage used by a contract.
 type storage-usage = u64
@@ -26,12 +29,10 @@ type account-id = string
 ///  Ed25519 public keys accepted are 32 bytes and secp256k1 keys are the uncompressed 64 format.
 type public-key = string
 
-type account-id = string
-
 ///  Raw type for timestamp in nanoseconds
 type timestamp = u64
 
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.0.2) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.9.0) 
 
 record storage-balance-bounds {
     min: u128,
@@ -143,10 +144,6 @@ nft-approve: function(token-id: token-id, account-id: account-id, msg: option<st
 
 ///  change
 start-sale: function(price: option<u128>)
-
-///  change
-nft-mint-many: function(num: u32) -> list<token>
-
 
 ///  change
 update-uri: function(uri: string)

@@ -13,7 +13,7 @@
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
     "test:linkdrop": "yarn test:testnet '*/linkdrop/*'",
     "deploy:testnet": "yarn build:testnet && near repl -s ./scripts/deploy.ts",
-    "deploy": "yarn build && near repl -s ./scripts/deploy.ts",
+    "deploy": "yarn build && NEAR_ENV=mainnet near repl -s ./scripts/deploy.ts",
     "createKeys": "ts-node ./scripts/create-keys.ts",
     "createLinkUrls": "ts-node ./scripts/create-linkdrops-urls.ts",
     "createLinkdrops": "near repl -s ./scripts/create-linkdrops.ts",
@@ -21,7 +21,7 @@
     "test:unit": "cargo test",
     "test:ci": "yarn test:unit && yarn test",
     "lint": "yarn eslint . --ext .ts",
-    "wit": "(cd contracts/tenk; witme wit -t ts/ --standards && tsc)",
+    "wit": "(cd contracts/tenk; witme near wit -t ts/ --standards && tsc)",
     "docs": "yarn wit && typedoc contracts/tenk/ts/index.ts --tsconfig contracts/tenk/tsconfig.json",
     "pack-car": "ipfs-car --wrapWithDirectory false",
     "upload-car": "ts-node ./scripts/car-uploader.ts"

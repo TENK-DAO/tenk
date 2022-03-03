@@ -461,7 +461,8 @@ impl Contract {
             let allowance = match self.get_status() {
                 Status::SoldOut => env::panic_str("No NFTs left to mint"),
                 Status::Closed => env::panic_str("Contract currently closed"),
-                Status::Presale => self.get_whitelist_allowance(account_id),
+                Status::Presale if self.tokens_left() >= 760 => self.get_whitelist_allowance(account_id),
+                Status::Presale => env::panic_str("No tokens left to meant during the presale"),
                 Status::Open => self.get_or_add_whitelist_allowance(account_id, num),
             };
             num = u32::min(allowance, num);

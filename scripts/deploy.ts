@@ -6,7 +6,7 @@ import { binPath } from "./utils";
 import { icon } from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri,
+  uri: "https://bafybeifry66qavug4hbo2kaa5brsltcr73yeax4b6sstf2dbrlr2kj6gj4.ipfs.dweb.link",
   name: "NEAR Extinct Heroes",
   symbol: "extinctheroes",
   icon,
@@ -16,10 +16,10 @@ const size = 2000;
 
 const sale: tenk.Sale = {
   presale_start: Date.parse("03 Mar 2022 18:00 UTC"),
-  public_sale_start: Date.parse("04 Mar 2022 17:00 UTC"),
+  public_sale_start: Date.parse("04 Mar 2022 18:00 UTC"),
   price: NEAR.parse("5 N").toJSON(),
 
-  // is_premint_over: true,
+  allowance: 6,
   initial_royalties: {
     percent: 10_000,
     accounts: {

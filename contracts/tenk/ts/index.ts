@@ -25,6 +25,7 @@ type u64 = number;
 * @asType integer
 */
 type i64 = number;
+
 /**
 * @minimum  0 
 * @maximum 255
@@ -196,19 +197,19 @@ export enum Status {
   /**
   * Not open for any sales
   */
-  Closed = 0,
+  Closed = "Closed",
   /**
   * VIP accounts can mint
   */
-  Presale = 1,
+  Presale = "Presale",
   /**
   * Any account can mint
   */
-  Open = 2,
+  Open = "Open",
   /**
   * No more tokens to be minted
   */
-  SoldOut = 3,
+  SoldOut = "SoldOut",
 }
 /**
 * Information about the current sale
@@ -314,7 +315,8 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<boolean> {
     return this.account.viewFunction(this.contractId, "whitelisted", args, options);
   }
-  get_sale_info(args: {} = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
+  get_sale_info(args: {
+  } = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
     return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
   }
   cost_per_token(args: {
@@ -337,7 +339,8 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("transfer_ownership", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  nft_total_supply(args: {} = {}, options?: ViewFunctionOptions): Promise<U128> {
+  nft_total_supply(args: {
+  } = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "nft_total_supply", args, options);
   }
   nft_tokens(args: {
@@ -369,13 +372,16 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<Token | null> {
     return this.account.viewFunction(this.contractId, "nft_token", args, options);
   }
-  async close_contract(args: {} = {}, options?: ChangeMethodOptions): Promise<void> {
+  async close_contract(args: {
+  } = {}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.close_contractRaw(args, options));
   }
-  close_contractRaw(args: {} = {}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
+  close_contractRaw(args: {
+  } = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "close_contract", args, ...options});
   }
-  close_contractTx(args: {} = {}, options?: ChangeMethodOptions):  transactions.Action {
+  close_contractTx(args: {
+  } = {}, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("close_contract", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async nft_approve(args: {
@@ -414,21 +420,6 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async nft_mint_many(args: {
-    num: u32;
-  }, options?: ChangeMethodOptions): Promise<Token[]> {
-    return providers.getTransactionLastResult(await this.nft_mint_manyRaw(args, options));
-  }
-  nft_mint_manyRaw(args: {
-    num: u32;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "nft_mint_many", args, ...options});
-  }
-  nft_mint_manyTx(args: {
-    num: u32;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("nft_mint_many", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
   async update_uri(args: {
     uri: string;
   }, options?: ChangeMethodOptions): Promise<void> {
@@ -443,18 +434,6 @@ export class Contract {
     uri: string;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_uri", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  async mint_special(args: {
-  } = {}, options?: ChangeMethodOptions): Promise<Token[] | null> {
-    return providers.getTransactionLastResult(await this.mint_specialRaw(args, options));
-  }
-  mint_specialRaw(args: {
-  } = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "mint_special", args, ...options});
-  }
-  mint_specialTx(args: {
-  } = {}, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("mint_special", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async nft_transfer_call(args: {
     receiver_id: AccountId;
@@ -523,7 +502,8 @@ export class Contract {
   /**
   * Returns the balance associated with given key.
   */
-  get_key_balance(args: {} = {}, options?: ViewFunctionOptions): Promise<U128> {
+  get_key_balance(args: {
+  } = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "get_key_balance", args, options);
   }
   /**
@@ -646,7 +626,8 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "total_cost", args, options);
   }
-  get_linkdrop_contract(args: {} = {}, options?: ViewFunctionOptions): Promise<AccountId> {
+  get_linkdrop_contract(args: {
+  } = {}, options?: ViewFunctionOptions): Promise<AccountId> {
     return this.account.viewFunction(this.contractId, "get_linkdrop_contract", args, options);
   }
   async new_default_meta(args: {
@@ -691,7 +672,8 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_revoke", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  nft_metadata(args: {} = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
+  nft_metadata(args: {
+  } = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
     return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
   }
   nft_is_approved(args: {
@@ -732,10 +714,6 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<UserSaleInfo> {
     return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
   }
-  initial(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<u64> {
-    return this.account.viewFunction(this.contractId, "initial", args, options);
-  }
   nft_tokens_for_owner(args: {
     account_id: AccountId;
     from_index?: U128;
@@ -761,7 +739,8 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("add_whitelist_account_ungaurded", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  tokens_left(args: {} = {}, options?: ViewFunctionOptions): Promise<number> {
+  tokens_left(args: {
+  } = {}, options?: ViewFunctionOptions): Promise<u32> {
     return this.account.viewFunction(this.contractId, "tokens_left", args, options);
   }
   nft_supply_for_owner(args: {
@@ -784,13 +763,16 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async nft_mint_one(args: {} = {}, options?: ChangeMethodOptions): Promise<Token> {
+  async nft_mint_one(args: {
+  } = {}, options?: ChangeMethodOptions): Promise<Token> {
     return providers.getTransactionLastResult(await this.nft_mint_oneRaw(args, options));
   }
-  nft_mint_oneRaw(args: {} = {}, options?: ChangeMethodOptions):  Promise<providers.FinalExecutionOutcome> {
+  nft_mint_oneRaw(args: {
+  } = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "nft_mint_one", args, ...options});
   }
-  nft_mint_oneTx(args: {} = {}, options?: ChangeMethodOptions):  transactions.Action {
+  nft_mint_oneTx(args: {
+  } = {}, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_mint_one", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
 }
@@ -848,15 +830,8 @@ export interface StartSale {
   price?: U128;
 }
 /** @contractMethod change */
-export interface NftMintMany {
-  num: u32;
-}
-/** @contractMethod change */
 export interface UpdateUri {
   uri: string;
-}
-/** @contractMethod change */
-export interface MintSpecial {
 }
 /** @contractMethod change */
 export interface NftTransferCall {
@@ -960,9 +935,6 @@ export interface NftMint {
 /** @contractMethod view */
 export interface GetUserSaleInfo {
   account_id: AccountId;
-}
-/** @contractMethod view */
-export interface Initial {
 }
 /** @contractMethod view */
 export interface NftTokensForOwner {
