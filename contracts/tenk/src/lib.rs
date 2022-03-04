@@ -340,12 +340,11 @@ impl Contract {
     }
 
     pub fn cost_per_token(&self, minter: &AccountId) -> U128 {
-        let base_cost = if self.is_owner(minter) {
+        if self.is_owner(minter) {
             0
         } else {
             self.price()
-        };
-        (base_cost + self.token_storage_cost().0).into()
+        }.into()
     }
 
     pub fn token_storage_cost(&self) -> U128 {
@@ -365,7 +364,7 @@ impl Contract {
     }
 
     pub fn mint_rate_limit(&self) -> Option<u32> {
-      self.sale.mint_rate_limit
+        self.sale.mint_rate_limit
     }
 
     // Owner private methods
