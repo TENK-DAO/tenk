@@ -190,6 +190,14 @@ impl Contract {
         });
     }
 
+    pub fn update_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance_increase: u32) {
+      self.assert_owner();
+      accounts.iter().for_each(|account_id| {
+          let allowance = self.whitelist.get(&account_id).unwrap_or(0) + allowance_increase;
+          self.whitelist.insert(account_id, &allowance);
+      });
+  }
+
     pub fn whitelisted(&self, account_id: &AccountId) -> bool {
         self.whitelist.contains_key(account_id)
     }

@@ -420,6 +420,24 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  async update_whitelist_accounts(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_whitelist_accountsRaw(args, options));
+  }
+  update_whitelist_accountsRaw(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_whitelist_accounts", args, ...options});
+  }
+  update_whitelist_accountsTx(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   async update_uri(args: {
     uri: string;
   }, options?: ChangeMethodOptions): Promise<void> {
@@ -828,6 +846,11 @@ export interface NftApprove {
 /** @contractMethod change */
 export interface StartSale {
   price?: U128;
+}
+/** @contractMethod change */
+export interface UpdateWhitelistAccounts {
+  accounts: AccountId[];
+  allowance_increase: u32;
 }
 /** @contractMethod change */
 export interface UpdateUri {

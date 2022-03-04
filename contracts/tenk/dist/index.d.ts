@@ -318,6 +318,18 @@ export declare class Contract {
     start_saleTx(args: {
         price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
+    update_whitelist_accounts(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    update_whitelist_accountsRaw(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_whitelist_accountsTx(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): transactions.Action;
     update_uri(args: {
         uri: string;
     }, options?: ChangeMethodOptions): Promise<void>;
@@ -608,6 +620,11 @@ export interface NftApprove {
 /** @contractMethod change */
 export interface StartSale {
     price?: U128;
+}
+/** @contractMethod change */
+export interface UpdateWhitelistAccounts {
+    accounts: AccountId[];
+    allowance_increase: u32;
 }
 /** @contractMethod change */
 export interface UpdateUri {

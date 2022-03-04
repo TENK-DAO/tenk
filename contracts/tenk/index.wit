@@ -146,6 +146,9 @@ nft-approve: function(token-id: token-id, account-id: account-id, msg: option<st
 start-sale: function(price: option<u128>)
 
 ///  change
+update-whitelist-accounts: function(accounts: list<account-id>, allowance-increase: u32)
+
+///  change
 update-uri: function(uri: string)
 
 ///  change
