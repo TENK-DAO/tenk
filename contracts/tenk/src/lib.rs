@@ -359,7 +359,7 @@ impl Contract {
     }
 
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens - 1500
+        self.raffle.len() as u32 - self.pending_tokens - 1445
     }
 
     pub fn nft_metadata(&self) -> NFTContractMetadata {

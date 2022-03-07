@@ -9,8 +9,8 @@ export interface ChangeMethodOptions {
   walletCallbackUrl?: string;
 }
 export interface ViewFunctionOptions {
-  parse?: (response: Uint8Array) => any;
-  stringify?: (input: any) => any;
+  // parse?: (response: Uint8Array) => any;
+  // stringify?: (input: any) => any;
 }
 
 /** 
@@ -246,6 +246,13 @@ export interface InitialMetadata {
   reference_hash?: Base64VecU8;
 }
 /**
+* @minimum 0
+* @maximum 10000
+* @asType integer
+*/
+type BasisPoint = u16;
+export {BasisPoint};
+/**
 * milliseconds elapsed since the UNIX epoch
 */
 type TimestampMs = u64;
@@ -259,8 +266,6 @@ export interface Sale {
   presale_price?: U128;
   price: U128;
 }
-type BasisPoint = u16;
-export {BasisPoint};
 /**
 * Information about the current sale from user perspective
 */
