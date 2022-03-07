@@ -685,7 +685,7 @@ mod tests {
         let contract = new_contract();
         assert_eq!(
             contract.cost_per_token(&account()).0,
-            TEN + contract.token_storage_cost().0
+            TEN
         );
     }
 }
