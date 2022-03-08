@@ -7,11 +7,37 @@ export interface ChangeMethodOptions {
     walletCallbackUrl?: string;
 }
 export interface ViewFunctionOptions {
-    parse?: (response: Uint8Array) => any;
-    stringify?: (input: any) => any;
+    parse?: any;
+    stringify?: any;
 }
-/** 64 bit unsigned integer less than 2^53 -1 */
+/**
+* @minimum 0
+* @maximum 18446744073709551615
+* @asType integer
+*/
 declare type u64 = number;
+/**
+* @minimum  0
+* @maximum 255
+* @asType integer
+* */
+declare type u8 = number;
+/**
+* @minimum  0
+* @maximum 65535
+* @asType integer
+* */
+declare type u16 = number;
+/**
+* @minimum 0
+* @maximum 4294967295
+* @asType integer
+* */
+declare type u32 = number;
+/**
+* @pattern ^[0-9]+$
+*/
+export declare type U128 = string;
 /**
 * StorageUsage is used to count the amount of storage used by a contract.
 */
@@ -32,7 +58,10 @@ export declare type Base64VecU8 = string;
 * Raw type for duration in nanoseconds
 */
 export declare type Duration = u64;
-export declare type U128 = string;
+/**
+* @pattern ^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$
+*/
+export declare type AccountId = string;
 /**
 * Public key in a binary format with base58 string serialization with human-readable curve.
 * The key types currently supported are `secp256k1` and `ed25519`.
@@ -40,7 +69,6 @@ export declare type U128 = string;
 * Ed25519 public keys accepted are 32 bytes and secp256k1 keys are the uncompressed 64 format.
 */
 export declare type PublicKey = string;
-export declare type AccountId = string;
 /**
 * Raw type for timestamp in nanoseconds
 */
@@ -56,7 +84,7 @@ export interface FungibleTokenMetadata {
     icon?: string;
     reference?: string;
     reference_hash?: Base64VecU8;
-    decimals: number;
+    decimals: u8;
 }
 /**
 * In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
@@ -165,19 +193,19 @@ export interface Sale {
     initial_royalties?: Royalties;
     presale_start?: Duration;
     public_sale_start?: Duration;
-    allowance?: number;
+    allowance?: u32;
     presale_price?: U128;
     price: U128;
-    mint_rate_limit?: number;
+    mint_rate_limit?: u32;
 }
-export declare type BasisPoint = number;
+export declare type BasisPoint = u16;
 /**
 * Information about the current sale from user perspective
 */
 export interface UserSaleInfo {
     sale_info: SaleInfo;
     is_vip: boolean;
-    remaining_allowance?: number;
+    remaining_allowance?: u32;
 }
 /**
 * Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
@@ -203,13 +231,13 @@ export declare class Contract {
         public_key: PublicKey;
     }, options?: ViewFunctionOptions): Promise<boolean>;
     update_allowance(args: {
-        allowance: number;
+        allowance: u32;
     }, options?: ChangeMethodOptions): Promise<void>;
     update_allowanceRaw(args: {
-        allowance: number;
+        allowance: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     update_allowanceTx(args: {
-        allowance: number;
+        allowance: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
     whitelisted(args: {
         account_id: AccountId;
@@ -263,13 +291,13 @@ export declare class Contract {
         price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_mint_many(args: {
-        num: number;
+        num: u32;
     }, options?: ChangeMethodOptions): Promise<Token[]>;
     nft_mint_manyRaw(args: {
-        num: number;
+        num: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_mint_manyTx(args: {
-        num: number;
+        num: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
     update_uri(args: {
         uri: string;
@@ -304,7 +332,7 @@ export declare class Contract {
     nft_payout(args: {
         token_id: string;
         balance: U128;
-        max_len_payout?: number;
+        max_len_payout?: u32;
     }, options?: ViewFunctionOptions): Promise<Payout>;
     nft_transfer_payout(args: {
         receiver_id: AccountId;
@@ -312,7 +340,7 @@ export declare class Contract {
         approval_id?: u64;
         memo?: string;
         balance: U128;
-        max_len_payout?: number;
+        max_len_payout?: u32;
     }, options?: ChangeMethodOptions): Promise<Payout>;
     nft_transfer_payoutRaw(args: {
         receiver_id: AccountId;
@@ -320,7 +348,7 @@ export declare class Contract {
         approval_id?: u64;
         memo?: string;
         balance: U128;
-        max_len_payout?: number;
+        max_len_payout?: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_transfer_payoutTx(args: {
         receiver_id: AccountId;
@@ -328,7 +356,7 @@ export declare class Contract {
         approval_id?: u64;
         memo?: string;
         balance: U128;
-        max_len_payout?: number;
+        max_len_payout?: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Returns the balance associated with given key.
@@ -354,32 +382,32 @@ export declare class Contract {
     }, options?: ChangeMethodOptions): transactions.Action;
     add_whitelist_accounts(args: {
         accounts: AccountId[];
-        allowance?: number;
+        allowance?: u32;
     }, options?: ChangeMethodOptions): Promise<void>;
     add_whitelist_accountsRaw(args: {
         accounts: AccountId[];
-        allowance?: number;
+        allowance?: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     add_whitelist_accountsTx(args: {
         accounts: AccountId[];
-        allowance?: number;
+        allowance?: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
     new(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
-        size: number;
+        size: u32;
         sale: Sale;
     }, options?: ChangeMethodOptions): Promise<void>;
     newRaw(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
-        size: number;
+        size: u32;
         sale: Sale;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     newTx(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
-        size: number;
+        size: u32;
         sale: Sale;
     }, options?: ChangeMethodOptions): transactions.Action;
     start_presale(args: {
@@ -426,26 +454,26 @@ export declare class Contract {
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
     total_cost(args: {
-        num: number;
+        num: u32;
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
     get_linkdrop_contract(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
     new_default_meta(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
-        size: number;
+        size: u32;
         sale?: Sale;
     }, options?: ChangeMethodOptions): Promise<void>;
     new_default_metaRaw(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
-        size: number;
+        size: u32;
         sale?: Sale;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     new_default_metaTx(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
-        size: number;
+        size: u32;
         sale?: Sale;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_revoke(args: {
@@ -461,7 +489,7 @@ export declare class Contract {
         account_id: AccountId;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
-    mint_rate_limit(args?: {}, options?: ViewFunctionOptions): Promise<number | null>;
+    mint_rate_limit(args?: {}, options?: ViewFunctionOptions): Promise<u32 | null>;
     nft_is_approved(args: {
         token_id: TokenId;
         approved_account_id: AccountId;
@@ -469,7 +497,7 @@ export declare class Contract {
     }, options?: ViewFunctionOptions): Promise<boolean>;
     remaining_allowance(args: {
         account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<number | null>;
+    }, options?: ViewFunctionOptions): Promise<u32 | null>;
     nft_mint(args: {
         token_id: TokenId;
         token_owner_id: AccountId;
@@ -495,17 +523,17 @@ export declare class Contract {
     }, options?: ViewFunctionOptions): Promise<Token[]>;
     add_whitelist_account_ungaurded(args: {
         account_id: AccountId;
-        allowance: number;
+        allowance: u32;
     }, options?: ChangeMethodOptions): Promise<void>;
     add_whitelist_account_ungaurdedRaw(args: {
         account_id: AccountId;
-        allowance: number;
+        allowance: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     add_whitelist_account_ungaurdedTx(args: {
         account_id: AccountId;
-        allowance: number;
+        allowance: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
-    tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<number>;
+    tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<u32>;
     nft_supply_for_owner(args: {
         account_id: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
@@ -521,5 +549,325 @@ export declare class Contract {
     nft_mint_one(args?: {}, options?: ChangeMethodOptions): Promise<Token>;
     nft_mint_oneRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_mint_oneTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface CheckKey {
+    public_key: PublicKey;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateAllowance {
+    allowance: u32;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface Whitelisted {
+    account_id: AccountId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface GetSaleInfo {
+}
+/**
+*
+* @contractMethod view
+*/
+export interface CostPerToken {
+    minter: AccountId;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface TransferOwnership {
+    new_owner: AccountId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftTotalSupply {
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftTokens {
+    from_index?: U128;
+    limit?: u64;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftToken {
+    token_id: TokenId;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface CloseContract {
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftApprove {
+    token_id: TokenId;
+    account_id: AccountId;
+    msg?: string;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface StartSale {
+    price?: U128;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftMintMany {
+    num: u32;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateUri {
+    uri: string;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftTransferCall {
+    receiver_id: AccountId;
+    token_id: TokenId;
+    approval_id?: u64;
+    memo?: string;
+    msg: string;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftPayout {
+    token_id: string;
+    balance: U128;
+    max_len_payout?: u32;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftTransferPayout {
+    receiver_id: AccountId;
+    token_id: string;
+    approval_id?: u64;
+    memo?: string;
+    balance: U128;
+    max_len_payout?: u32;
+}
+/**
+* Returns the balance associated with given key.
+*
+* @contractMethod view
+*/
+export interface GetKeyBalance {
+}
+/**
+* Create a pending token that can be claimed with corresponding private key
+*
+* @contractMethod change
+*/
+export interface CreateLinkdrop {
+    public_key: PublicKey;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface AddWhitelistAccounts {
+    accounts: AccountId[];
+    allowance?: u32;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface New {
+    owner_id: AccountId;
+    metadata: NftContractMetadata;
+    size: u32;
+    sale: Sale;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface StartPresale {
+    public_sale_start?: Duration;
+    presale_price?: U128;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface TokenStorageCost {
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftTransfer {
+    receiver_id: AccountId;
+    token_id: TokenId;
+    approval_id?: u64;
+    memo?: string;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftRevokeAll {
+    token_id: TokenId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface CostOfLinkdrop {
+    minter: AccountId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface TotalCost {
+    num: u32;
+    minter: AccountId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface GetLinkdropContract {
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NewDefaultMeta {
+    owner_id: AccountId;
+    metadata: InitialMetadata;
+    size: u32;
+    sale?: Sale;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftRevoke {
+    token_id: TokenId;
+    account_id: AccountId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftMetadata {
+}
+/**
+*
+* @contractMethod view
+*/
+export interface MintRateLimit {
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftIsApproved {
+    token_id: TokenId;
+    approved_account_id: AccountId;
+    approval_id?: u64;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface RemainingAllowance {
+    account_id: AccountId;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftMint {
+    token_id: TokenId;
+    token_owner_id: AccountId;
+    token_metadata: TokenMetadata;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface GetUserSaleInfo {
+    account_id: AccountId;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftTokensForOwner {
+    account_id: AccountId;
+    from_index?: U128;
+    limit?: u64;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface AddWhitelistAccountUngaurded {
+    account_id: AccountId;
+    allowance: u32;
+}
+/**
+*
+* @contractMethod view
+*/
+export interface TokensLeft {
+}
+/**
+*
+* @contractMethod view
+*/
+export interface NftSupplyForOwner {
+    account_id: AccountId;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateRoyalties {
+    royalties: Royalties;
+}
+/**
+*
+* @contractMethod change
+*/
+export interface NftMintOne {
 }
 export {};

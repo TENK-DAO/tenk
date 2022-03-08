@@ -22,6 +22,8 @@
     "test:ci": "yarn test:unit && yarn test",
     "lint": "yarn eslint . --ext .ts",
     "wit": "(cd contracts/tenk; witme near wit -t ts/ --standards && tsc)",
+    "schema":"(cd contracts/tenk; ts-json-schema-generator -f ./tsconfig.json --validation-keywords contractMethod -o schema.json)",
+    "wit:schema": "yarn wit && yarn schema",
     "docs": "yarn wit && typedoc contracts/tenk/ts/index.ts --tsconfig contracts/tenk/tsconfig.json",
     "pack-car": "ipfs-car --wrapWithDirectory false",
     "upload-car": "ts-node ./scripts/car-uploader.ts"
