@@ -9,8 +9,8 @@ import {
   KeyPair,
   PublicKey,
   AccountManager,
-} from "near-willem-workspaces";
-import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
+} from "near-workspaces";
+import { ONE_NEAR, TransactionResult } from "near-workspaces-ava";
 import { binPath } from "./bin";
 import { BalanceDelta, getDelta } from "./delta";
 import {Contract} from "../..";

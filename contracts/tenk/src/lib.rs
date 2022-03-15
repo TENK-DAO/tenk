@@ -117,6 +117,7 @@ pub struct Sale {
     allowance: Option<u32>,
     presale_price: Option<U128>,
     price: U128,
+    mint_rate_limit: Option<u32>,
 }
 
 impl Default for Sale {
@@ -130,6 +131,7 @@ impl Default for Sale {
             public_sale_start: Default::default(),
             allowance: Default::default(),
             presale_price: Default::default(),
+            mint_rate_limit: Default::default(),
         }
     }
 }
@@ -285,6 +287,9 @@ impl Contract {
 
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+        self.sale
+            .mint_rate_limit
+            .map(|limit| require!(num <= limit, "over mint limit"));
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -327,7 +332,7 @@ impl Contract {
     }
 
     pub fn cost_of_linkdrop(&self, minter: &AccountId) -> U128 {
-        (self.full_link_price(minter) + self.total_cost(1, minter).0).into()
+        (self.full_link_price(minter) + self.total_cost(1, minter).0 + self.token_storage_cost().0).into()
     }
 
     pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
@@ -335,12 +340,11 @@ impl Contract {
     }
 
     pub fn cost_per_token(&self, minter: &AccountId) -> U128 {
-        let base_cost = if self.is_owner(minter) {
+        if self.is_owner(minter) {
             0
         } else {
             self.price()
-        };
-        (base_cost + self.token_storage_cost().0).into()
+        }.into()
     }
 
     pub fn token_storage_cost(&self) -> U128 {
@@ -357,6 +361,10 @@ impl Contract {
 
     pub fn remaining_allowance(&self, account_id: &AccountId) -> Option<u32> {
         self.whitelist.get(account_id)
+    }
+
+    pub fn mint_rate_limit(&self) -> Option<u32> {
+        self.sale.mint_rate_limit
     }
 
     // Owner private methods
@@ -511,16 +519,16 @@ impl Contract {
         let reference = Some(format!("{}.json", token_id));
         let title = Some(token_id.to_string());
         TokenMetadata {
-            title,             // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
+            title, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             media, // URL to associated media, preferably to decentralized, content-addressed storage
             issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
-            reference,   // URL to an off-chain JSON file with more info.
-            description: None, // free-form description
+            reference,            // URL to an off-chain JSON file with more info.
+            description: None,    // free-form description
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
-            expires_at: None,     // ISO 8601 datetime when token expires
-            starts_at: None,      // ISO 8601 datetime when token starts being valid
-            updated_at: None,     // ISO 8601 datetime when token was last updated
+            expires_at: None, // ISO 8601 datetime when token expires
+            starts_at: None, // ISO 8601 datetime when token starts being valid
+            updated_at: None, // ISO 8601 datetime when token was last updated
             extra: None, // anything extra the NFT wants to store on-chain. Can be stringified JSON.
             reference_hash: None, // Base64-encoded sha256 hash of JSON from reference field. Required if `reference` is included.
         }
@@ -677,7 +685,7 @@ mod tests {
         let contract = new_contract();
         assert_eq!(
             contract.cost_per_token(&account()).0,
-            TEN + contract.token_storage_cost().0
+            TEN
         );
     }
 }

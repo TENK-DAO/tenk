@@ -1,4 +1,4 @@
-import { NEAR, NearAccount } from "near-willem-workspaces-ava";
+import { NEAR, NearAccount } from "near-workspaces-ava";
 
 export class NEARDelta {
   static readonly ZERO_NEAR = NEAR.from(0);

@@ -1,4 +1,4 @@
-import { Workspace, NearAccount } from "near-willem-workspaces-ava";
+import { Workspace, NearAccount } from "near-workspaces-ava";
 import { NEAR } from "near-units";
 import {
   costPerToken,
@@ -34,20 +34,9 @@ const runner = Workspace.init(
   }
 );
 
-runner.test("can get cost per token", async (t, { root, tenk }) => {
+runner.test("can get cost per token", async (t, { tenk }) => {
   const cost = await costPerToken(tenk, 1);
-  const storageCost = await tokenStorageCost(tenk);
-  t.log(
-    "One token costs " +
-      cost.toHuman() +
-      "to buy and " +
-      storageCost.toHuman() +
-      " to store"
-  );
-  t.deepEqual(cost.toBigInt(), price.add(storageCost).toBigInt());
-  // if (cost.toBigInt() > 0) {
-  //   t.assert(cost.gt(await costPerToken(tenk, 24)));
-  // }
+  t.deepEqual(cost.toBigInt(), price.toBigInt());
 });
 
 async function assertXTokens(t, root: NearAccount, tenk, num) {

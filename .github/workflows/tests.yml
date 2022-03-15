@@ -5,7 +5,7 @@ jobs:
     strategy:
       matrix:
         platform: [ubuntu-latest, macos-latest]
-        node-version: ['14', '16']
+        node-version: ['16']
         toolchain: [stable]
     runs-on: ${{ matrix.platform }}
     steps:

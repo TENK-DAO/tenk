@@ -1,4 +1,4 @@
-import { Workspace, NearAccount, ONE_NEAR } from "near-willem-workspaces-ava";
+import { Workspace, NearAccount, ONE_NEAR } from "near-workspaces-ava";
 import { NEAR, Gas } from "near-units";
 import {
   nftTokensForOwner,

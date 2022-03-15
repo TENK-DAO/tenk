@@ -1,4 +1,4 @@
-import { Workspace, NearAccount } from "near-willem-workspaces-ava";
+import { Workspace, NearAccount } from "near-workspaces-ava";
 import { NEAR } from "near-units";
 import { DEFAULT_SALE, deploy, getDelta, mint, now, totalCost } from "./util";
 import { Royalties, Sale } from "..";
