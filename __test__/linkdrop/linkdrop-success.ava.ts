@@ -2,10 +2,10 @@ import {
   Workspace,
   NearAccount,
   randomAccountId,
-} from "near-willem-workspaces-ava";
+} from "near-workspaces-ava";
 import {
   ava
-} from "near-willem-workspaces-ava";
+} from "near-workspaces-ava";
 import { NEAR, Gas } from "near-units";
 import { readFile } from "fs/promises";
 import {

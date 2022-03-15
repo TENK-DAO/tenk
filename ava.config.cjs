@@ -1,1 +1,1 @@
-module.exports = require("near-willem-workspaces-ava/ava.config.cjs")
+module.exports = require("near-workspaces-ava/ava.config.cjs")

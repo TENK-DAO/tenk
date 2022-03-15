@@ -1,4 +1,4 @@
-import { Workspace } from "near-willem-workspaces-ava";
+import { Workspace } from "near-workspaces-ava";
 import { NEAR } from "near-units";
 import {
   DEFAULT_SALE,

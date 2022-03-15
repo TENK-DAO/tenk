@@ -1,4 +1,4 @@
-import { ONE_NEAR, Workspace } from "near-willem-workspaces-ava";
+import { ONE_NEAR, Workspace } from "near-workspaces-ava";
 import { NEAR } from "near-units";
 import {
   claim,
