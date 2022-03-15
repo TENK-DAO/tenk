@@ -1,23 +1,12 @@
-import {
-  Workspace,
-  NearAccount,
-  randomAccountId,
-} from "near-workspaces-ava";
-import {
-  ava
-} from "near-workspaces-ava";
-import { NEAR, Gas } from "near-units";
+import { Workspace, randomAccountId } from "near-workspaces-ava";
+import { ava } from "near-workspaces-ava";
+import { NEAR } from "near-units";
 import { readFile } from "fs/promises";
 import {
-  ActualTestnet,
   createLinkdrop,
   getTokens,
   checkKey,
-  BalanceDelta,
   claim,
-  claim_raw,
-  // repeat,
-  // zeroDelta,
   hasDelta,
   getDelta,
   create_account_and_claim,
@@ -28,8 +17,6 @@ import {
 
 const base_cost = NEAR.parse("1 N");
 const min_cost = NEAR.parse("0.01 N");
-
-
 
 if (Workspace.networkIsTestnet()) {
   const runner = Workspace.init(
@@ -69,7 +56,6 @@ if (Workspace.networkIsTestnet()) {
         );
       });
       await delta.isGreaterOrEqual(NEAR.from(0));
-      t.log(await delta.toHuman());
       const tokens = await getTokens(tenk, alice);
       t.assert(tokens.length == 1, "should contain only one token");
       t.log(
@@ -113,8 +99,6 @@ if (Workspace.networkIsTestnet()) {
       // await deployEmpty(tenk);
     }
   );
-
-
 
   // runner.test(
   //   "Spam `claim` to send to non-existent account",
@@ -185,7 +169,6 @@ if (Workspace.networkIsTestnet()) {
       // await new_account.delete(root.accountId);
     }
   );
-  
 } else {
   ava("skipped on sandbox", (t) => t.assert(true));
 }

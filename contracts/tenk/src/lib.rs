@@ -332,7 +332,7 @@ impl Contract {
     }
 
     pub fn cost_of_linkdrop(&self, minter: &AccountId) -> U128 {
-        (self.full_link_price(minter) + self.total_cost(1, minter).0).into()
+        (self.full_link_price(minter) + self.total_cost(1, minter).0 + self.token_storage_cost().0).into()
     }
 
     pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
