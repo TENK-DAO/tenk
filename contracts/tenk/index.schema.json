@@ -2,7 +2,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "AccountId": {
-      "pattern": "^(([a-z\\d]+[\\-_])*[a-z\\d]+\\.)*([a-z\\d]+[\\-_])*[a-z\\d]+$",
+      "maxLength": 64,
+      "minLength": 2,
+      "pattern": "^(([a-z\\d]+[-_])*[a-z\\d]+\\.)*([a-z\\d]+[-_])*[a-z\\d]+$",
       "type": "string"
     },
     "AddWhitelistAccountUngaurded": {
@@ -13,9 +15,7 @@
           "$ref": "#/definitions/AccountId"
         },
         "allowance": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -35,9 +35,7 @@
           "type": "array"
         },
         "allowance": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -54,29 +52,7 @@
       "type": "string"
     },
     "BasisPoint": {
-      "maximum": 65535,
-      "minimum": 0,
-      "type": "integer"
-    },
-    "ChangeMethodOptions": {
-      "additionalProperties": false,
-      "properties": {
-        "attachedDeposit": {
-          "additionalProperties": false,
-          "type": "object"
-        },
-        "gas": {
-          "additionalProperties": false,
-          "type": "object"
-        },
-        "walletCallbackUrl": {
-          "type": "string"
-        },
-        "walletMeta": {
-          "type": "string"
-        }
-      },
-      "type": "object"
+      "$ref": "#/definitions/u16"
     },
     "CheckKey": {
       "additionalProperties": false,
@@ -137,18 +113,14 @@
       "type": "object"
     },
     "Duration": {
-      "description": "Raw type for duration in nanoseconds",
-      "maximum": 18446744073709552000,
-      "minimum": 0,
-      "type": "integer"
+      "$ref": "#/definitions/u64",
+      "description": "Raw type for duration in nanoseconds"
     },
     "FungibleTokenMetadata": {
       "additionalProperties": false,
       "properties": {
         "decimals": {
-          "maximum": 255,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u8"
         },
         "icon": {
           "type": "string"
@@ -178,10 +150,8 @@
       "type": "object"
     },
     "Gas": {
-      "description": "Represents the amount of NEAR tokens in \"gas units\" which are used to fund transactions.",
-      "maximum": 18446744073709552000,
-      "minimum": 0,
-      "type": "integer"
+      "$ref": "#/definitions/u64",
+      "description": "Represents the amount of NEAR tokens in \"gas units\" which are used to fund transactions."
     },
     "GetKeyBalance": {
       "additionalProperties": false,
@@ -210,6 +180,11 @@
       "required": [
         "account_id"
       ],
+      "type": "object"
+    },
+    "Initial": {
+      "additionalProperties": false,
+      "contractMethod": "view",
       "type": "object"
     },
     "InitialMetadata": {
@@ -263,9 +238,7 @@
           "$ref": "#/definitions/Sale"
         },
         "size": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -290,9 +263,7 @@
           "$ref": "#/definitions/Sale"
         },
         "size": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -305,6 +276,7 @@
     "NftApprove": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Add an approved account for a specific token.\n\nRequirements\n* Caller of the method must attach a deposit of at least 1 yoctoⓃ for security purposes\n* Contract MAY require caller to attach larger deposit, to cover cost of storing approver data\n* Contract MUST panic if called by someone other than token owner\n* Contract MUST panic if addition would cause `nft_revoke_all` to exceed single-block gas limit\n* Contract MUST increment approval ID even if re-approving an account\n* If successfully approved or if had already been approved, and if `msg` is present, contract MUST call `nft_on_approve` on `account_id`. See `nft_on_approve` description below for details.\n\nArguments:\n* `token_id`: the token for which to add an approval\n* `account_id`: the account to add to `approvals`\n* `msg`: optional string to be passed to `nft_on_approve`\n\nReturns void, if no `msg` given. Otherwise, returns promise call to `nft_on_approve`, which can resolve with whatever it wants.",
       "properties": {
         "account_id": {
           "$ref": "#/definitions/AccountId"
@@ -358,11 +330,10 @@
     "NftIsApproved": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Check if a token is approved for transfer by a given account, optionally checking an approval_id\n\nArguments:\n* `token_id`: the token for which to revoke an approval\n* `approved_account_id`: the account to check the existence of in `approvals`\n* `approval_id`: an optional approval ID to check against current approval ID for given account\n\nReturns: if `approval_id` given, `true` if `approved_account_id` is approved with given `approval_id` otherwise, `true` if `approved_account_id` is in list of approved accounts",
       "properties": {
         "approval_id": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         },
         "approved_account_id": {
           "$ref": "#/definitions/AccountId"
@@ -408,9 +379,7 @@
       "contractMethod": "change",
       "properties": {
         "num": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -431,9 +400,7 @@
           "$ref": "#/definitions/U128"
         },
         "max_len_payout": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         },
         "token_id": {
           "type": "string"
@@ -448,6 +415,7 @@
     "NftRevoke": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Revoke an approved account for a specific token.\n\nRequirements\n* Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes\n* If contract requires >1yN deposit on `nft_approve`, contract MUST refund associated storage deposit when owner revokes approval\n* Contract MUST panic if called by someone other than token owner\n\nArguments:\n* `token_id`: the token for which to revoke an approval\n* `account_id`: the account to remove from `approvals`",
       "properties": {
         "account_id": {
           "$ref": "#/definitions/AccountId"
@@ -465,6 +433,7 @@
     "NftRevokeAll": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Revoke all approved accounts for a specific token.\n\nRequirements\n* Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes\n* If contract requires >1yN deposit on `nft_approve`, contract MUST refund all associated storage deposit when owner revokes approvals\n* Contract MUST panic if called by someone other than token owner\n\nArguments:\n* `token_id`: the token with approvals to revoke",
       "properties": {
         "token_id": {
           "$ref": "#/definitions/TokenId"
@@ -478,6 +447,7 @@
     "NftSupplyForOwner": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Get number of tokens owned by a given account\n\nArguments:\n* `account_id`: a valid NEAR account\n\nReturns the number of non-fungible tokens owned by given `account_id` as a string representing the value as an unsigned 128-bit integer to avoid JSON number limit of 2^53.",
       "properties": {
         "account_id": {
           "$ref": "#/definitions/AccountId"
@@ -491,6 +461,7 @@
     "NftToken": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Returns the token with the given `token_id` or `null` if no such token.",
       "properties": {
         "token_id": {
           "$ref": "#/definitions/TokenId"
@@ -504,14 +475,13 @@
     "NftTokens": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Get a list of all tokens\n\nArguments:\n* `from_index`: a string representing an unsigned 128-bit integer, representing the starting index of tokens to return. (default 0)\n* `limit`: the maximum number of tokens to return (default total supply) Could fail on gas\n\nReturns an array of Token objects, as described in Core standard",
       "properties": {
         "from_index": {
           "$ref": "#/definitions/U128"
         },
         "limit": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         }
       },
       "type": "object"
@@ -519,6 +489,7 @@
     "NftTokensForOwner": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Get list of all tokens owned by a given account\n\nArguments:\n* `account_id`: a valid NEAR account\n* `from_index`: a string representing an unsigned 128-bit integer, representing the starting index of tokens to return. (default 0)\n* `limit`: the maximum number of tokens to return. (default unlimited) Could fail on gas\n\nReturns a paginated list of all tokens owned by this account",
       "properties": {
         "account_id": {
           "$ref": "#/definitions/AccountId"
@@ -527,9 +498,7 @@
           "$ref": "#/definitions/U128"
         },
         "limit": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         }
       },
       "required": [
@@ -540,16 +509,16 @@
     "NftTotalSupply": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Returns the total supply of non-fungible tokens as a string representing an unsigned 128-bit integer to avoid JSON number limit of 2^53.",
       "type": "object"
     },
     "NftTransfer": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Simple transfer. Transfer a given `token_id` from current owner to `receiver_id`.\n\nRequirements\n* Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes\n* Contract MUST panic if called by someone other than token owner or, if using Approval Management, one of the approved accounts\n* `approval_id` is for use with Approval Management, see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>\n* If using Approval Management, contract MUST nullify approved accounts on successful transfer.\n* TODO: needed? Both accounts must be registered with the contract for transfer to succeed. See see <https://nomicon.io/Standards/StorageManagement.html>\n\nArguments:\n* `receiver_id`: the valid NEAR account receiving the token\n* `token_id`: the token to transfer\n* `approval_id`: expected approval ID. A number smaller than 2^53, and therefore representable as JSON. See Approval Management standard for full explanation.\n* `memo` (optional): for use cases that may benefit from indexing or providing information for a transfer",
       "properties": {
         "approval_id": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         },
         "memo": {
           "type": "string"
@@ -570,11 +539,10 @@
     "NftTransferCall": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Transfer token and call a method on a receiver contract. A successful workflow will end in a success execution outcome to the callback on the NFT contract at the method `nft_resolve_transfer`.\n\nYou can think of this as being similar to attaching native NEAR tokens to a function call. It allows you to attach any Non-Fungible Token in a call to a receiver contract.\n\nRequirements:\n* Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes\n* Contract MUST panic if called by someone other than token owner or, if using Approval Management, one of the approved accounts\n* The receiving contract must implement `ft_on_transfer` according to the standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal with the resulting failed cross-contract call and roll back the transfer.\n* Contract MUST implement the behavior described in `ft_resolve_transfer`\n* `approval_id` is for use with Approval Management extension, see that document for full explanation.\n* If using Approval Management, contract MUST nullify approved accounts on successful transfer.\n\nArguments:\n* `receiver_id`: the valid NEAR account receiving the token.\n* `token_id`: the token to send.\n* `approval_id`: expected approval ID. A number smaller than 2^53, and therefore representable as JSON. See Approval Management standard for full explanation.\n* `memo` (optional): for use cases that may benefit from indexing or providing information for a transfer.\n* `msg`: specifies information needed by the receiving contract in order to properly handle the transfer. Can indicate both a function to call and the parameters to pass to that function.",
       "properties": {
         "approval_id": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         },
         "memo": {
           "type": "string"
@@ -601,17 +569,13 @@
       "contractMethod": "change",
       "properties": {
         "approval_id": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         },
         "balance": {
           "$ref": "#/definitions/U128"
         },
         "max_len_payout": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         },
         "memo": {
           "type": "string"
@@ -686,17 +650,13 @@
       "additionalProperties": false,
       "properties": {
         "allowance": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         },
         "initial_royalties": {
           "$ref": "#/definitions/Royalties"
         },
         "mint_rate_limit": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         },
         "presale_price": {
           "$ref": "#/definitions/U128"
@@ -740,10 +700,8 @@
           "description": "Current state of contract"
         },
         "token_final_supply": {
-          "description": "Total tokens that could be minted",
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64",
+          "description": "Total tokens that could be minted"
         }
       },
       "required": [
@@ -820,22 +778,16 @@
       "type": "object"
     },
     "StorageUsage": {
-      "description": "StorageUsage is used to count the amount of storage used by a contract.",
-      "maximum": 18446744073709552000,
-      "minimum": 0,
-      "type": "integer"
+      "$ref": "#/definitions/u64",
+      "description": "StorageUsage is used to count the amount of storage used by a contract."
     },
     "Timestamp": {
-      "description": "Raw type for timestamp in nanoseconds",
-      "maximum": 18446744073709552000,
-      "minimum": 0,
-      "type": "integer"
+      "$ref": "#/definitions/u64",
+      "description": "Raw type for timestamp in nanoseconds"
     },
     "TimestampMs": {
-      "description": "milliseconds elapsed since the UNIX epoch",
-      "maximum": 18446744073709552000,
-      "minimum": 0,
-      "type": "integer"
+      "$ref": "#/definitions/u64",
+      "description": "milliseconds elapsed since the UNIX epoch"
     },
     "Token": {
       "additionalProperties": false,
@@ -843,9 +795,7 @@
       "properties": {
         "approved_account_ids": {
           "additionalProperties": {
-            "maximum": 18446744073709552000,
-            "minimum": 0,
-            "type": "integer"
+            "$ref": "#/definitions/u64"
           },
           "type": "object"
         },
@@ -874,9 +824,7 @@
       "description": "Metadata on the individual token level.",
       "properties": {
         "copies": {
-          "maximum": 18446744073709552000,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u64"
         },
         "description": {
           "type": "string"
@@ -932,9 +880,7 @@
           "$ref": "#/definitions/AccountId"
         },
         "num": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -957,7 +903,8 @@
       "type": "object"
     },
     "U128": {
-      "pattern": "^[0-9]+$",
+      "description": "String representation of a u128-bit integer",
+      "pattern": "^[0-9]+$\nNote: largest u128 is \"340282366920938463463374607431768211455\"",
       "type": "string"
     },
     "UpdateAllowance": {
@@ -965,9 +912,7 @@
       "contractMethod": "change",
       "properties": {
         "allowance": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         }
       },
       "required": [
@@ -1009,9 +954,7 @@
           "type": "boolean"
         },
         "remaining_allowance": {
-          "maximum": 4294967295,
-          "minimum": 0,
-          "type": "integer"
+          "$ref": "#/definitions/u32"
         },
         "sale_info": {
           "$ref": "#/definitions/SaleInfo"
@@ -1021,14 +964,6 @@
         "sale_info",
         "is_vip"
       ],
-      "type": "object"
-    },
-    "ViewFunctionOptions": {
-      "additionalProperties": false,
-      "properties": {
-        "parse": {},
-        "stringify": {}
-      },
       "type": "object"
     },
     "Whitelisted": {
@@ -1046,6 +981,26 @@
     },
     "WrappedDuration": {
       "type": "string"
+    },
+    "u16": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "u32": {
+      "maximum": 4294967295,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "u64": {
+      "maximum": 18446744073709552000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "u8": {
+      "maximum": 255,
+      "minimum": 0,
+      "type": "integer"
     }
   }
 }

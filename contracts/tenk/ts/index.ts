@@ -1,91 +1,23 @@
-import { Account, transactions, providers, DEFAULT_FUNCTION_CALL_GAS } from 'near-api-js';
+import {
+  Account,
+  transactions,
+  providers,
+  DEFAULT_FUNCTION_CALL_GAS,
+  u8,
+  i8,
+  u16,
+  i16,
+  u32,
+  i32,
+  u64,
+  i64,
+  f32,
+  f64,
+  BN,
+  ChangeMethodOptions,
+  ViewFunctionOptions,
+} from './helper';
 
-
-import BN from 'bn.js';
-export interface ChangeMethodOptions {
-  gas?: BN;
-  attachedDeposit?: BN;
-  walletMeta?: string;
-  walletCallbackUrl?: string;
-}
-export interface ViewFunctionOptions {
-  // TODO currently JSON schema generator doesn't like function types
-  parse?: any;
-  // TODO currently JSON schema generator doesn't like function types
-  stringify?: any;
-}
-
-/** 
-* @minimum 0
-* @maximum 18446744073709551615
-* @asType integer
-*/
-type u64 = number;
-/** 
-* @minimum -9223372036854775808
-* @maximum 9223372036854775807
-* @asType integer
-*/
-type i64 = number;
-
-/**
-* @minimum  0 
-* @maximum 255
-* @asType integer
-* */
-type u8 = number;
-/**
-* @minimum  -128 
-* @maximum 127
-* @asType integer
-* */
-type i8 = number;
-/**
-* @minimum  0 
-* @maximum 65535
-* @asType integer
-* */
-type u16 = number;
-/**
-* @minimum -32768 
-* @maximum 32767
-* @asType integer
-* */
-type i16 = number;
-/**
-* @minimum 0 
-* @maximum 4294967295
-* @asType integer
-* */
-type u32 = number;
-/**
-* @minimum 0 
-* @maximum 4294967295
-* @asType integer
-* */
-type usize = number;
-/**
-* @minimum  -2147483648 
-* @maximum 2147483647
-* @asType integer
-* */
-type i32 = number;
-
-/**
-* @minimum -3.40282347E+38
-* @maximum 3.40282347E+38
-*/
-type f32 = number;
-
-/**
-* @minimum -1.7976931348623157E+308
-* @maximum 1.7976931348623157E+308
-*/
-type f64 = number;
-/**
-* @pattern ^[0-9]+$
-*/
-export type U128 = string;
 /**
 * StorageUsage is used to count the amount of storage used by a contract.
 */
@@ -94,6 +26,12 @@ export type StorageUsage = u64;
 * Balance is a type for storing amounts of tokens, specified in yoctoNEAR.
 */
 export type Balance = U128;
+/**
+* String representation of a u128-bit integer
+* @pattern ^[0-9]+$
+* Note: largest u128 is "340282366920938463463374607431768211455"
+*/
+export type U128 = string;
 /**
 * Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
 */
@@ -107,7 +45,9 @@ export type Base64VecU8 = string;
 */
 export type Duration = u64;
 /**
-* @pattern ^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$
+* @minLength 2
+* @maxLength 64
+* @pattern ^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$
 */
 export type AccountId = string;
 /**
@@ -121,9 +61,14 @@ export type PublicKey = string;
 * Raw type for timestamp in nanoseconds
 */
 export type Timestamp = u64;
-export interface StorageBalanceBounds {
-  min: U128;
-  max?: U128;
+/**
+* In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
+*/
+export interface Token {
+  token_id: TokenId;
+  owner_id: AccountId;
+  metadata?: TokenMetadata;
+  approved_account_ids?: Record<AccountId, u64>;
 }
 export interface FungibleTokenMetadata {
   spec: string;
@@ -135,23 +80,25 @@ export interface FungibleTokenMetadata {
   decimals: u8;
 }
 /**
-* In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
-*/
-export interface Token {
-  token_id: TokenId;
-  owner_id: AccountId;
-  metadata?: TokenMetadata;
-  approved_account_ids?: Record<AccountId, u64>;
-}
-/**
 * Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
 */
 export type TokenId = string;
-export interface StorageBalance {
-  total: U128;
-  available: U128;
+/**
+* Metadata for the NFT contract itself.
+*/
+export interface NftContractMetadata {
+  spec: string;
+  name: string;
+  symbol: string;
+  icon?: string;
+  base_uri?: string;
+  reference?: string;
+  reference_hash?: Base64VecU8;
 }
-export type WrappedDuration = string;
+export interface StorageBalanceBounds {
+  min: U128;
+  max?: U128;
+}
 /**
 * Metadata on the individual token level.
 */
@@ -169,18 +116,11 @@ export interface TokenMetadata {
   reference?: string;
   reference_hash?: Base64VecU8;
 }
-/**
-* Metadata for the NFT contract itself.
-*/
-export interface NftContractMetadata {
-  spec: string;
-  name: string;
-  symbol: string;
-  icon?: string;
-  base_uri?: string;
-  reference?: string;
-  reference_hash?: Base64VecU8;
+export interface StorageBalance {
+  total: U128;
+  available: U128;
 }
+export type WrappedDuration = string;
 /**
 * Current state of contract
 */
@@ -305,8 +245,7 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<boolean> {
     return this.account.viewFunction(this.contractId, "whitelisted", args, options);
   }
-  get_sale_info(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
+  get_sale_info(args = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
     return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
   }
   /**
@@ -401,16 +340,13 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("start_presale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async close_contract(args: {
-  } = {}, options?: ChangeMethodOptions): Promise<void> {
+  async close_contract(args = {}, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.close_contractRaw(args, options));
   }
-  close_contractRaw(args: {
-  } = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+  close_contractRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "close_contract", args, ...options});
   }
-  close_contractTx(args: {
-  } = {}, options?: ChangeMethodOptions): transactions.Action {
+  close_contractTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("close_contract", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
@@ -763,8 +699,7 @@ export class Contract {
   /**
   * Returns the balance associated with given key.
   */
-  get_key_balance(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<U128> {
+  get_key_balance(args = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "get_key_balance", args, options);
   }
   /**
@@ -905,12 +840,10 @@ export class Contract {
   * Returns the total supply of non-fungible tokens as a string representing an
   * unsigned 128-bit integer to avoid JSON number limit of 2^53.
   */
-  nft_total_supply(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<U128> {
+  nft_total_supply(args = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "nft_total_supply", args, options);
   }
-  token_storage_cost(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<U128> {
+  token_storage_cost(args = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
   }
   /**
@@ -1017,8 +950,7 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "total_cost", args, options);
   }
-  get_linkdrop_contract(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<AccountId> {
+  get_linkdrop_contract(args = {}, options?: ViewFunctionOptions): Promise<AccountId> {
     return this.account.viewFunction(this.contractId, "get_linkdrop_contract", args, options);
   }
   async new_default_meta(args: {
@@ -1060,12 +992,10 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "nft_supply_for_owner", args, options);
   }
-  nft_metadata(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
+  nft_metadata(args = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
     return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
   }
-  mint_rate_limit(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<u32 | null> {
+  mint_rate_limit(args = {}, options?: ViewFunctionOptions): Promise<u32 | null> {
     return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
   }
   remaining_allowance(args: {
@@ -1118,8 +1048,7 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<UserSaleInfo> {
     return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
   }
-  initial(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<u64> {
+  initial(args = {}, options?: ViewFunctionOptions): Promise<u64> {
     return this.account.viewFunction(this.contractId, "initial", args, options);
   }
   async add_whitelist_account_ungaurded(args: {
@@ -1140,8 +1069,7 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("add_whitelist_account_ungaurded", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  tokens_left(args: {
-  } = {}, options?: ViewFunctionOptions): Promise<u32> {
+  tokens_left(args = {}, options?: ViewFunctionOptions): Promise<u32> {
     return this.account.viewFunction(this.contractId, "tokens_left", args, options);
   }
   async update_royalties(args: {
@@ -1159,16 +1087,13 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async nft_mint_one(args: {
-  } = {}, options?: ChangeMethodOptions): Promise<Token> {
+  async nft_mint_one(args = {}, options?: ChangeMethodOptions): Promise<Token> {
     return providers.getTransactionLastResult(await this.nft_mint_oneRaw(args, options));
   }
-  nft_mint_oneRaw(args: {
-  } = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+  nft_mint_oneRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "nft_mint_one", args, ...options});
   }
-  nft_mint_oneTx(args: {
-  } = {}, options?: ChangeMethodOptions): transactions.Action {
+  nft_mint_oneTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_mint_one", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
 }
