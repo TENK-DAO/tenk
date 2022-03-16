@@ -1,43 +1,4 @@
-import { Account, transactions, providers } from 'near-api-js';
-import BN from 'bn.js';
-export interface ChangeMethodOptions {
-    gas?: BN;
-    attachedDeposit?: BN;
-    walletMeta?: string;
-    walletCallbackUrl?: string;
-}
-export interface ViewFunctionOptions {
-    parse?: any;
-    stringify?: any;
-}
-/**
-* @minimum 0
-* @maximum 18446744073709551615
-* @asType integer
-*/
-declare type u64 = number;
-/**
-* @minimum  0
-* @maximum 255
-* @asType integer
-* */
-declare type u8 = number;
-/**
-* @minimum  0
-* @maximum 65535
-* @asType integer
-* */
-declare type u16 = number;
-/**
-* @minimum 0
-* @maximum 4294967295
-* @asType integer
-* */
-declare type u32 = number;
-/**
-* @pattern ^[0-9]+$
-*/
-export declare type U128 = string;
+import { Account, transactions, providers, u8, u16, u32, u64, ChangeMethodOptions, ViewFunctionOptions } from './helper';
 /**
 * StorageUsage is used to count the amount of storage used by a contract.
 */
@@ -46,6 +7,12 @@ export declare type StorageUsage = u64;
 * Balance is a type for storing amounts of tokens, specified in yoctoNEAR.
 */
 export declare type Balance = U128;
+/**
+* String representation of a u128-bit integer
+* @pattern ^[0-9]+$
+* Note: largest u128 is "340282366920938463463374607431768211455"
+*/
+export declare type U128 = string;
 /**
 * Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
 */
@@ -59,7 +26,9 @@ export declare type Base64VecU8 = string;
 */
 export declare type Duration = u64;
 /**
-* @pattern ^(([a-z\d]+[\-_])*[a-z\d]+\.)*([a-z\d]+[\-_])*[a-z\d]+$
+* @minLength 2
+* @maxLength 64
+* @pattern ^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$
 */
 export declare type AccountId = string;
 /**
@@ -73,9 +42,14 @@ export declare type PublicKey = string;
 * Raw type for timestamp in nanoseconds
 */
 export declare type Timestamp = u64;
-export interface StorageBalanceBounds {
-    min: U128;
-    max?: U128;
+/**
+* In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
+*/
+export interface Token {
+    token_id: TokenId;
+    owner_id: AccountId;
+    metadata?: TokenMetadata;
+    approved_account_ids?: Record<AccountId, u64>;
 }
 export interface FungibleTokenMetadata {
     spec: string;
@@ -87,23 +61,25 @@ export interface FungibleTokenMetadata {
     decimals: u8;
 }
 /**
-* In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
-*/
-export interface Token {
-    token_id: TokenId;
-    owner_id: AccountId;
-    metadata?: TokenMetadata;
-    approved_account_ids?: Record<AccountId, u64>;
-}
-/**
 * Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
 */
 export declare type TokenId = string;
-export interface StorageBalance {
-    total: U128;
-    available: U128;
+/**
+* Metadata for the NFT contract itself.
+*/
+export interface NftContractMetadata {
+    spec: string;
+    name: string;
+    symbol: string;
+    icon?: string;
+    base_uri?: string;
+    reference?: string;
+    reference_hash?: Base64VecU8;
 }
-export declare type WrappedDuration = string;
+export interface StorageBalanceBounds {
+    min: U128;
+    max?: U128;
+}
 /**
 * Metadata on the individual token level.
 */
@@ -121,18 +97,11 @@ export interface TokenMetadata {
     reference?: string;
     reference_hash?: Base64VecU8;
 }
-/**
-* Metadata for the NFT contract itself.
-*/
-export interface NftContractMetadata {
-    spec: string;
-    name: string;
-    symbol: string;
-    icon?: string;
-    base_uri?: string;
-    reference?: string;
-    reference_hash?: Base64VecU8;
+export interface StorageBalance {
+    total: U128;
+    available: U128;
 }
+export declare type WrappedDuration = string;
 /**
 * Current state of contract
 */
@@ -1405,4 +1374,3 @@ export interface UpdateRoyalties {
 */
 export interface NftMintOne {
 }
-export {};

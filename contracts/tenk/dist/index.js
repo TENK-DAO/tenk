@@ -46,13 +46,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Contract = exports.Status = void 0;
-var near_api_js_1 = require("near-api-js");
-var bn_js_1 = __importDefault(require("bn.js"));
+var helper_1 = require("./helper");
 /**
 * Current state of contract
 */
@@ -89,7 +85,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.update_allowanceRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -101,7 +97,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.update_allowanceTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("update_allowance", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("update_allowance", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.whitelisted = function (args, options) {
         return this.account.viewFunction(this.contractId, "whitelisted", args, options);
@@ -129,7 +125,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_revoke_allRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -167,7 +163,7 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.nft_revoke_allTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_revoke_all", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_revoke_all", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.cost_per_token = function (args, options) {
         return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
@@ -178,7 +174,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.transfer_ownershipRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -190,7 +186,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.transfer_ownershipTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("transfer_ownership", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("transfer_ownership", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.start_presale = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -198,7 +194,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.start_presaleRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -210,7 +206,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.start_presaleTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.close_contract = function (args, options) {
         if (args === void 0) { args = {}; }
@@ -219,7 +215,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.close_contractRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -233,7 +229,7 @@ var Contract = /** @class */ (function () {
     Contract.prototype.close_contractTx = function (args, options) {
         var _a, _b;
         if (args === void 0) { args = {}; }
-        return near_api_js_1.transactions.functionCall("close_contract", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("close_contract", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Simple transfer. Transfer a given `token_id` from current owner to
@@ -265,7 +261,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_transferRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -325,7 +321,7 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.nft_transferTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_transfer", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_transfer", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.start_sale = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -333,7 +329,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.start_saleRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -345,7 +341,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.start_saleTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("start_sale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("start_sale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_mint_many = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -353,7 +349,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_mint_manyRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -365,7 +361,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.nft_mint_manyTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_mint_many", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_mint_many", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Check if a token is approved for transfer by a given account, optionally
@@ -389,7 +385,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.update_uriRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -401,7 +397,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.update_uriTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("update_uri", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("update_uri", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_payout = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_payout", args, options);
@@ -461,7 +457,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_transfer_callRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -543,7 +539,7 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.nft_transfer_callTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_transfer_call", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_transfer_call", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_transfer_payout = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -551,7 +547,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_transfer_payoutRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -563,7 +559,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.nft_transfer_payoutTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_transfer_payout", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_transfer_payout", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Returns the balance associated with given key.
@@ -592,7 +588,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_revokeRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -632,7 +628,7 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.nft_revokeTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_revoke", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_revoke", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Create a pending token that can be claimed with corresponding private key
@@ -643,7 +639,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.create_linkdropRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -661,7 +657,7 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.create_linkdropTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.add_whitelist_accounts = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -669,7 +665,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.add_whitelist_accountsRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -681,7 +677,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.add_whitelist_accountsTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("add_whitelist_accounts", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("add_whitelist_accounts", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Returns the token with the given `token_id` or `null` if no such token.
@@ -695,7 +691,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.newRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -707,7 +703,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.newTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("new", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("new", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Returns the total supply of non-fungible tokens as a string representing an
@@ -751,7 +747,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_approveRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -811,7 +807,7 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.nft_approveTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_approve", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_approve", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.cost_of_linkdrop = function (args, options) {
         return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
@@ -829,7 +825,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.new_default_metaRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -841,7 +837,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.new_default_metaTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("new_default_meta", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("new_default_meta", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Get number of tokens owned by a given account
@@ -888,7 +884,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_mintRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -900,7 +896,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.nft_mintTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("nft_mint", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_mint", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.get_user_sale_info = function (args, options) {
         return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
@@ -915,7 +911,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.add_whitelist_account_ungaurdedRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -927,7 +923,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.add_whitelist_account_ungaurdedTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("add_whitelist_account_ungaurded", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("add_whitelist_account_ungaurded", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.tokens_left = function (args, options) {
         if (args === void 0) { args = {}; }
@@ -939,7 +935,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.update_royaltiesRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -951,7 +947,7 @@ var Contract = /** @class */ (function () {
     };
     Contract.prototype.update_royaltiesTx = function (args, options) {
         var _a, _b;
-        return near_api_js_1.transactions.functionCall("update_royalties", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("update_royalties", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_mint_one = function (args, options) {
         if (args === void 0) { args = {}; }
@@ -960,7 +956,7 @@ var Contract = /** @class */ (function () {
             return __generator(this, function (_c) {
                 switch (_c.label) {
                     case 0:
-                        _b = (_a = near_api_js_1.providers).getTransactionLastResult;
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
                         return [4 /*yield*/, this.nft_mint_oneRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
@@ -974,7 +970,7 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_mint_oneTx = function (args, options) {
         var _a, _b;
         if (args === void 0) { args = {}; }
-        return near_api_js_1.transactions.functionCall("nft_mint_one", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : near_api_js_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new bn_js_1.default(0));
+        return helper_1.transactions.functionCall("nft_mint_one", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     return Contract;
 }());
