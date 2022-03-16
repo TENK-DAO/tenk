@@ -1,6 +1,5 @@
 use linkdrop::LINKDROP_DEPOSIT;
 use near_contract_standards::non_fungible_token::{
-    events::NftMint,
     metadata::{NFTContractMetadata, TokenMetadata, NFT_METADATA_SPEC},
     refund_deposit_to_account, NonFungibleToken, Token, TokenId,
 };
@@ -9,20 +8,29 @@ use near_sdk::{
     collections::{LazyOption, LookupMap},
     env, ext_contract,
     json_types::{Base64VecU8, U128},
-    log, near_bindgen, require, witgen, AccountId, Balance, BorshStorageKey, Duration, Gas,
-    PanicOnDefault, Promise, PromiseOrValue, PublicKey,
+    log, near_bindgen, require,
+    serde::{Deserialize, Serialize},
+    witgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise, PromiseOrValue,
+    PublicKey,
 };
 use near_units::{parse_gas, parse_near};
 
+/// milliseconds elapsed since the UNIX epoch
+#[witgen]
+type TimestampMs = u64;
+
 pub mod linkdrop;
+mod owner;
 pub mod payout;
 mod raffle;
+mod types;
 mod util;
+mod views;
 
 use payout::*;
 use raffle::Raffle;
-use serde::{Deserialize, Serialize};
-use util::{is_promise_success, refund};
+use types::*;
+use util::{current_time_ms, is_promise_success, log_mint, refund};
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -72,81 +80,6 @@ enum StorageKey {
     Whitelist,
 }
 
-#[witgen]
-#[derive(Deserialize, Serialize, Default)]
-pub struct InitialMetadata {
-    name: String,
-    symbol: String,
-    uri: String,
-    icon: Option<String>,
-    spec: Option<String>,
-    reference: Option<String>,
-    reference_hash: Option<Base64VecU8>,
-}
-
-impl From<InitialMetadata> for NFTContractMetadata {
-    fn from(inital_metadata: InitialMetadata) -> Self {
-        let InitialMetadata {
-            spec,
-            name,
-            symbol,
-            icon,
-            uri,
-            reference,
-            reference_hash,
-        } = inital_metadata;
-        NFTContractMetadata {
-            spec: spec.unwrap_or_else(|| NFT_METADATA_SPEC.to_string()),
-            name,
-            symbol,
-            icon,
-            base_uri: Some(uri),
-            reference,
-            reference_hash,
-        }
-    }
-}
-
-#[witgen]
-#[derive(Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
-pub struct Sale {
-    royalties: Option<Royalties>,
-    initial_royalties: Option<Royalties>,
-    presale_start: Option<Duration>,
-    public_sale_start: Option<Duration>,
-    allowance: Option<u32>,
-    presale_price: Option<U128>,
-    price: U128,
-    mint_rate_limit: Option<u32>,
-}
-
-impl Default for Sale {
-    fn default() -> Self {
-        Self {
-            price: U128(0),
-            // ..Default::default()
-            royalties: Default::default(),
-            initial_royalties: Default::default(),
-            presale_start: Default::default(),
-            public_sale_start: Default::default(),
-            allowance: Default::default(),
-            presale_price: Default::default(),
-            mint_rate_limit: Default::default(),
-        }
-    }
-}
-
-impl Sale {
-    pub fn validate(&self) {
-        if let Some(r) = self.royalties.as_ref() {
-            r.validate()
-        }
-        if let Some(r) = self.initial_royalties.as_ref() {
-            r.validate()
-        }
-    }
-}
-
 #[near_bindgen]
 impl Contract {
     #[init]
@@ -180,54 +113,6 @@ impl Contract {
         }
     }
 
-    pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) {
-        self.assert_owner();
-        let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
-        accounts.iter().for_each(|account_id| {
-            self.whitelist.insert(account_id, &allowance);
-        });
-    }
-
-    pub fn whitelisted(&self, account_id: &AccountId) -> bool {
-        self.whitelist.contains_key(account_id)
-    }
-
-    #[cfg(feature = "testnet")]
-    pub fn add_whitelist_account_ungaurded(&mut self, account_id: AccountId, allowance: u32) {
-        self.whitelist.insert(&account_id, &allowance);
-    }
-
-    pub fn close_contract(&mut self) {
-        #[cfg(not(feature = "testnet"))]
-        self.assert_owner();
-        self.sale.presale_start = None;
-        self.sale.public_sale_start = None;
-    }
-
-    pub fn start_presale(
-        &mut self,
-        public_sale_start: Option<Duration>,
-        presale_price: Option<U128>,
-    ) {
-        #[cfg(not(feature = "testnet"))]
-        self.assert_owner();
-        let current_time = current_time_ms();
-        self.sale.presale_start = Some(current_time);
-        self.sale.public_sale_start = public_sale_start;
-        if presale_price.is_some() {
-            self.sale.presale_price = presale_price;
-        }
-    }
-
-    pub fn start_sale(&mut self, price: Option<U128>) {
-        #[cfg(not(feature = "testnet"))]
-        self.assert_owner();
-        self.sale.public_sale_start = Some(current_time_ms());
-        if let Some(price) = price {
-            self.sale.price = price
-        }
-    }
-
     #[payable]
     pub fn nft_mint(
         &mut self,
@@ -239,57 +124,15 @@ impl Contract {
     }
 
     #[payable]
-    /// Create a pending token that can be claimed with corresponding private key
-    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
-        let deposit = env::attached_deposit();
-        let account = &env::predecessor_account_id();
-        self.assert_can_mint(account, 1);
-        let total_cost = self.cost_of_linkdrop(account).0;
-        self.pending_tokens += 1;
-        let mint_for_free = self.is_owner(account);
-        self.use_whitelist_allowance(account, 1);
-        log!("Total cost of creation is {}", total_cost);
-        refund(account, deposit - total_cost);
-        self.send(public_key, mint_for_free)
-            .then(ext_self::on_send_with_callback(
-                env::current_account_id(),
-                total_cost,
-                GAS_REQUIRED_TO_CREATE_LINKDROP,
-            ))
-    }
-
-    // #[payable]
-    // pub fn create_linkdrops(&mut self, public_keys: Vec<PublicKey>) -> Promise {
-    //     let num_of_links = public_keys.len() as u32;
-    //     require!(num_of_links > 0, format!("Must include at least one public key, got {:#?}", public_keys));
-    //     require!(num_of_links <= 10, "Can create at most 10 keys");
-    //     self.pending_tokens += num_of_links;
-    //     let current_account_id = env::current_account_id();
-    //     let mut promises: Promise = self.send_with_callback(
-    //         public_keys[0].clone(),
-    //         current_account_id.clone(),
-    //         GAS_REQUIRED_FOR_LINKDROP,
-    //     );
-    //     for key in 1..num_of_links {
-    //         promises = promises.then(self.send_with_callback(
-    //             public_keys[key as usize].clone(),
-    //             current_account_id.clone(),
-    //             GAS_REQUIRED_FOR_LINKDROP,
-    //         ))
-    //     }
-    //     promises
-    // }
-
-    #[payable]
     pub fn nft_mint_one(&mut self) -> Token {
         self.nft_mint_many(1)[0].clone()
     }
 
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
-        self.sale
-            .mint_rate_limit
-            .map(|limit| require!(num <= limit, "over mint limit"));
+        if let Some(limit) = self.sale.mint_rate_limit {
+            require!(num <= limit, "over mint limit");
+        }
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
         let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
@@ -329,100 +172,6 @@ impl Contract {
         // Emit mint event log
         log_mint(owner_id, &tokens);
         tokens
-    }
-
-    pub fn cost_of_linkdrop(&self, minter: &AccountId) -> U128 {
-        (self.full_link_price(minter) + self.total_cost(1, minter).0 + self.token_storage_cost().0).into()
-    }
-
-    pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
-        (num as Balance * self.cost_per_token(minter).0).into()
-    }
-
-    pub fn cost_per_token(&self, minter: &AccountId) -> U128 {
-        if self.is_owner(minter) {
-            0
-        } else {
-            self.price()
-        }.into()
-    }
-
-    pub fn token_storage_cost(&self) -> U128 {
-        (env::storage_byte_cost() * self.tokens.extra_storage_in_bytes_per_token as Balance).into()
-    }
-
-    pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens
-    }
-
-    pub fn nft_metadata(&self) -> NFTContractMetadata {
-        self.metadata.get().unwrap()
-    }
-
-    pub fn remaining_allowance(&self, account_id: &AccountId) -> Option<u32> {
-        self.whitelist.get(account_id)
-    }
-
-    pub fn mint_rate_limit(&self) -> Option<u32> {
-        self.sale.mint_rate_limit
-    }
-
-    // Owner private methods
-
-    pub fn transfer_ownership(&mut self, new_owner: AccountId) {
-        self.assert_owner();
-        env::log_str(&format!(
-            "{} transfers ownership to {}",
-            self.tokens.owner_id, new_owner
-        ));
-        self.tokens.owner_id = new_owner;
-    }
-
-    pub fn update_royalties(&mut self, royalties: Royalties) {
-        self.assert_owner();
-        royalties.validate();
-        self.sale.royalties = Some(royalties);
-    }
-
-    pub fn update_allowance(&mut self, allowance: u32) {
-        self.assert_owner();
-        self.sale.allowance = Some(allowance);
-    }
-
-    pub fn update_uri(&mut self, uri: String) {
-        self.assert_owner();
-        let mut metadata = self.metadata.get().unwrap();
-        log!("New URI: {}", &uri);
-        metadata.base_uri = Some(uri);
-        self.metadata.set(&metadata);
-    }
-
-    pub fn get_sale_info(&self) -> SaleInfo {
-        SaleInfo {
-            status: self.get_status(),
-            presale_start: self.sale.presale_start.unwrap_or(MAX_DATE),
-            sale_start: self.sale.public_sale_start.unwrap_or(MAX_DATE),
-            token_final_supply: self.initial(),
-            price: self.price().into(),
-        }
-    }
-
-    pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
-        let sale_info = self.get_sale_info();
-        let remaining_allowance = if self.is_presale() || self.sale.allowance.is_some() {
-            self.remaining_allowance(account_id)
-        } else {
-            None
-        };
-        UserSaleInfo {
-            sale_info,
-            remaining_allowance,
-            is_vip: self.whitelisted(account_id),
-        }
-    }
-
-    fn initial(&self) -> u64 {
-        self.raffle.len() + self.nft_total_supply().0 as u64
     }
 
     // Contract private methods
@@ -586,106 +335,6 @@ impl Contract {
     }
 }
 
-fn current_time_ms() -> Duration {
-    env::block_timestamp() / 1_000_000
-}
-
-/// Current state of contract
-#[witgen]
-#[derive(Serialize)]
-enum Status {
-    /// Not open for any sales
-    Closed,
-    /// VIP accounts can mint
-    Presale,
-    /// Any account can mint
-    Open,
-    /// No more tokens to be minted
-    SoldOut,
-}
-
-/// Information about the current sale from user perspective
-#[allow(dead_code)]
-#[witgen]
-#[derive(Serialize)]
-pub struct UserSaleInfo {
-    sale_info: SaleInfo,
-    is_vip: bool,
-    remaining_allowance: Option<u32>,
-}
-
-/// Information about the current sale
-#[allow(dead_code)]
-#[witgen]
-#[derive(Serialize)]
-pub struct SaleInfo {
-    /// Current state of contract
-    status: Status,
-    /// Start of the VIP sale
-    presale_start: Duration,
-    /// Start of public sale
-    sale_start: Duration,
-    /// Total tokens that could be minted
-    token_final_supply: u64,
-    /// Current price for one token
-    price: U128,
-}
-
 near_contract_standards::impl_non_fungible_token_core!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_approval!(Contract, tokens);
 near_contract_standards::impl_non_fungible_token_enumeration!(Contract, tokens);
-
-fn log_mint(owner_id: &AccountId, tokens: &[Token]) {
-    let token_ids = &tokens
-        .iter()
-        .map(|t| t.token_id.as_str())
-        .collect::<Vec<&str>>();
-    NftMint {
-        owner_id,
-        token_ids,
-        memo: None,
-    }
-    .emit()
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use near_units::parse_near;
-    const TEN: u128 = parse_near!("10 N");
-
-    fn account() -> AccountId {
-        AccountId::new_unchecked("alice.near".to_string())
-    }
-
-    fn initial_metadata() -> InitialMetadata {
-        InitialMetadata {
-            name: "name".to_string(),
-            symbol: "sym".to_string(),
-            uri: "https://".to_string(),
-            ..Default::default()
-        }
-    }
-
-    fn new_contract() -> Contract {
-        Contract::new_default_meta(
-            AccountId::new_unchecked("root".to_string()),
-            initial_metadata(),
-            10_000,
-            Some(Sale {
-                price: TEN.into(),
-                ..Default::default()
-            }),
-        )
-    }
-
-    #[test]
-    fn check_price() {
-        let contract = new_contract();
-        assert_eq!(
-            contract.cost_per_token(&account()).0,
-            TEN
-        );
-    }
-}
