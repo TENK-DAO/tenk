@@ -233,6 +233,20 @@ impl Contract {
             .remove(0)
     }
 
+    pub fn nft_burn(&mut self, token_id: String) {
+        self.assert_owner();
+        let owner_id = self.tokens.owner_by_id.remove(&token_id).unwrap();
+        self.tokens
+            .token_metadata_by_id
+            .as_mut()
+            .and_then(|by_id| by_id.remove(&token_id));
+        if let Some(tokens_per_owner) = &mut self.tokens.tokens_per_owner {
+            let mut token_ids = tokens_per_owner.get(&owner_id).unwrap();
+            token_ids.remove(&token_id);
+            tokens_per_owner.insert(&owner_id, &token_ids);
+        }
+    }
+
     #[payable]
     /// Create a pending token that can be claimed with corresponding private key
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
