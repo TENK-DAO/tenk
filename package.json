@@ -13,7 +13,7 @@
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet yarn test",
     "test:linkdrop": "yarn test:testnet '*/linkdrop/*'",
     "deploy:testnet": "yarn build:testnet && near repl -s ./scripts/deploy.ts",
-    "delpoy": "yarn build && near repl -s ./scripts/deploy.ts",
+    "deploy": "yarn build && near repl -s ./scripts/deploy.ts",
     "createKeys": "ts-node ./scripts/create-keys.ts",
     "createLinkUrls": "ts-node ./scripts/create-linkdrops-urls.ts",
     "createLinkdrops": "near repl -s ./scripts/create-linkdrops.ts",
