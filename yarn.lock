@@ -357,9 +357,9 @@
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
 "@sindresorhus/is@^4.0.0":
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.4.0.tgz#e277e5bdbdf7cb1e20d320f02f5e2ed113cd3185"
-  integrity sha512-QppPM/8l3Mawvh4rn9CNEYIU9bxpXUCRMaX9yUpvBk1nMKusLKpfXGDEKExKaPhLzcn3lzil7pR6rnJ11HgeRQ==
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.6.0.tgz#3c7c9c46e678feefe7a2e5bb609d3dbd665ffb3f"
+  integrity sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.3"
@@ -464,9 +464,9 @@
   integrity sha512-qcUXuemtEu+E5wZSJHNxUXeCZhAfXKQ41D+duX+VYPde7xyEVZci+/oXKJL13tnRs9lR2pr4fod59GT6/X1/yQ==
 
 "@types/keyv@*":
-  version "3.1.3"
-  resolved "https://registry.yarnpkg.com/@types/keyv/-/keyv-3.1.3.tgz#1c9aae32872ec1f20dcdaee89a9f3ba88f465e41"
-  integrity sha512-FXCJgyyN3ivVgRoml4h94G/p3kY+u/B86La+QptcqJaWtBWtmc6TtkNfS40n9bIvyLteHh7zXOtgbobORKPbDg==
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/@types/keyv/-/keyv-3.1.4.tgz#3ccdb1c6751b0c7e52300bcdacd5bcbf8faa75b6"
+  integrity sha512-BQ5aZNSCpj7D6K2ksrRCTmKRLEpnPvWDiLPfoGyhZ++8YtiK9d/3DBKPJgry359X/P1PfruyYwvnvwFjuEiEIg==
   dependencies:
     "@types/node" "*"
 
@@ -496,9 +496,9 @@
   integrity sha512-Exw4yUWMBXM3X+8oqzJNRqZSwUAaS4+7NdvHqQuFi/d+synz++xmX3QIf+BFqneW8N31R8Ky+sikfZUXq07ggQ==
 
 "@types/node@^16.4.10":
-  version "16.11.24"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.24.tgz#9624338b685fea65fb1aba6c7b7eb45ca2df7188"
-  integrity sha512-Ezv33Rl4mIi6YdSHfIRNBd4Q9kUe5okiaw/ikvJiJDmuQZNW5kfdg7+oQPF8NO6sTcr3woIpj3jANzTXdvEZXA==
+  version "16.11.26"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.26.tgz#63d204d136c9916fb4dcd1b50f9740fe86884e47"
+  integrity sha512-GZ7bu5A6+4DtG7q9GsoHXy3ALcgeIHP4NnL0Vv2wu0uUB/yQex26v0tf6/na1mm0+bS9Uw+0DFex7aaKr2qawQ==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.1"
@@ -2043,9 +2043,9 @@ fs-constants@^1.0.0:
   integrity sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow==
 
 fs-extra@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-10.0.0.tgz#9ff61b655dde53fb34a82df84bb214ce802e17c1"
-  integrity sha512-C5owb14u9eJwizKGdchcDUQeFtlSHHthBk8pbX9Vc1PFZrLombudjDnNns88aYslCyF6IY5SUw3Roz6xShcEIQ==
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-10.0.1.tgz#27de43b4320e833f6867cc044bfce29fdf0ef3b8"
+  integrity sha512-NbdoVMZso2Lsrn/QwLXOy6rm0ufY2zEOKCDzJR/0kBsb0E6qed0P3iYK+Ath3BfvXEeu4JhEtXLgILx5psUfag==
   dependencies:
     graceful-fs "^4.2.0"
     jsonfile "^6.0.1"
@@ -3585,23 +3585,23 @@ near-units@^0.1.9:
   dependencies:
     bn.js "^5.2.0"
 
-near-willem-workspaces-ava@^1.0.3-alpha.0:
-  version "1.0.3-alpha.0"
-  resolved "https://registry.yarnpkg.com/near-willem-workspaces-ava/-/near-willem-workspaces-ava-1.0.3-alpha.0.tgz#75e1e171fcef905b3568bd8998ebbba2b04ed030"
-  integrity sha512-vsWLfOskQgSgYzg2TU+KxBsB4yaJoULEPWyDAqx4OouC155y7H5y7GL0oZB0vu4bCm0WBs1VEPFei1RgVtOuWQ==
+near-workspaces-ava@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/near-workspaces-ava/-/near-workspaces-ava-1.1.0.tgz#63874bdaca74759de94f04228f220bbc8096dded"
+  integrity sha512-gEcR/hg9LMxfc+8PFxzN5p+sdlxGNiUtnSK7rM65uplJE4WaO8fxTRyC00499krC47ya2t/mMEvLt9SqqOE5pg==
   dependencies:
     "@ava/typescript" "^2.0.0"
     "@types/bn.js" "^5.1.0"
     "@types/node" "^16.4.10"
     ava "3.15.0"
-    near-willem-workspaces "^1.0.3-alpha.0"
+    near-workspaces "^1.1.0"
     ts-node "^10.1.0"
     typescript "^4.3.5"
 
-near-willem-workspaces@^1.0.3-alpha.0:
-  version "1.0.3-alpha.0"
-  resolved "https://registry.yarnpkg.com/near-willem-workspaces/-/near-willem-workspaces-1.0.3-alpha.0.tgz#b80495f183d1ac57ca0ca3f58b21774a370a6580"
-  integrity sha512-5JPhXZ82uIXumJKUWEI2CXUjtzk0XSxql0Crnx+whc8BA1x26JOYRp98iNELCOV4+pREoeSKTDKCNpYsanX2Hw==
+near-workspaces@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/near-workspaces/-/near-workspaces-1.1.0.tgz#95167230d10233063224a69ee97dd2b469871669"
+  integrity sha512-cmn3k44Ce+INWhz9JUR9RlPGqVWKoM7ETSnKSXXpUZmVNj6smu7DtWQTAoSjPGvHCnftv7wu/6Gn1qq5F2KnFA==
   dependencies:
     base64url "^3.0.1"
     bn.js "^5.2.0"
@@ -4837,7 +4837,26 @@ trim-off-newlines@^1.0.1:
   resolved "https://registry.yarnpkg.com/trim-off-newlines/-/trim-off-newlines-1.0.3.tgz#8df24847fcb821b0ab27d58ab6efec9f2fe961a1"
   integrity sha512-kh6Tu6GbeSNMGfrrZh6Bb/4ZEHV1QlB4xNDBeog8Y9/QwFlKTRyWvY3Fs9tRDAMZliVUwieMgEdIeL/FtqjkJg==
 
-ts-node@^10.1.0, ts-node@^10.4.0:
+ts-node@^10.1.0:
+  version "10.7.0"
+  resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.7.0.tgz#35d503d0fab3e2baa672a0e94f4b40653c2463f5"
+  integrity sha512-TbIGS4xgJoX2i3do417KSaep1uRAW/Lu+WAL2doDHC0D6ummjirVOXU5/7aiZotbQ5p1Zp9tP7U6cYhA0O7M8A==
+  dependencies:
+    "@cspotcode/source-map-support" "0.7.0"
+    "@tsconfig/node10" "^1.0.7"
+    "@tsconfig/node12" "^1.0.7"
+    "@tsconfig/node14" "^1.0.0"
+    "@tsconfig/node16" "^1.0.2"
+    acorn "^8.4.1"
+    acorn-walk "^8.1.1"
+    arg "^4.1.0"
+    create-require "^1.1.0"
+    diff "^4.0.1"
+    make-error "^1.1.1"
+    v8-compile-cache-lib "^3.0.0"
+    yn "3.1.1"
+
+ts-node@^10.4.0:
   version "10.5.0"
   resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.5.0.tgz#618bef5854c1fbbedf5e31465cbb224a1d524ef9"
   integrity sha512-6kEJKwVxAJ35W4akuiysfKwKmjkbYxwQMTBaAxo9KKAx/Yd26mPUyhGz3ji+EsJoAgrLqVsYHNuuYwQe22lbtw==
@@ -4940,7 +4959,12 @@ typedoc@^0.22.11:
     minimatch "^3.0.4"
     shiki "^0.10.0"
 
-typescript@^4.3.5, typescript@^4.5.5:
+typescript@^4.3.5:
+  version "4.6.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.6.2.tgz#fe12d2727b708f4eef40f51598b3398baa9611d4"
+  integrity sha512-HM/hFigTBHZhLXshn9sN37H085+hQGeJHJ/X7LpBWLID/fbc2acUMfU+lGD98X81sKP+pFa9f0DZmCwB9GnbAg==
+
+typescript@^4.5.5:
   version "4.5.5"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.5.tgz#d8c953832d28924a9e3d37c73d729c846c5896f3"
   integrity sha512-TCTIul70LyWe6IJWT8QSYeA54WQe8EjQFU4wY52Fasj5UKx88LNYKCgBEHcOMOrFF1rKGbD8v/xcNWVUq9SymA==

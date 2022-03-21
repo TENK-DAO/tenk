@@ -9,11 +9,11 @@ import {
   KeyPair,
   PublicKey,
   AccountManager,
-} from "near-willem-workspaces";
-import { ONE_NEAR, TransactionResult } from "near-willem-workspaces-ava";
+} from "near-workspaces";
+import { ONE_NEAR, TransactionResult } from "near-workspaces-ava";
 import { binPath } from "./bin";
 import { BalanceDelta, getDelta } from "./delta";
-import {Contract} from "../..";
+import {Contract, Token} from "../..";
 
 let c: Contract;
 type f = typeof c.new_default_meta;
@@ -320,7 +320,7 @@ export async function createLinkAndNewAccount(
 export async function getTokens(
   contract: NearAccount,
   account_id: NearAccount
-): Promise<any[]> {
+): Promise<Token[]> {
   return contract.view("nft_tokens_for_owner", { account_id });
 }
 

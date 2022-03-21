@@ -1,9 +1,6 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.1.0) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.2) 
 
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.9.0) 
-
-///  @pattern ^[0-9]+$
-type u128 = string
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
 ///  StorageUsage is used to count the amount of storage used by a contract.
 type storage-usage = u64
@@ -20,8 +17,14 @@ type base64-vec-u8 = string
 ///  Raw type for duration in nanoseconds
 type duration = u64
 
-///  @pattern ^(([a-z\\d]+[\\-_])*[a-z\\d]+\\.)*([a-z\\d]+[\\-_])*[a-z\\d]+$"
+///  @minLength 2
+///  @maxLength 64
+///  @pattern ^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$
 type account-id = string
+
+///  String representation of a u128-bit integer
+///  @pattern ^[0-9]+$
+type u128 = string
 
 ///  Public key in a binary format with base58 string serialization with human-readable curve.
 ///  The key types currently supported are `secp256k1` and `ed25519`.
@@ -32,67 +35,67 @@ type public-key = string
 ///  Raw type for timestamp in nanoseconds
 type timestamp = u64
 
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (cargo-witgen v0.9.0) 
-
-record storage-balance-bounds {
-    min: u128,
-	max: option<u128>
-}
-
-record fungible-token-metadata {
-    spec: string,
-	name: string,
-	symbol: string,
-	icon: option<string>,
-	reference: option<string>,
-	reference-hash: option<base64-vec-u8>,
-	decimals: u8
-}
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.1.0) 
 
 ///  In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.
 record token {
     token-id: token-id,
-	owner-id: account-id,
-	metadata: option<token-metadata>,
-	approved-account-ids: option<list<tuple<account-id,u64>>>
+    owner-id: account-id,
+    metadata: option<token-metadata>,
+    approved-account-ids: option<list<tuple<account-id,u64>>>
+}
+
+record fungible-token-metadata {
+    spec: string,
+    name: string,
+    symbol: string,
+    icon: option<string>,
+    reference: option<string>,
+    reference-hash: option<base64-vec-u8>,
+    decimals: u8
 }
 
 ///  Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.
 type token-id = string
 
-record storage-balance {
-    total: u128,
-	available: u128
+///  Metadata for the NFT contract itself.
+record nft-contract-metadata {
+    spec: string,
+    name: string,
+    symbol: string,
+    icon: option<string>,
+    base-uri: option<string>,
+    reference: option<string>,
+    reference-hash: option<base64-vec-u8>
 }
 
-type wrapped-duration = string
+record storage-balance-bounds {
+    min: u128,
+    max: option<u128>
+}
 
 ///  Metadata on the individual token level.
 record token-metadata {
     title: option<string>,
-	description: option<string>,
-	media: option<string>,
-	media-hash: option<base64-vec-u8>,
-	copies: option<u64>,
-	issued-at: option<string>,
-	expires-at: option<string>,
-	starts-at: option<string>,
-	updated-at: option<string>,
-	extra: option<string>,
-	reference: option<string>,
-	reference-hash: option<base64-vec-u8>
+    description: option<string>,
+    media: option<string>,
+    media-hash: option<base64-vec-u8>,
+    copies: option<u64>,
+    issued-at: option<string>,
+    expires-at: option<string>,
+    starts-at: option<string>,
+    updated-at: option<string>,
+    extra: option<string>,
+    reference: option<string>,
+    reference-hash: option<base64-vec-u8>
 }
 
-///  Metadata for the NFT contract itself.
-record nft-contract-metadata {
-    spec: string,
-	name: string,
-	symbol: string,
-	icon: option<string>,
-	base-uri: option<string>,
-	reference: option<string>,
-	reference-hash: option<base64-vec-u8>
+record storage-balance {
+    total: u128,
+    available: u128
 }
+
+type wrapped-duration = string
 
 check-key: function(public-key: public-key) -> bool
 
@@ -206,6 +209,10 @@ record sale-info {
 }
 
 ///  change
+nft-mint: function(num: u32, token-owner-id: account-id) -> token
+
+
+///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
 ///  change
@@ -244,11 +251,10 @@ nft-metadata: function() -> nft-contract-metadata
 nft-is-approved: function(token-id: token-id, approved-account-id: account-id, approval-id: option<u64>) -> bool
 
 
-remaining-allowance: function(account-id: account-id) -> option<u32>
-
-
 ///  change
-nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadata: token-metadata) -> token
+nft-burn: function(token-id: token-id)
+
+remaining-allowance: function(account-id: account-id) -> option<u32>
 
 
 get-user-sale-info: function(account-id: account-id) -> user-sale-info
