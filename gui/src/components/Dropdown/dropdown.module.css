@@ -1,0 +1,59 @@
+.trigger {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KICA8cGF0aCBmaWxsPSJncmF5IiBkPSJNMTAsMjMyLjdsNDkwLDUzNC41bDQ5MC01MzQuNUgxMHoiIC8+DQo8L3N2Zz4=);
+  background-repeat: no-repeat;
+  background-position: bottom 50% right var(--spacing-s);
+  background-size: var(--spacing-s);
+  border-radius: var(--br-small);
+  border: 1px solid var(--gray-3);
+  padding-right: var(--spacing-l);
+}
+
+.trigger,
+.item {
+  border-radius: var(--br-small);
+  color: inherit;
+  font-weight: var(--fw-regular);
+}
+
+.trigger:focus,
+.trigger:hover,
+.item:focus,
+.item:hover {
+  box-shadow: none;
+  outline: none;
+}
+.trigger:focus,
+.trigger:hover {
+  border-color: var(--gray-5);
+}
+.item:focus,
+.item:hover {
+  background-color: var(--gray-1);
+}
+
+.trigger:active,
+.item:active {
+  top: 0;
+  border-color: var(--gray-4);
+}
+
+.item {
+  border: none;
+}
+
+.arrow {
+  fill: var(--gray-4);
+}
+
+.content {
+  background-color: var(--bg);
+  border-radius: var(--br-small);
+  border: 1px solid var(--gray-4);
+  box-shadow: rgba(22, 23, 24, 0.35) 0px 10px 38px -10px, rgba(22, 23, 24, 0.2) 0px 10px 20px -15px;
+  padding: var(--spacing-xs);
+}
+
+.item {
+  cursor: pointer;
+  padding: 0 var(--spacing-s);
+}

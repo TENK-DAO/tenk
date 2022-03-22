@@ -22,9 +22,9 @@
     "test:ci": "yarn test:unit && yarn test",
     "lint": "yarn eslint . --ext .ts",
     "wit": "(cd contracts/tenk; witme near wit -t ts/ --standards && tsc)",
-    "schema": "(cd contracts/tenk; ts-json-schema-generator -f ./tsconfig.json --validation-keywords contractMethod -o index.schema.json)",
+    "schema": "(cd contracts/tenk; witme near json -o ../../gui/src/near/contracts/tenk)",
     "wit:schema": "yarn wit && yarn schema",
-    "docs": "yarn wit && typedoc contracts/tenk/ts/index.ts --tsconfig contracts/tenk/tsconfig.json",
+    "gui": "yarn wit && (cd gui && yarn && yarn build) && typedoc contracts/tenk/ts/index.ts --tsconfig contracts/tenk/tsconfig.json --out gui/build/docs",
     "pack-car": "ipfs-car --wrapWithDirectory false",
     "upload-car": "ts-node ./scripts/car-uploader.ts"
   },
@@ -36,9 +36,7 @@
     "acquit-markdown": "^0.1.0",
     "eslint": "^7.29.0",
     "glob": "^7.2.0",
-    "near-api-js": "git+https://github.com/ahalabs/near-api-js#beta",
     "near-cli": "git+https://github.com/ahalabs/near-cli#beta",
-    "near-units": "^0.1.9",
     "near-workspaces-ava": "^1.1.0",
     "nft.storage": "^5.0.0",
     "ts-node": "^10.4.0",
@@ -46,6 +44,7 @@
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "ipfs-car": "^0.6.2"
+    "ipfs-car": "^0.6.2",
+    "near-api-js": "ahalabs/near-api-js#develop"
   }
 }

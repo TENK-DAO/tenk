@@ -1,0 +1,21 @@
+/* This is a CSS Module; see https://create-react-app.dev/docs/adding-a-css-modules-stylesheet/ */
+.nav {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-s) var(--spacing-m);
+  justify-content: space-between;
+  padding: var(--spacing-l) 0;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+}
+
+.title svg,
+.title img {
+  display: inline-block;
+  height: var(--fs-heading-1);
+  width: var(--fs-heading-1);
+}

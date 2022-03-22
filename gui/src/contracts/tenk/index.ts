@@ -27,6 +27,12 @@ export type StorageUsage = u64;
 */
 export type Balance = U128;
 /**
+* String representation of a u128-bit integer
+* @pattern ^[0-9]+$
+* Note: largest u128 is "340282366920938463463374607431768211455"
+*/
+export type U128 = string;
+/**
 * Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
 */
 export type Gas = u64;
@@ -44,11 +50,6 @@ export type Duration = u64;
 * @pattern ^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$
 */
 export type AccountId = string;
-/**
-* String representation of a u128-bit integer
-* @pattern ^[0-9]+$
-*/
-export type U128 = string;
 /**
 * Public key in a binary format with base58 string serialization with human-readable curve.
 * The key types currently supported are `secp256k1` and `ed25519`.
@@ -1106,7 +1107,7 @@ export interface CheckKey {
   };
   
 }
-export type CheckKey__Result = boolean;
+export type CheckKey__Result =boolean;
 /**
 * 
 * @contractMethod change
@@ -1128,7 +1129,7 @@ export interface UpdateAllowance {
   }
   
 }
-export type UpdateAllowance__Result = void;
+export type UpdateAllowance__Result =void;
 /**
 * 
 * @contractMethod view
@@ -1139,7 +1140,7 @@ export interface Whitelisted {
   };
   
 }
-export type Whitelisted__Result = boolean;
+export type Whitelisted__Result =boolean;
 /**
 * 
 * @contractMethod view
@@ -1148,7 +1149,7 @@ export interface GetSaleInfo {
   args: {};
   
 }
-export type GetSaleInfo__Result = SaleInfo;
+export type GetSaleInfo__Result =SaleInfo;
 /**
 * Revoke all approved accounts for a specific token.
 * 
@@ -1181,7 +1182,7 @@ export interface NftRevokeAll {
   }
   
 }
-export type NftRevokeAll__Result = void;
+export type NftRevokeAll__Result =void;
 /**
 * 
 * @contractMethod view
@@ -1192,7 +1193,7 @@ export interface CostPerToken {
   };
   
 }
-export type CostPerToken__Result = U128;
+export type CostPerToken__Result =U128;
 /**
 * 
 * @contractMethod change
@@ -1214,7 +1215,7 @@ export interface TransferOwnership {
   }
   
 }
-export type TransferOwnership__Result = void;
+export type TransferOwnership__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1237,7 +1238,7 @@ export interface StartPresale {
   }
   
 }
-export type StartPresale__Result = void;
+export type StartPresale__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1257,7 +1258,7 @@ export interface CloseContract {
   }
   
 }
-export type CloseContract__Result = void;
+export type CloseContract__Result =void;
 /**
 * Simple transfer. Transfer a given `token_id` from current owner to
 * `receiver_id`.
@@ -1304,7 +1305,7 @@ export interface NftTransfer {
   }
   
 }
-export type NftTransfer__Result = void;
+export type NftTransfer__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1326,7 +1327,7 @@ export interface StartSale {
   }
   
 }
-export type StartSale__Result = void;
+export type StartSale__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1348,7 +1349,7 @@ export interface NftMintMany {
   }
   
 }
-export type NftMintMany__Result = Token[];
+export type NftMintMany__Result =Token[];
 /**
 * Check if a token is approved for transfer by a given account, optionally
 * checking an approval_id
@@ -1372,7 +1373,7 @@ export interface NftIsApproved {
   };
   
 }
-export type NftIsApproved__Result = boolean;
+export type NftIsApproved__Result =boolean;
 /**
 * 
 * @contractMethod change
@@ -1394,7 +1395,7 @@ export interface UpdateUri {
   }
   
 }
-export type UpdateUri__Result = void;
+export type UpdateUri__Result =void;
 /**
 * 
 * @contractMethod view
@@ -1407,7 +1408,7 @@ export interface NftPayout {
   };
   
 }
-export type NftPayout__Result = Payout;
+export type NftPayout__Result =Payout;
 /**
 * Get a list of all tokens
 * 
@@ -1428,7 +1429,7 @@ export interface NftTokens {
   };
   
 }
-export type NftTokens__Result = Token[];
+export type NftTokens__Result =Token[];
 /**
 * Transfer token and call a method on a receiver contract. A successful
 * workflow will end in a success execution outcome to the callback on the NFT
@@ -1487,7 +1488,7 @@ export interface NftTransferCall {
   }
   
 }
-export type NftTransferCall__Result = void;
+export type NftTransferCall__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1514,7 +1515,7 @@ export interface NftTransferPayout {
   }
   
 }
-export type NftTransferPayout__Result = Payout;
+export type NftTransferPayout__Result =Payout;
 /**
 * Returns the balance associated with given key.
 * 
@@ -1524,7 +1525,7 @@ export interface GetKeyBalance {
   args: {};
   
 }
-export type GetKeyBalance__Result = U128;
+export type GetKeyBalance__Result =U128;
 /**
 * Revoke an approved account for a specific token.
 * 
@@ -1559,7 +1560,7 @@ export interface NftRevoke {
   }
   
 }
-export type NftRevoke__Result = void;
+export type NftRevoke__Result =void;
 /**
 * Create a pending token that can be claimed with corresponding private key
 * 
@@ -1582,7 +1583,7 @@ export interface CreateLinkdrop {
   }
   
 }
-export type CreateLinkdrop__Result = void;
+export type CreateLinkdrop__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1605,7 +1606,7 @@ export interface AddWhitelistAccounts {
   }
   
 }
-export type AddWhitelistAccounts__Result = void;
+export type AddWhitelistAccounts__Result =void;
 /**
 * Returns the token with the given `token_id` or `null` if no such token.
 * 
@@ -1617,7 +1618,7 @@ export interface NftToken {
   };
   
 }
-export type NftToken__Result = Token | null;
+export type NftToken__Result =Token | null;
 /**
 * 
 * @contractMethod change
@@ -1642,7 +1643,7 @@ export interface New {
   }
   
 }
-export type New__Result = void;
+export type New__Result =void;
 /**
 * Returns the total supply of non-fungible tokens as a string representing an
 * unsigned 128-bit integer to avoid JSON number limit of 2^53.
@@ -1653,7 +1654,7 @@ export interface NftTotalSupply {
   args: {};
   
 }
-export type NftTotalSupply__Result = U128;
+export type NftTotalSupply__Result =U128;
 /**
 * 
 * @contractMethod view
@@ -1662,7 +1663,7 @@ export interface TokenStorageCost {
   args: {};
   
 }
-export type TokenStorageCost__Result = U128;
+export type TokenStorageCost__Result =U128;
 /**
 * Add an approved account for a specific token.
 * 
@@ -1708,7 +1709,7 @@ export interface NftApprove {
   }
   
 }
-export type NftApprove__Result = void;
+export type NftApprove__Result =void;
 /**
 * 
 * @contractMethod view
@@ -1719,7 +1720,7 @@ export interface CostOfLinkdrop {
   };
   
 }
-export type CostOfLinkdrop__Result = U128;
+export type CostOfLinkdrop__Result =U128;
 /**
 * 
 * @contractMethod view
@@ -1731,7 +1732,7 @@ export interface TotalCost {
   };
   
 }
-export type TotalCost__Result = U128;
+export type TotalCost__Result =U128;
 /**
 * 
 * @contractMethod view
@@ -1740,7 +1741,7 @@ export interface GetLinkdropContract {
   args: {};
   
 }
-export type GetLinkdropContract__Result = AccountId;
+export type GetLinkdropContract__Result =AccountId;
 /**
 * 
 * @contractMethod change
@@ -1765,7 +1766,7 @@ export interface NewDefaultMeta {
   }
   
 }
-export type NewDefaultMeta__Result = void;
+export type NewDefaultMeta__Result =void;
 /**
 * Get number of tokens owned by a given account
 * 
@@ -1784,7 +1785,7 @@ export interface NftSupplyForOwner {
   };
   
 }
-export type NftSupplyForOwner__Result = U128;
+export type NftSupplyForOwner__Result =U128;
 /**
 * 
 * @contractMethod view
@@ -1793,7 +1794,7 @@ export interface NftMetadata {
   args: {};
   
 }
-export type NftMetadata__Result = NftContractMetadata;
+export type NftMetadata__Result =NftContractMetadata;
 /**
 * 
 * @contractMethod view
@@ -1802,7 +1803,7 @@ export interface MintRateLimit {
   args: {};
   
 }
-export type MintRateLimit__Result = u32 | null;
+export type MintRateLimit__Result =u32 | null;
 /**
 * 
 * @contractMethod view
@@ -1813,7 +1814,7 @@ export interface RemainingAllowance {
   };
   
 }
-export type RemainingAllowance__Result = u32 | null;
+export type RemainingAllowance__Result =u32 | null;
 /**
 * Get list of all tokens owned by a given account
 * 
@@ -1836,7 +1837,7 @@ export interface NftTokensForOwner {
   };
   
 }
-export type NftTokensForOwner__Result = Token[];
+export type NftTokensForOwner__Result =Token[];
 /**
 * 
 * @contractMethod change
@@ -1860,7 +1861,7 @@ export interface NftMint {
   }
   
 }
-export type NftMint__Result = Token;
+export type NftMint__Result =Token;
 /**
 * 
 * @contractMethod view
@@ -1871,7 +1872,7 @@ export interface GetUserSaleInfo {
   };
   
 }
-export type GetUserSaleInfo__Result = UserSaleInfo;
+export type GetUserSaleInfo__Result =UserSaleInfo;
 /**
 * 
 * @contractMethod view
@@ -1880,7 +1881,7 @@ export interface Initial {
   args: {};
   
 }
-export type Initial__Result = u64;
+export type Initial__Result =u64;
 /**
 * 
 * @contractMethod change
@@ -1903,7 +1904,7 @@ export interface AddWhitelistAccountUngaurded {
   }
   
 }
-export type AddWhitelistAccountUngaurded__Result = void;
+export type AddWhitelistAccountUngaurded__Result =void;
 /**
 * 
 * @contractMethod view
@@ -1912,7 +1913,7 @@ export interface TokensLeft {
   args: {};
   
 }
-export type TokensLeft__Result = u32;
+export type TokensLeft__Result =u32;
 /**
 * 
 * @contractMethod change
@@ -1934,7 +1935,7 @@ export interface UpdateRoyalties {
   }
   
 }
-export type UpdateRoyalties__Result = void;
+export type UpdateRoyalties__Result =void;
 /**
 * 
 * @contractMethod change
@@ -1954,4 +1955,4 @@ export interface NftMintOne {
   }
   
 }
-export type NftMintOne__Result = Token;
+export type NftMintOne__Result =Token;
