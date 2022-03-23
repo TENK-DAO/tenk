@@ -43,8 +43,3 @@ export function getMethod(m?: string | null): Schema | undefined {
   if (!hasContractMethod(m as MethodName)) return undefined
   return methods[m as MethodName]
 }
-
-export function methodType(m: MethodName): "change" | "view" {
-  if (changeMethods.includes(m)) { return "change" }
-  return "view";
-}

@@ -193,6 +193,22 @@ pre code {
   padding: 0;
 }
 
+legend {
+  font-weight: bold;
+}
+legend#root_args__title .required,
+legend#root_options__title .required {
+  display: none;
+}
+legend#root_args__title {
+  display: none;
+}
+legend#root_options__title {
+  text-transform: capitalize;
+  font-size: 1.5em;
+  margin: var(--spacing-m) 0 var(--spacing-s);
+}
+
 button,
 .button,
 input,
@@ -203,16 +219,13 @@ select {
 
 button,
 .button {
-  --color: #{$primary};
-  --color-shadow: #{soft(light($primary))};
-  background-color: transparent;
-  border-radius: var(--br-base);
-  border: 2px solid var(--color);
-  color: var(--color);
+  background-color: var(--fg);
+  border-radius: var(--br-small);
+  border: none;
+  color: var(--bg);
   cursor: pointer;
   display: inline-block;
   font-size: inherit;
-  font-weight: var(--fw-bold);
 }
 
 input,
@@ -234,18 +247,13 @@ button:hover,
 .button:hover,
 button:focus,
 .button:focus {
-  box-shadow: 0 0 10px 4px var(--color-shadow);
+  box-shadow: 0 0 10px 4px var(--gray-2);
   text-decoration: none;
 }
 button:active,
 .button:active {
   position: relative;
   top: 2px;
-}
-button.secondary,
-.button.secondary {
-  --color: #{$secondary};
-  --color-shadow: #{soft(light($secondary))};
 }
 button.link,
 .button.link {
@@ -314,4 +322,14 @@ input::selection {
 
 input[type=checkbox] {
   margin-right: var(--spacing-xs);
+}
+
+// fill in some missing bootstrap form styles
+.array-item {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.array-item .btn {
+  padding: 0;
 }

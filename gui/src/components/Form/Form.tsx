@@ -4,7 +4,7 @@ import snake from "to-snake-case";
 import { useNavigate, useParams } from "react-router-dom"
 import useNear from "../../hooks/useNear"
 import { Selector } from ".."
-import { getMethod, MethodName, methodType } from "../../near/methods"
+import { getMethod } from "../../near/methods"
 
 import css from "./form.module.css"
 
@@ -77,16 +77,8 @@ export function Form() {
               setLoading(true)
               setError(undefined)
               try {
-                let ty = methodType(method as MethodName);
-                let realName = snake(method);
-                let res;
-                if (ty === "view") {
-                  //@ts-expect-error can't see final method name
-                  res = await TenK[realName](formData)
-                } else {
-                  //@ts-expect-error can't see final method name
-                  res = await TenK[realName](formData.args, formData.options);
-                }
+                // @ts-expect-error can't see final method name
+                const res = await TenK[snake(method)](formData.args, formData.options)
                 setResult(JSON.stringify(res, null, 2));
               } catch (e: unknown) {
                 if (e instanceof Error) {
