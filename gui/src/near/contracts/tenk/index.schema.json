@@ -32,7 +32,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -81,7 +81,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -152,7 +152,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -246,7 +246,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -492,7 +492,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -543,7 +543,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -597,7 +597,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -731,7 +731,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -771,7 +771,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -809,7 +809,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -892,7 +892,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -933,7 +933,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1131,7 +1131,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1186,7 +1186,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1246,7 +1246,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1430,7 +1430,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1470,7 +1470,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1702,7 +1702,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1750,7 +1750,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1793,7 +1793,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {
@@ -1836,7 +1836,7 @@
           "properties": {
             "attachedDeposit": {
               "$ref": "#/definitions/Balance",
-              "default": 0,
+              "default": "0",
               "description": "Units in yoctoNear"
             },
             "gas": {

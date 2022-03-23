@@ -22,7 +22,7 @@ jobs:
       - uses: actions-rs/cargo@v1
         with:
           command: install
-          args: witme --version 0.2.0
+          args: witme --version 0.2.3
       - uses: actions/setup-node@v1
         with:
           node-version: '16.x'
