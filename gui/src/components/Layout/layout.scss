@@ -1,0 +1,335 @@
+@import "./a11y.css";
+@import "./bootstrap.css";
+
+$white: white !default;
+$black: black !default;
+$primary: #e73b93 !default;
+$secondary: #a463b0 !default;
+$tertiary: #aad055 !default;
+
+:root {
+  /* Typographic Scale */
+  --base-font-size: 14px;
+  @media (min-width: 415px) {
+    --base-font-size: 16px;
+  }
+  @media (min-width: 600px) {
+    --base-font-size: 18px;
+  }
+
+  /* Font Family */
+  --sans: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --monospace: "Source Code Pro", monospace;
+
+  /* Font Weights */
+  --fw-regular: 400;
+  --fw-bold: 600;
+  --fw-black: 700;
+
+  /* Line Heights */
+  --lh-headings: 1.1;
+  --lh-copy: 1.5;
+
+  /* Spacing Scale */
+  --base-spacing: 0.5rem;
+  --spacing-xs: calc(var(--base-spacing) / 2);
+  --spacing-s: var(--base-spacing);
+  --spacing-m: calc(var(--base-spacing) * 2);
+  --spacing-l: calc(var(--base-spacing) * 3);
+  --spacing-xl: calc(var(--base-spacing) * 4);
+  --spacing-xxl: calc(var(--base-spacing) * 5);
+
+  /* Sizes */
+  --header-height: 80px;
+  --input-height: 48px;
+  --input-height--small: 40px;
+
+  /* Border Radius */
+  --br-base: 1000px;
+  --br-small: 4px;
+
+  /* Colors */
+  /* TODO: move these base colors to settings.json or similar */
+  --white: #{$white};
+  --black: #{$black};
+  --primary: #{$primary};
+  --secondary: #{$secondary};
+  --tertiary: #{$tertiary};
+
+  --fg: var(--black);
+  --bg: var(--white);
+
+  --gray-1: #{adjust-color($black, $alpha: -0.9)};
+  --gray-2: #{adjust-color($black, $alpha: -0.8)};
+  --gray-3: #{adjust-color($black, $alpha: -0.7)};
+  --gray-4: #{adjust-color($black, $alpha: -0.6)};
+  --gray-5: #{adjust-color($black, $alpha: -0.5)};
+  --gray-6: #{adjust-color($black, $alpha: -0.4)};
+  --gray-7: #{adjust-color($black, $alpha: -0.3)};
+  --gray-8: #{adjust-color($black, $alpha: -0.2)};
+
+  --red: #fc5b5b;
+  --bg-red: #{adjust-color(#fc5b5b, $alpha: -0.9)};
+  @media (prefers-color-scheme: dark) {
+    --bg: var(--black);
+    --fg: var(--white);
+
+    --gray-1: #{adjust-color($white, $alpha: -0.9)};
+    --gray-2: #{adjust-color($white, $alpha: -0.8)};
+    --gray-3: #{adjust-color($white, $alpha: -0.7)};
+    --gray-4: #{adjust-color($white, $alpha: -0.6)};
+    --gray-5: #{adjust-color($white, $alpha: -0.5)};
+    --gray-6: #{adjust-color($white, $alpha: -0.4)};
+    --gray-7: #{adjust-color($white, $alpha: -0.3)};
+    --gray-8: #{adjust-color($white, $alpha: -0.2)};
+
+    --red: #ff8588;
+    --bg-red: #{adjust-color(#ff8588, $alpha: -0.9)};
+  }
+}
+
+@function light($color) {
+  @return adjust-color($color, $saturation: 53%, $lightness: 15%);
+}
+
+@function soft($color) {
+  @return adjust-color($color, $alpha: -0.85);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+html {
+  background-color: var(--bg);
+  color: var(--fg);
+  line-height: var(--lh-copy);
+  font-family: var(--sans);
+  font-size: var(--base-font-size);
+  font-weight: var(--fw-regular);
+}
+
+body {
+  margin: 0 auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: var(--fw-black);
+  margin: 0;
+  line-height: var(--lh-headings);
+}
+
+img,
+picture {
+  display: block;
+  max-width: 100%;
+}
+
+a,
+.link,
+a:visited {
+  color: var(--primary);
+  padding: 0;
+  text-decoration: none;
+}
+a:hover,
+a:focus,
+.link:hover,
+.link:focus {
+  color: var(--secondary);
+  text-decoration: underline;
+}
+a:active,
+.link:active {
+  color: var(--tertiary);
+}
+
+strong {
+  font-weight: var(--fw-bold);
+}
+
+em {
+  color: var(--primary);
+  font-style: inherit;
+  font-weight: inherit;
+}
+
+label {
+  display: block;
+}
+
+code {
+  color: var(--fg);
+  margin: 0;
+  font-size: 85%;
+  font-family: var(--monospace);
+}
+
+code,
+pre {
+  background-color: var(--gray-1);
+  border-radius: var(--br-small);
+  padding: var(--spacing-xs) var(--spacing-s);
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 5px 0 0;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+legend {
+  font-weight: bold;
+}
+legend#root_args__title .required,
+legend#root_options__title .required {
+  display: none;
+}
+legend#root_args__title {
+  display: none;
+}
+legend#root_options__title {
+  text-transform: capitalize;
+  font-size: 1.5em;
+  margin: var(--spacing-m) 0 var(--spacing-s);
+}
+
+button,
+.button,
+input,
+select {
+  font: inherit;
+  outline: none;
+}
+
+button,
+.button {
+  background-color: var(--fg);
+  border-radius: var(--br-small);
+  border: none;
+  color: var(--bg);
+  cursor: pointer;
+  display: inline-block;
+  font-size: inherit;
+}
+
+input,
+select {
+  background-color: var(--bg);
+  border: 1px solid var(--gray-3);
+  border-radius: var(--br-small);
+  color: inherit;
+}
+
+input,
+select,
+button,
+.button {
+  padding: var(--spacing-s) var(--spacing-m);
+}
+
+button:hover,
+.button:hover,
+button:focus,
+.button:focus {
+  box-shadow: 0 0 10px 4px var(--gray-2);
+  text-decoration: none;
+}
+button:active,
+.button:active {
+  position: relative;
+  top: 2px;
+}
+button.link,
+.button.link {
+  background: none;
+  box-shadow: none;
+  display: inline;
+}
+[disabled] button,
+button[disabled],
+.button[disabled] {
+  box-shadow: none;
+  background-color: var(--gray-3);
+  color: var(--gray-5);
+  cursor: not-allowed;
+  transform: none;
+}
+
+input:hover,
+input:focus,
+input:active,
+select:hover,
+select:focus,
+select:active {
+  border-color: var(--gray-5);
+}
+
+select {
+  appearance: none;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMTAwMCAxMDAwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPg0KICA8cGF0aCBmaWxsPSJncmF5IiBkPSJNMTAsMjMyLjdsNDkwLDUzNC41bDQ5MC01MzQuNUgxMHoiIC8+DQo8L3N2Zz4=);
+  background-repeat: no-repeat;
+  background-position: bottom 50% right var(--spacing-s);
+  background-size: var(--spacing-s);
+  cursor: pointer;
+  padding-right: var(--spacing-l);
+}
+
+input.error,
+select.error {
+  border-color: var(--red);
+}
+
+input {
+  caret-color: var(--primary);
+}
+
+input::selection {
+  background-color: var(--primary);
+  color: var(--bg);
+}
+
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: calc(75 * var(--spacing-m));
+  padding-left: var(--spacing-l);
+  padding-right: var(--spacing-l);
+}
+
+.columns {
+  align-items: center;
+  display: grid;
+  gap: var(--spacing-l);
+  grid-template-columns: repeat(auto-fit, minmax(18em, 1fr));
+  margin-bottom: var(--spacing-l);
+}
+
+input[type=checkbox] {
+  margin-right: var(--spacing-xs);
+}
+
+// fill in some missing bootstrap form styles
+.array-item {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.array-item .btn {
+  padding: 0;
+}

@@ -1,17 +1,12 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.3) 
 
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.1.0) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
 ///  StorageUsage is used to count the amount of storage used by a contract.
 type storage-usage = u64
 
 ///  Balance is a type for storing amounts of tokens, specified in yoctoNEAR.
 type balance = u128
-
-///  String representation of a u128-bit integer
-///  @pattern ^[0-9]+$
-///  Note: largest u128 is "340282366920938463463374607431768211455"
-type u128 = string
 
 ///  Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
 type gas = u64
@@ -26,6 +21,10 @@ type duration = u64
 ///  @maxLength 64
 ///  @pattern ^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$
 type account-id = string
+
+///  String representation of a u128-bit integer
+///  @pattern ^[0-9]+$
+type u128 = string
 
 ///  Public key in a binary format with base58 string serialization with human-readable curve.
 ///  The key types currently supported are `secp256k1` and `ed25519`.

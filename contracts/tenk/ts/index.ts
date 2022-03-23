@@ -27,12 +27,6 @@ export type StorageUsage = u64;
 */
 export type Balance = U128;
 /**
-* String representation of a u128-bit integer
-* @pattern ^[0-9]+$
-* Note: largest u128 is "340282366920938463463374607431768211455"
-*/
-export type U128 = string;
-/**
 * Represents the amount of NEAR tokens in "gas units" which are used to fund transactions.
 */
 export type Gas = u64;
@@ -50,6 +44,11 @@ export type Duration = u64;
 * @pattern ^(([a-z\d]+[-_])*[a-z\d]+\.)*([a-z\d]+[-_])*[a-z\d]+$
 */
 export type AccountId = string;
+/**
+* String representation of a u128-bit integer
+* @pattern ^[0-9]+$
+*/
+export type U128 = string;
 /**
 * Public key in a binary format with base58 string serialization with human-readable curve.
 * The key types currently supported are `secp256k1` and `ed25519`.
@@ -1102,28 +1101,54 @@ export class Contract {
 * @contractMethod view
 */
 export interface CheckKey {
-  public_key: PublicKey;
+  args: {
+    public_key: PublicKey;
+  };
+  
 }
+export type CheckKey__Result = boolean;
 /**
 * 
 * @contractMethod change
 */
 export interface UpdateAllowance {
-  allowance: u32;
+  args: {
+    allowance: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type UpdateAllowance__Result = void;
 /**
 * 
 * @contractMethod view
 */
 export interface Whitelisted {
-  account_id: AccountId;
+  args: {
+    account_id: AccountId;
+  };
+  
 }
+export type Whitelisted__Result = boolean;
 /**
 * 
 * @contractMethod view
 */
 export interface GetSaleInfo {
+  args: {};
+  
 }
+export type GetSaleInfo__Result = SaleInfo;
 /**
 * Revoke all approved accounts for a specific token.
 * 
@@ -1140,36 +1165,99 @@ export interface GetSaleInfo {
 * @contractMethod change
 */
 export interface NftRevokeAll {
-  token_id: TokenId;
+  args: {
+    token_id: TokenId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftRevokeAll__Result = void;
 /**
 * 
 * @contractMethod view
 */
 export interface CostPerToken {
-  minter: AccountId;
+  args: {
+    minter: AccountId;
+  };
+  
 }
+export type CostPerToken__Result = U128;
 /**
 * 
 * @contractMethod change
 */
 export interface TransferOwnership {
-  new_owner: AccountId;
+  args: {
+    new_owner: AccountId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type TransferOwnership__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface StartPresale {
-  public_sale_start?: TimestampMs;
-  presale_price?: U128;
+  args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type StartPresale__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface CloseContract {
+  args: {};
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type CloseContract__Result = void;
 /**
 * Simple transfer. Transfer a given `token_id` from current owner to
 * `receiver_id`.
@@ -1197,25 +1285,70 @@ export interface CloseContract {
 * @contractMethod change
 */
 export interface NftTransfer {
-  receiver_id: AccountId;
-  token_id: TokenId;
-  approval_id?: u64;
-  memo?: string;
+  args: {
+    receiver_id: AccountId;
+    token_id: TokenId;
+    approval_id?: u64;
+    memo?: string;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftTransfer__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface StartSale {
-  price?: U128;
+  args: {
+    price?: U128;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type StartSale__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface NftMintMany {
-  num: u32;
+  args: {
+    num: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftMintMany__Result = Token[];
 /**
 * Check if a token is approved for transfer by a given account, optionally
 * checking an approval_id
@@ -1232,26 +1365,49 @@ export interface NftMintMany {
 * @contractMethod view
 */
 export interface NftIsApproved {
-  token_id: TokenId;
-  approved_account_id: AccountId;
-  approval_id?: u64;
+  args: {
+    token_id: TokenId;
+    approved_account_id: AccountId;
+    approval_id?: u64;
+  };
+  
 }
+export type NftIsApproved__Result = boolean;
 /**
 * 
 * @contractMethod change
 */
 export interface UpdateUri {
-  uri: string;
+  args: {
+    uri: string;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type UpdateUri__Result = void;
 /**
 * 
 * @contractMethod view
 */
 export interface NftPayout {
-  token_id: string;
-  balance: U128;
-  max_len_payout?: u32;
+  args: {
+    token_id: string;
+    balance: U128;
+    max_len_payout?: u32;
+  };
+  
 }
+export type NftPayout__Result = Payout;
 /**
 * Get a list of all tokens
 * 
@@ -1266,9 +1422,13 @@ export interface NftPayout {
 * @contractMethod view
 */
 export interface NftTokens {
-  from_index?: U128;
-  limit?: u64;
+  args: {
+    from_index?: U128;
+    limit?: u64;
+  };
+  
 }
+export type NftTokens__Result = Token[];
 /**
 * Transfer token and call a method on a receiver contract. A successful
 * workflow will end in a success execution outcome to the callback on the NFT
@@ -1307,31 +1467,64 @@ export interface NftTokens {
 * @contractMethod change
 */
 export interface NftTransferCall {
-  receiver_id: AccountId;
-  token_id: TokenId;
-  approval_id?: u64;
-  memo?: string;
-  msg: string;
+  args: {
+    receiver_id: AccountId;
+    token_id: TokenId;
+    approval_id?: u64;
+    memo?: string;
+    msg: string;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftTransferCall__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface NftTransferPayout {
-  receiver_id: AccountId;
-  token_id: string;
-  approval_id?: u64;
-  memo?: string;
-  balance: U128;
-  max_len_payout?: u32;
+  args: {
+    receiver_id: AccountId;
+    token_id: string;
+    approval_id?: u64;
+    memo?: string;
+    balance: U128;
+    max_len_payout?: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftTransferPayout__Result = Payout;
 /**
 * Returns the balance associated with given key.
 * 
 * @contractMethod view
 */
 export interface GetKeyBalance {
+  args: {};
+  
 }
+export type GetKeyBalance__Result = U128;
 /**
 * Revoke an approved account for a specific token.
 * 
@@ -1349,43 +1542,107 @@ export interface GetKeyBalance {
 * @contractMethod change
 */
 export interface NftRevoke {
-  token_id: TokenId;
-  account_id: AccountId;
+  args: {
+    token_id: TokenId;
+    account_id: AccountId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftRevoke__Result = void;
 /**
 * Create a pending token that can be claimed with corresponding private key
 * 
 * @contractMethod change
 */
 export interface CreateLinkdrop {
-  public_key: PublicKey;
+  args: {
+    public_key: PublicKey;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type CreateLinkdrop__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface AddWhitelistAccounts {
-  accounts: AccountId[];
-  allowance?: u32;
+  args: {
+    accounts: AccountId[];
+    allowance?: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type AddWhitelistAccounts__Result = void;
 /**
 * Returns the token with the given `token_id` or `null` if no such token.
 * 
 * @contractMethod view
 */
 export interface NftToken {
-  token_id: TokenId;
+  args: {
+    token_id: TokenId;
+  };
+  
 }
+export type NftToken__Result = Token | null;
 /**
 * 
 * @contractMethod change
 */
 export interface New {
-  owner_id: AccountId;
-  metadata: NftContractMetadata;
-  size: u32;
-  sale: Sale;
+  args: {
+    owner_id: AccountId;
+    metadata: NftContractMetadata;
+    size: u32;
+    sale: Sale;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type New__Result = void;
 /**
 * Returns the total supply of non-fungible tokens as a string representing an
 * unsigned 128-bit integer to avoid JSON number limit of 2^53.
@@ -1393,13 +1650,19 @@ export interface New {
 * @contractMethod view
 */
 export interface NftTotalSupply {
+  args: {};
+  
 }
+export type NftTotalSupply__Result = U128;
 /**
 * 
 * @contractMethod view
 */
 export interface TokenStorageCost {
+  args: {};
+  
 }
+export type TokenStorageCost__Result = U128;
 /**
 * Add an approved account for a specific token.
 * 
@@ -1427,41 +1690,82 @@ export interface TokenStorageCost {
 * @contractMethod change
 */
 export interface NftApprove {
-  token_id: TokenId;
-  account_id: AccountId;
-  msg?: string;
+  args: {
+    token_id: TokenId;
+    account_id: AccountId;
+    msg?: string;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftApprove__Result = void;
 /**
 * 
 * @contractMethod view
 */
 export interface CostOfLinkdrop {
-  minter: AccountId;
+  args: {
+    minter: AccountId;
+  };
+  
 }
+export type CostOfLinkdrop__Result = U128;
 /**
 * 
 * @contractMethod view
 */
 export interface TotalCost {
-  num: u32;
-  minter: AccountId;
+  args: {
+    num: u32;
+    minter: AccountId;
+  };
+  
 }
+export type TotalCost__Result = U128;
 /**
 * 
 * @contractMethod view
 */
 export interface GetLinkdropContract {
+  args: {};
+  
 }
+export type GetLinkdropContract__Result = AccountId;
 /**
 * 
 * @contractMethod change
 */
 export interface NewDefaultMeta {
-  owner_id: AccountId;
-  metadata: InitialMetadata;
-  size: u32;
-  sale?: Sale;
+  args: {
+    owner_id: AccountId;
+    metadata: InitialMetadata;
+    size: u32;
+    sale?: Sale;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NewDefaultMeta__Result = void;
 /**
 * Get number of tokens owned by a given account
 * 
@@ -1475,27 +1779,41 @@ export interface NewDefaultMeta {
 * @contractMethod view
 */
 export interface NftSupplyForOwner {
-  account_id: AccountId;
+  args: {
+    account_id: AccountId;
+  };
+  
 }
+export type NftSupplyForOwner__Result = U128;
 /**
 * 
 * @contractMethod view
 */
 export interface NftMetadata {
+  args: {};
+  
 }
+export type NftMetadata__Result = NftContractMetadata;
 /**
 * 
 * @contractMethod view
 */
 export interface MintRateLimit {
+  args: {};
+  
 }
+export type MintRateLimit__Result = u32 | null;
 /**
 * 
 * @contractMethod view
 */
 export interface RemainingAllowance {
-  account_id: AccountId;
+  args: {
+    account_id: AccountId;
+  };
+  
 }
+export type RemainingAllowance__Result = u32 | null;
 /**
 * Get list of all tokens owned by a given account
 * 
@@ -1511,56 +1829,129 @@ export interface RemainingAllowance {
 * @contractMethod view
 */
 export interface NftTokensForOwner {
-  account_id: AccountId;
-  from_index?: U128;
-  limit?: u64;
+  args: {
+    account_id: AccountId;
+    from_index?: U128;
+    limit?: u64;
+  };
+  
 }
+export type NftTokensForOwner__Result = Token[];
 /**
 * 
 * @contractMethod change
 */
 export interface NftMint {
-  token_id: TokenId;
-  token_owner_id: AccountId;
-  token_metadata: TokenMetadata;
+  args: {
+    token_id: TokenId;
+    token_owner_id: AccountId;
+    token_metadata: TokenMetadata;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftMint__Result = Token;
 /**
 * 
 * @contractMethod view
 */
 export interface GetUserSaleInfo {
-  account_id: AccountId;
+  args: {
+    account_id: AccountId;
+  };
+  
 }
+export type GetUserSaleInfo__Result = UserSaleInfo;
 /**
 * 
 * @contractMethod view
 */
 export interface Initial {
+  args: {};
+  
 }
+export type Initial__Result = u64;
 /**
 * 
 * @contractMethod change
 */
 export interface AddWhitelistAccountUngaurded {
-  account_id: AccountId;
-  allowance: u32;
+  args: {
+    account_id: AccountId;
+    allowance: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type AddWhitelistAccountUngaurded__Result = void;
 /**
 * 
 * @contractMethod view
 */
 export interface TokensLeft {
+  args: {};
+  
 }
+export type TokensLeft__Result = u32;
 /**
 * 
 * @contractMethod change
 */
 export interface UpdateRoyalties {
-  royalties: Royalties;
+  args: {
+    royalties: Royalties;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type UpdateRoyalties__Result = void;
 /**
 * 
 * @contractMethod change
 */
 export interface NftMintOne {
+  args: {};
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
 }
+export type NftMintOne__Result = Token;

@@ -1,0 +1,38 @@
+# .github/workflows/preview.yml
+name: Deploy PR previews
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - closed
+
+concurrency: preview-${{ github.ref }}
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+      - uses: actions-rs/cargo@v1
+        with:
+          command: install
+          args: witme --version 0.2.3
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16.x'
+
+      - name: Install and Build
+        run: |
+          yarn install --frozen-lockfile
+          yarn gui:build
+
+      - name: Deploy preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: ./gui/build
