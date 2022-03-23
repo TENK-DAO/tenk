@@ -30,7 +30,7 @@ jobs:
       - name: Install and Build
         run: |
           yarn install --frozen-lockfile
-          yarn gui
+          yarn gui:build
 
       - name: Deploy preview
         uses: rossjrw/pr-preview-action@v1
