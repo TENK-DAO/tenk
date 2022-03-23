@@ -1,7 +1,7 @@
 {
   "name": "tenk-nft",
   "version": "0.1.0",
-  "license": "MIT",
+  "license": "LGPL-3.0",
   "main": "./contracts/tenk/dist/index.js",
   "types": "./contracts/tenk/dist/index.d.ts",
   "scripts": {
