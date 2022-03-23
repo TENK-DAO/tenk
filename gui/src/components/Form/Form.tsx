@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { withTheme } from "@rjsf/core";
 import snake from "to-snake-case";
-import { useLocation } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import useNear from "../../hooks/useNear"
 import { Selector } from ".."
 import { getMethod, MethodName, methodType } from "../../near/methods"
@@ -9,20 +9,6 @@ import { getMethod, MethodName, methodType } from "../../near/methods"
 import css from "./form.module.css"
 
 const FormComponent = withTheme({})
-
-function setUrl(params: URLSearchParams) {
-  window.history.replaceState({}, '',
-    window.location.href.replace(window.location.search, '?' + params)
-  )
-}
-
-function resetUrlParams(method: MethodName) {
-  const oldParams = new URLSearchParams(window.location.search)
-  const newParams = new URLSearchParams({})
-  newParams.set('name', oldParams.get('name')!)
-  newParams.set('method', method)
-  setUrl(newParams)
-}
 
 const Display: React.FC<{
   result?: string
@@ -45,9 +31,8 @@ const Display: React.FC<{
 }
 
 export function Form() {
-  const location = useLocation()
-  const urlParams = new URLSearchParams(location.search)
-  const [method, setMethod] = useState<string | undefined>(urlParams.get('method') ?? undefined)
+  const navigate = useNavigate()
+  const { contract, method } = useParams<{ contract: string, method: string }>()
   const schema = method && getMethod(method)?.schema
 
   const { TenK } = useNear()
@@ -67,8 +52,7 @@ export function Form() {
             setResult(undefined)
             setError(undefined)
             setFormData(undefined)
-            resetUrlParams(newMethod)
-            setMethod(newMethod)
+            navigate(`/${contract}/${newMethod}`)
           }}
         />
         <label>

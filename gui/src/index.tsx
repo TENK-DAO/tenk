@@ -10,7 +10,8 @@ ReactDOM.render(
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/:contractName" element={<Contract />} />
+          <Route path="/:contract" element={<Contract />} />
+          <Route path="/:contract/:method" element={<Contract />} />
         </Routes>
       </Layout>
     </HashRouter>

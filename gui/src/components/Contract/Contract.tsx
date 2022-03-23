@@ -4,14 +4,14 @@ import { init } from "../../near"
 import { Form, NotFound } from ".."
 
 export function Contract() {
-  const { contractName } = useParams<{ contractName: string }>()
+  const { contract } = useParams<{ contract: string }>()
   let errorMessage: string | null = null
 
-  if (!contractName) {
-    errorMessage = "No `contractName` param provided; you may have typed in this URL manually."
+  if (!contract) {
+    errorMessage = "No `contract` param provided; how is this possible?"
   } else {
     try {
-      init(contractName)
+      init(contract)
     } catch (e: unknown) {
       if (e instanceof Error) {
         errorMessage = e.message

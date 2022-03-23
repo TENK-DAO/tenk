@@ -7,15 +7,15 @@ import { ContractInterface, init, UnknownNetworkError } from "../near"
  * If no `contract` in url params, returns blanks
  */
 export default function useNear(): Partial<ContractInterface> {
-  const { contractName } = useParams<{contractName: string }>()
+  const { contract } = useParams<{contract: string }>()
 
-  if (!contractName) return {}
+  if (!contract) return {}
 
   try {
-    return init(contractName)
+    return init(contract)
   } catch (e: unknown) {
     if (e instanceof UnknownNetworkError) {
-      return { contract: contractName }
+      return { contract }
     }
     throw e
   }
