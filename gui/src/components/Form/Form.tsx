@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { withTheme } from "@rjsf/core";
 import snake from "to-snake-case";
 import { useNavigate, useParams } from "react-router-dom"
@@ -31,29 +31,32 @@ const Display: React.FC<{
 }
 
 export function Form() {
-  const navigate = useNavigate()
-  const { contract, method } = useParams<{ contract: string, method: string }>()
-  const schema = method && getMethod(method)?.schema
-
   const { TenK } = useNear()
+  const { contract, method } = useParams<{ contract: string, method: string }>()
   const [liveValidate, setLiveValidate] = useState<boolean>(false)
   const [formData, setFormData] = useState<FormData>()
   const [result, setResult] = useState<any>()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<any>()
+  const schema = method && getMethod(method)?.schema
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    setResult(undefined)
+    setError(undefined)
+    setFormData(undefined)
+    document.title = `${method ? `${snake(method)} ‹ ` : ''}${contract} ‹ TenK Admin`
+    return function onUnmount() {
+      document.title = 'TenK Admin'
+    }
+  }, [contract, method])
 
   return (
     <>
       <div className="columns">
         <Selector
           value={method && snake(method)}
-          onSelected={(newMethod: MethodName) => {
-            if (newMethod === method) return
-            setResult(undefined)
-            setError(undefined)
-            setFormData(undefined)
-            navigate(`/${contract}/${newMethod}`)
-          }}
+          onSelected={method => navigate(`/${contract}/${method}`)}
         />
         <label>
           <input

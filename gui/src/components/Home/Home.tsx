@@ -1,5 +1,6 @@
 import * as React from "react"
 import featuredContracts from "./featured-contracts.json"
+import { Layout } from ".."
 import { init } from "../../near"
 import { Link, useNavigate } from "react-router-dom";
 
@@ -8,7 +9,7 @@ export function Home() {
   const [error, setError] = React.useState<string>()
   const navigate = useNavigate()
   return (
-    <>
+    <Layout>
       <h2>Inspect a contract</h2>
       <p>This admin panel currently supports TenK contracts created since 2022-03-15. <a href="./docs" target="_blank">Contract docs</a>.</p>
       <form onSubmit={e => {
@@ -43,6 +44,6 @@ export function Home() {
           </li>
         ))}
       </ul>
-    </>
+    </Layout>
   )
 }

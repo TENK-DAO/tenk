@@ -1,19 +1,17 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Contract, Home, Layout } from "./components"
+import { Contract, Home } from "./components"
 import { HashRouter, Routes, Route } from "react-router-dom";
 import reportWebVitals from "./reportWebVitals";
 
 ReactDOM.render(
   <React.StrictMode>
     <HashRouter>
-      <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/:contract" element={<Contract />} />
           <Route path="/:contract/:method" element={<Contract />} />
-        </Routes>
-      </Layout>
+      </Routes>
     </HashRouter>
   </React.StrictMode>,
   document.getElementById("root")
