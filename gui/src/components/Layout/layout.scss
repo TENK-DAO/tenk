@@ -166,6 +166,8 @@ em {
 
 label {
   display: block;
+  margin-top: var(--spacing-m);
+  font-weight: bold;
 }
 
 code {
@@ -227,6 +229,10 @@ button,
   display: inline-block;
   font-size: inherit;
 }
+button[type=submit],
+.button[type=submit] {
+  margin-top: var(--spacing-l);
+}
 
 input,
 select {
@@ -241,6 +247,7 @@ select,
 button,
 .button {
   padding: var(--spacing-s) var(--spacing-m);
+  margin-bottom: var(--spacing-xs);
 }
 
 button:hover,
@@ -248,7 +255,9 @@ button:hover,
 button:focus,
 .button:focus {
   box-shadow: 0 0 10px 4px var(--gray-2);
+  position: relative;
   text-decoration: none;
+  top: -1px;
 }
 button:active,
 .button:active {
@@ -295,12 +304,8 @@ select.error {
   border-color: var(--red);
 }
 
-input {
-  caret-color: var(--primary);
-}
-
 input::selection {
-  background-color: var(--primary);
+  background-color: var(--fg);
   color: var(--bg);
 }
 
@@ -320,16 +325,35 @@ input::selection {
   margin-bottom: var(--spacing-l);
 }
 
+.columns > * {
+  margin: 0;
+}
+
 input[type=checkbox] {
   margin-right: var(--spacing-xs);
 }
 
 // fill in some missing bootstrap form styles
+.form-group p {
+  margin: 0;
+}
+
 .array-item {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-s);
 }
 
 .array-item .btn {
   padding: 0;
+  padding-top: 2px;
+}
+
+.array-item-add button {
+  border-radius: var(--br-base);
+}
+
+.btn-group {
+  height: 100%;
+  align-items: center;
+  gap: var(--spacing-xs);
 }
