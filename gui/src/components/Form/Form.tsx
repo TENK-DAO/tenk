@@ -4,9 +4,11 @@ import snake from "to-snake-case";
 import { useNavigate, useParams } from "react-router-dom"
 import useNear from "../../hooks/useNear"
 import { Selector } from ".."
-import { getMethod } from "../../near/methods"
+import { getMethod, getDefinition } from "../../near/methods"
 
 import css from "./form.module.css"
+
+type Data = Record<string, any>
 
 const FormComponent = withTheme({})
 
@@ -34,22 +36,49 @@ export function Form() {
   const { TenK } = useNear()
   const { contract, method } = useParams<{ contract: string, method: string }>()
   const [liveValidate, setLiveValidate] = useState<boolean>(false)
-  const [formData, setFormData] = useState<FormData>()
+  const [formData, setFormData] = useState<Data>()
   const [result, setResult] = useState<any>()
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<any>()
   const schema = method && getMethod(method)?.schema
   const navigate = useNavigate()
 
+  const onSubmit = React.useMemo(() => async function onSubmitRaw(
+    { formData }: { formData: { args: Data, options?: Data } }
+  ) {
+    setLoading(true)
+    setError(undefined)
+    try {
+      // @ts-expect-error can't see final method name
+      const res = await TenK[snake(method)](formData.args, formData.options)
+      setResult(JSON.stringify(res, null, 2));
+    } catch (e: unknown) {
+      setError(
+        e instanceof Error
+          ? JSON.stringify(e.message, null, 2)
+          : JSON.stringify(e)
+      )
+    } finally {
+      setLoading(false)
+    }
+  }, [TenK, method])
+
   useEffect(() => {
     setResult(undefined)
     setError(undefined)
     setFormData(undefined)
     document.title = `${method ? `${snake(method)} ‹ ` : ''}${contract} ‹ TenK Admin`
+
+    // auto-submit if no arguments to fill in
+    const def = getDefinition(method)
+    if (def?.contractMethod === 'view' && !def?.properties?.args?.required) {
+      onSubmit({ formData: { args: {} } })
+    }
+
     return function onUnmount() {
       document.title = 'TenK Admin'
     }
-  }, [contract, method])
+  }, [contract, method, onSubmit])
 
   return (
     <>
@@ -72,24 +101,8 @@ export function Form() {
             liveValidate={liveValidate}
             schema={schema}
             formData={formData}
-            onChange={({ formData }: { formData: FormData }) => setFormData(formData)}
-            onSubmit={async ({ formData }: any) => {
-              setLoading(true)
-              setError(undefined)
-              try {
-                // @ts-expect-error can't see final method name
-                const res = await TenK[snake(method)](formData.args, formData.options)
-                setResult(JSON.stringify(res, null, 2));
-              } catch (e: unknown) {
-                if (e instanceof Error) {
-                  setError(JSON.stringify(e.message, null, 2))
-                } else {
-                  setError(JSON.stringify(e))
-                }
-              } finally {
-                setLoading(false)
-              }
-            }}
+            onChange={({ formData }: { formData: Data }) => setFormData(formData)}
+            onSubmit={onSubmit}
           />
           <div>
             {loading

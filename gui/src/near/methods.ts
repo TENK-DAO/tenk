@@ -43,3 +43,32 @@ export function getMethod(m?: string | null): Schema | undefined {
   if (!hasContractMethod(m as MethodName)) return undefined
   return methods[m as MethodName]
 }
+
+type MethodDefinition = {
+  additionalProperties?: boolean
+  contractMethod?: "view" | "change"
+  properties?: {
+    args: {
+      additionalProperties: boolean
+      properties: Record<string, JSONSchema7>
+      required?: string[]
+      type?: string
+    }
+    options?: {
+      additionalProperties: boolean
+      properties: Record<string, JSONSchema7>
+      required?: string[]
+      type?: string
+    }
+  },
+  required?: string[]
+  type?: string
+}
+
+export function getDefinition(m?: string): MethodDefinition | undefined {
+  if (!m) return undefined
+  const def = topLevelSchema.definitions[m as MethodName]
+  if (!def) return undefined
+  if (!hasContractMethodProperty(def)) return undefined
+  return def as MethodDefinition
+}
