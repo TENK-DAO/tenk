@@ -19,7 +19,7 @@ Currently this project wraps its own linkdrop-proxy, but in the future it this w
 
 ## API
 
-TypeScript docs are found at [https://tenk-dao.github.io/tenk/](https://tenk-dao.github.io/tenk/).
+TypeScript docs are found at [https://tenk-dao.github.io/tenk/docs](https://tenk-dao.github.io/tenk/docs).
 
 Currently there is no standard format to describe the types of a contract. One proposal is to use the [`wit` format](https://github.com/bytecodealliance/wit-bindgen/blob/main/WIT.md),
 which while intended as a tool to generate bindings that act as polyfill for [`WebAssembly Interface Types`](https://github.com/WebAssembly/interface-types), it provides a language agnostic
