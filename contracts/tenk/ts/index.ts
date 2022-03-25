@@ -32,6 +32,7 @@ export type Balance = U128;
 export type Gas = u64;
 /**
 * base64 string.
+* @contentEncoding base64
 */
 export type Base64VecU8 = string;
 /**
@@ -1122,7 +1123,7 @@ export interface UpdateAllowance {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1175,7 +1176,7 @@ export interface NftRevokeAll {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1208,7 +1209,7 @@ export interface TransferOwnership {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1231,7 +1232,7 @@ export interface StartPresale {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1251,7 +1252,7 @@ export interface CloseContract {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1298,7 +1299,7 @@ export interface NftTransfer {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1320,7 +1321,7 @@ export interface StartSale {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1342,7 +1343,7 @@ export interface NftMintMany {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1388,7 +1389,7 @@ export interface UpdateUri {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1481,7 +1482,7 @@ export interface NftTransferCall {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1508,7 +1509,7 @@ export interface NftTransferPayout {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1553,7 +1554,7 @@ export interface NftRevoke {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1576,7 +1577,7 @@ export interface CreateLinkdrop {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1599,7 +1600,7 @@ export interface AddWhitelistAccounts {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1636,7 +1637,7 @@ export interface New {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1702,7 +1703,7 @@ export interface NftApprove {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1759,7 +1760,7 @@ export interface NewDefaultMeta {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1854,7 +1855,7 @@ export interface NftMint {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1897,7 +1898,7 @@ export interface AddWhitelistAccountUngaurded {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1928,7 +1929,7 @@ export interface UpdateRoyalties {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
@@ -1948,7 +1949,7 @@ export interface NftMintOne {
     */
     gas?: string;
     /** Units in yoctoNear
-    * @default 0
+    * @default "0"
     */
     attachedDeposit?: Balance;
   }
