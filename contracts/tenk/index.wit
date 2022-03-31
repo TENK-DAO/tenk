@@ -12,7 +12,6 @@ type balance = u128
 type gas = u64
 
 ///  base64 string.
-/// @contentEncoding base64
 type base64-vec-u8 = string
 
 ///  Raw type for duration in nanoseconds
