@@ -1,4 +1,4 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.2) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.3) 
 
 // This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
@@ -12,7 +12,6 @@ type balance = u128
 type gas = u64
 
 ///  base64 string.
-/// @contentEncoding base64
 type base64-vec-u8 = string
 
 ///  Raw type for duration in nanoseconds

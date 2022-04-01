@@ -32,7 +32,6 @@ export type Balance = U128;
 export type Gas = u64;
 /**
 * base64 string.
-* @contentEncoding base64
 */
 export type Base64VecU8 = string;
 /**

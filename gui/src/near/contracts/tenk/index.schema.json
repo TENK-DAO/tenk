@@ -108,7 +108,6 @@
       "description": "Balance is a type for storing amounts of tokens, specified in yoctoNEAR."
     },
     "Base64VecU8": {
-      "contentEncoding": "base64",
       "description": "base64 string.",
       "type": "string"
     },
