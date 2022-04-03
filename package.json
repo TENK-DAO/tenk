@@ -28,9 +28,7 @@
     "gui:start": "yarn docs && cd gui && yarn && yarn start",
     "gui:build": "yarn docs && cd gui && yarn && yarn build",
     "gui:lint": "cd gui && yarn lint",
-    "start": "yarn gui:start",
-    "pack-car": "ipfs-car --wrapWithDirectory false",
-    "upload-car": "ts-node ./scripts/car-uploader.ts"
+    "start": "yarn gui:start"
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
