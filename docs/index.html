@@ -59,14 +59,15 @@ and any arguments after the <code>--</code> are collected in the passed <code>ar
 </code></pre>
 <p>This makes it easy to create your own near scripts, while still getting the benefit of type checking parameters.</p>
 
-<a href="#uploading-assets" id="uploading-assets" style="color: inherit; text-decoration: none;">
-  <h2>Uploading Assets</h2>
+<a href="#uploading-assets-with-nft-cli" id="uploading-assets-with-nft-cli" style="color: inherit; text-decoration: none;">
+  <h2>Uploading Assets with <a href="https://github.com/TENK-DAO/nft-cli"><code>nft-cli</code></a></h2>
 </a>
 <ol>
 <li>Have <code>NFT_STORAGE_API_TOKEN</code> env var set to api key from <a href="https://nft.storage">https://nft.storage</a></li>
 <li>Have assets numbered <code>0-x</code> with matching names <code>0.png</code> <code>0.json</code> in all in the same directory. E.g. <code>dir/0.png</code> <code>dir/0.json</code>.</li>
-<li>Pack assets with <code>yarn pack-car --pack &lt;dir&gt; --output nfts.car</code></li>
-<li>Upload to nft.storage with <code>yarn upload-car nfts.car</code></li>
+<li>Install <code>nft-cli</code>: <code>npm install -g nft-cli</code></li>
+<li>Pack assets with <code>nft pack &lt;dir&gt; --output nfts.car</code></li>
+<li>Upload to nft.storage with <code>nft upload nfts.car</code>.  Optionaly can pass api token <code>--api-key</code></li>
 </ol>
 
 <a href="#aspects-of-near-that-prevents-hacks-on-this-method-of-minting" id="aspects-of-near-that-prevents-hacks-on-this-method-of-minting" style="color: inherit; text-decoration: none;">
