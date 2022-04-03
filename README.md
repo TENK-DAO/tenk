@@ -139,8 +139,8 @@ This makes it easy to create your own near scripts, while still getting the bene
 1. Have `NFT_STORAGE_API_TOKEN` env var set to api key from https://nft.storage
 1. Have assets numbered `0-x` with matching names `0.png` `0.json` in all in the same directory. E.g. `dir/0.png` `dir/0.json`.
 1. Install `nft-cli`: `npm install -g nft-cli`
-1. Pack assets with `nft pack <dir> --output nfts.car`
-1. Upload to nft.storage with `nft upload nfts.car`.  Optionaly can pass api token `--api-key`
+1. Pack assets with `nft pack dir --output nfts.car`
+1. Upload to nft.storage with `nft upload nfts.car`.  Optionaly can pass api token with `--api-key`
 
 ## Aspects of Near that prevents hacks on this method of minting
 
