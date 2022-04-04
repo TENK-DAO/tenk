@@ -6,7 +6,7 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+  uri: "https://bafybeieaff2wh62baaqp3biuhdanzqdkdz77a2sbv23u2q5tbp5fuvf4xu.ipfs.dweb.link",
   name: "Shinto Society",
   symbol: "Shinto",
   icon,
