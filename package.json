@@ -47,6 +47,6 @@
   },
   "dependencies": {
     "ipfs-car": "^0.6.2",
-    "near-api-js": "ahalabs/near-api-js#develop"
+    "near-api-js": "git+https://github.com/ahalabs/near-api-js#beta"
   }
 }
