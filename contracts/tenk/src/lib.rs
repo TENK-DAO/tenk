@@ -131,7 +131,7 @@ impl Contract {
     #[payable]
     pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
         if let Some(limit) = self.sale.mint_rate_limit {
-            require!(num <= limit, "over mint limit");
+            require!(num == limit, format!("Must mint exactly {}", limit));
         }
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
