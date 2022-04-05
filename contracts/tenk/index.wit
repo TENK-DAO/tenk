@@ -1,4 +1,4 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.3) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.4) 
 
 // This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
@@ -164,6 +164,9 @@ nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id:
 start-sale: function(price: option<u128>)
 
 ///  change
+update-whitelist-accounts: function(accounts: list<account-id>, allowance-increase: u32)
+
+///  change
 nft-mint-many: function(num: u32) -> list<token>
 
 
@@ -199,6 +202,9 @@ update-uri: function(uri: string)
 
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
+
+///  change
+update-initial-royalties: function(initial-royalties: royalties)
 
 ///  Get a list of all tokens
 /// 

@@ -1,4 +1,4 @@
-import { ONE_NEAR, Workspace } from "near-workspaces-ava";
+import { BN, ONE_NEAR, Workspace } from "near-workspaces-ava";
 import { NEAR } from "near-units";
 import {
   claim,
@@ -6,6 +6,7 @@ import {
   deploy,
   getTokens,
   mint,
+  mint_many_raw,
   mint_raw,
   now,
   sleep,
@@ -69,6 +70,50 @@ runner.test("premint", async (t, { root, tenk, alice }) => {
       accounts: [alice],
       allowance: 2,
     });
+    await mint(tenk, alice, cost);
+    await mint(tenk, alice, cost);
+    let last_try = await mint_raw(tenk, alice, cost);
+    t.assert(last_try.failed);
+    const tokens = await getTokens(tenk, alice);
+    t.assert(tokens.length == 3);
+  });
+  t.log(await tenk.view("get_sale_info"));
+  const sale_price = await totalCost(tenk, 1, alice.accountId);
+  t.log(sale_price.toHuman(), cost.toHuman());
+  t.assert(sale_price.gt(cost), "actual sale price has increased");
+
+  t.assert((await mint_raw(tenk, alice, sale_price)).failed);
+  t.assert((await mint_raw(tenk, root, sale_price)).succeeded);
+});
+
+
+runner.test("premint fail", async (t, { root, tenk, alice }) => {
+  const cost = await totalCost(tenk, 1, alice.accountId);
+  const token = await mint(tenk, root);
+  const duration = 20;
+  const linkkeys = await createLinkdrop(t, tenk, root);
+  await claim(t, tenk, alice, linkkeys);
+
+  await premint_period({ tenk, root, duration }, async () => {
+    // await t.throwsAsync(
+    //   root.call(tenk, "end_premint", {
+    //     base_cost,
+    //     min_cost: base_cost,
+    //   })
+    // );
+
+    let initial_try = await mint_raw(tenk, alice, cost);
+    t.assert(initial_try.failed);
+    // owner can still mint
+    const second_token = await mint_raw(tenk, root);
+    t.assert(second_token.succeeded);
+
+    await root.call(tenk, "add_whitelist_accounts", {
+      accounts: [alice],
+      allowance: 2,
+    });
+    const second_try = await mint_many_raw(root, alice, 3, cost.mul(new BN(3)));
+    t.assert(second_try.failed)
     await mint(tenk, alice, cost);
     await mint(tenk, alice, cost);
     let last_try = await mint_raw(tenk, alice, cost);

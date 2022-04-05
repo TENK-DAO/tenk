@@ -19,6 +19,12 @@ impl Contract {
         self.sale.royalties = Some(royalties);
     }
 
+    pub fn update_initial_royalties(&mut self, initial_royalties: Royalties) {
+      self.assert_owner();
+      initial_royalties.validate();
+      self.sale.initial_royalties = Some(initial_royalties);
+  }
+
     pub fn update_allowance(&mut self, allowance: u32) {
         self.assert_owner();
         self.sale.allowance = Some(allowance);

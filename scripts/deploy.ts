@@ -19,13 +19,13 @@ const sale: tenk.Sale = {
   price,
   presale_price,
   mint_rate_limit: 6,
-  presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-  public_sale_start: Date.parse("05 April 2022 5:00 PM UTC"),
+  presale_start: Date.parse("05 April 2022 16:00 UTC"),
+  public_sale_start: Date.parse("05 April 2022 17:00 UTC"),
   initial_royalties: {
     percent: 10_000,
     accounts: {
       "tenk.sputnik-dao.near": 2_000,
-      "project.sputnik-dao.near": 2_000,
+      "shinto-society-dao.sputnik-dao.near": 2_000,
       "mistcop.near": 6_000,
     },
   },
@@ -33,7 +33,7 @@ const sale: tenk.Sale = {
     percent: 500,
     accounts: {
       "tenk.sputnik-dao.near": 4_000,
-      "project.sputnik-dao.near": 2_000,
+      "shinto-society-dao.sputnik-dao.near": 2_000,
       "mistcop.near": 4_000,
     },
   },

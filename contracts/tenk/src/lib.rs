@@ -218,8 +218,11 @@ impl Contract {
                 Status::Presale => self.get_whitelist_allowance(account_id),
                 Status::Open => self.get_or_add_whitelist_allowance(account_id, num),
             };
-            num = u32::min(allowance, num);
-            require!(num > 0, "Account has no more allowance left");
+            let allowed_to_mint = u32::min(allowance, num);
+            require!(allowed_to_mint > 0, "Account has no more allowance left");
+            require!(allowed_to_mint == num, "Cannot mint more than allowance");
+            num = allowed_to_mint;
+            
         }
         require!(self.tokens_left() >= num, "No NFTs left to mint");
         self.assert_deposit(num, account_id);

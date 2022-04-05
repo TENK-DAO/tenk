@@ -348,6 +348,22 @@ export function mint_raw(
   );
 }
 
+export function mint_many_raw(
+  tenk: NearAccount,
+  root: NearAccount,
+  num: number,
+  attachedDeposit = ONE_NEAR
+): Promise<TransactionResult> {
+  return root.call_raw(
+    tenk,
+    "nft_mint_many",
+    {num},
+    {
+      attachedDeposit,
+    }
+  );
+}
+
 export * from "./delta";
 
 export function sleep(ms: number) {

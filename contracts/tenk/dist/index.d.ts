@@ -389,6 +389,18 @@ export declare class Contract {
     start_saleTx(args: {
         price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
+    update_whitelist_accounts(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    update_whitelist_accountsRaw(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_whitelist_accountsTx(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): transactions.Action;
     nft_mint_many(args: {
         num: u32;
     }, options?: ChangeMethodOptions): Promise<Token[]>;
@@ -430,6 +442,15 @@ export declare class Contract {
         balance: U128;
         max_len_payout?: u32;
     }, options?: ViewFunctionOptions): Promise<Payout>;
+    update_initial_royalties(args: {
+        initial_royalties: Royalties;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    update_initial_royaltiesRaw(args: {
+        initial_royalties: Royalties;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_initial_royaltiesTx(args: {
+        initial_royalties: Royalties;
+    }, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Get a list of all tokens
     *
@@ -1130,6 +1151,28 @@ export declare type StartSale__Result = void;
 *
 * @contractMethod change
 */
+export interface UpdateWhitelistAccounts {
+    args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdateWhitelistAccounts__Result = void;
+/**
+*
+* @contractMethod change
+*/
 export interface NftMintMany {
     args: {
         num: u32;
@@ -1203,6 +1246,27 @@ export interface NftPayout {
     };
 }
 export declare type NftPayout__Result = Payout;
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateInitialRoyalties {
+    args: {
+        initial_royalties: Royalties;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdateInitialRoyalties__Result = void;
 /**
 * Get a list of all tokens
 *
