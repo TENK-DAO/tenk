@@ -1,5 +1,9 @@
 use crate::*;
 
+/// String of yocto NEAR; 1N = 1000000000000000000000000 yN
+#[witgen]
+pub type YoctoNEAR = U128;
+
 #[derive(Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
 #[witgen]

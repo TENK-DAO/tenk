@@ -100,9 +100,6 @@ type wrapped-duration = string
 check-key: function(public-key: public-key) -> bool
 
 
-///  change
-update-allowance: function(allowance: u32)
-
 ///  Revoke all approved accounts for a specific token.
 /// 
 ///  Requirements
@@ -116,9 +113,6 @@ update-allowance: function(allowance: u32)
 ///  * `token_id`: the token with approvals to revoke
 ///  change
 nft-revoke-all: function(token-id: token-id)
-
-///  change
-transfer-ownership: function(new-owner: account-id)
 
 ///  Information about a current user. Whether they are VIP and how many tokens left in their allowance.
 get-user-sale-info: function(account-id: account-id) -> user-sale-info
@@ -153,11 +147,16 @@ tokens-left: function() -> u32
 ///  change
 nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>)
 
+///  Update public sale price. 
+///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
 ///  change
-start-sale: function(price: option<u128>)
+update-price: function(price: u128) -> bool
 
+
+///  Contract wwill
 ///  change
-update-whitelist-accounts: function(accounts: list<account-id>, allowance-increase: u32)
+close-contract: function() -> bool
+
 
 ///  change
 nft-mint-many: function(num: u32) -> list<token>
@@ -191,17 +190,15 @@ enum status {
 
 
 ///  change
-update-uri: function(uri: string)
+update-uri: function(uri: string) -> bool
 
-///  Contract wwill
-///  change
-close-contract: function()
 
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
 
 ///  change
-update-initial-royalties: function(initial-royalties: royalties)
+add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>) -> bool
+
 
 ///  Current cost in NEAR to store one NFT
 token-storage-cost: function() -> u128
@@ -209,6 +206,10 @@ token-storage-cost: function() -> u128
 
 ///  Cost of NFT + fees for linkdrop
 cost-of-linkdrop: function(minter: account-id) -> u128
+
+
+///  change
+update-whitelist-accounts: function(accounts: list<account-id>, allowance-increase: u32) -> bool
 
 
 ///  Get a list of all tokens
@@ -263,16 +264,15 @@ nft-transfer-call: function(receiver-id: account-id, token-id: token-id, approva
 nft-transfer-payout: function(receiver-id: account-id, token-id: string, approval-id: option<u64>, memo: option<string>, balance: u128, max-len-payout: option<u32>) -> payout
 
 
+///  String of yocto NEAR; 1N = 1000000000000000000000000 yN
+type yocto-near = u128
+
 ///  Information about the current sale from user perspective
 record user-sale-info {
     sale-info: sale-info,
     is-vip: bool,
     remaining-allowance: option<u32>
 }
-
-///  Update the presale price
-///  change
-update-presale-price: function(presale-price: option<u128>)
 
 ///  Returns the balance associated with given key.
 get-key-balance: function() -> u128
@@ -297,17 +297,14 @@ nft-revoke: function(token-id: token-id, account-id: account-id)
 ///  change
 create-linkdrop: function(public-key: public-key)
 
-///  Add a new admin. Careful who you add!
 ///  change
-add-admin: function(account-id: account-id)
+transfer-ownership: function(new-owner: account-id) -> bool
+
 
 record royalties {
     accounts: list<tuple<account-id,basis-point>>,
     percent: basis-point
 }
-
-///  change
-add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>)
 
 ///  Returns the token with the given `token_id` or `null` if no such token.
 nft-token: function(token-id: token-id) -> option<token>
@@ -326,6 +323,10 @@ record sale {
 
 ///  change
 new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale)
+
+///  change
+update-initial-royalties: function(initial-royalties: royalties) -> bool
+
 
 ///  Returns the total supply of non-fungible tokens as a string representing an
 ///  unsigned 128-bit integer to avoid JSON number limit of 2^53.
@@ -364,19 +365,24 @@ nft-approve: function(token-id: token-id, account-id: account-id, msg: option<st
 cost-per-token: function(minter: account-id) -> u128
 
 
+///  change
+start-sale: function(price: option<yocto-near>) -> bool
+
+
+///  Add a new admin. Careful who you add!
+///  change
+add-admin: function(account-id: account-id) -> bool
+
+
+///  change
+update-royalties: function(royalties: royalties) -> bool
+
+
 total-cost: function(num: u32, minter: account-id) -> u128
 
 
 get-linkdrop-contract: function() -> account-id
 
-
-///  Override the current presale start time to start presale now.
-///  Most provide when public sale starts. None, means never.
-///  Can provide new presale price.
-///  Note: you most likely won't need to call this since the presale
-///  starts automatically based on time.
-///  change
-start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>)
 
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)
@@ -392,9 +398,24 @@ new-default-meta: function(owner-id: account-id, metadata: initial-metadata, siz
 nft-supply-for-owner: function(account-id: account-id) -> u128
 
 
-///  Update public sale price
 ///  change
-update-price: function(price: u128)
+update-allowance: function(allowance: u32) -> bool
+
+
+///  Update the presale price
+///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+///  change
+update-presale-price: function(presale-price: option<u128>) -> bool
+
+
+///  Override the current presale start time to start presale now.
+///  Most provide when public sale starts. None, means never.
+///  Can provide new presale price.
+///  Note: you most likely won't need to call this since the presale
+///  starts automatically based on time.
+///  change
+start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>) -> bool
+
 
 record initial-metadata {
     name: string,
@@ -473,9 +494,6 @@ get-sale-info: function() -> sale-info
 record payout {
     payout: list<tuple<account-id,u128>>
 }
-
-///  change
-update-royalties: function(royalties: royalties)
 
 ///  change
 nft-mint-one: function() -> token

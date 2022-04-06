@@ -142,6 +142,10 @@ export enum Status {
   SoldOut = "SoldOut",
 }
 /**
+* String of yocto NEAR; 1N = 1000000000000000000000000 yN
+*/
+export type YoctoNear = U128;
+/**
 * Information about the current sale from user perspective
 */
 export interface UserSaleInfo {
@@ -224,21 +228,6 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<boolean> {
     return this.account.viewFunction(this.contractId, "check_key", args, options);
   }
-  async update_allowance(args: {
-    allowance: u32;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.update_allowanceRaw(args, options));
-  }
-  update_allowanceRaw(args: {
-    allowance: u32;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "update_allowance", args, ...options});
-  }
-  update_allowanceTx(args: {
-    allowance: u32;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("update_allowance", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
   /**
   * Revoke all approved accounts for a specific token.
   * 
@@ -292,21 +281,6 @@ export class Contract {
     token_id: TokenId;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_revoke_all", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  async transfer_ownership(args: {
-    new_owner: AccountId;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.transfer_ownershipRaw(args, options));
-  }
-  transfer_ownershipRaw(args: {
-    new_owner: AccountId;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "transfer_ownership", args, ...options});
-  }
-  transfer_ownershipTx(args: {
-    new_owner: AccountId;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("transfer_ownership", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
@@ -418,38 +392,50 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_transfer", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async start_sale(args: {
-    price?: U128;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.start_saleRaw(args, options));
+  /**
+  * Update public sale price.
+  * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+  */
+  async update_price(args: {
+    price: U128;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_priceRaw(args, options));
   }
-  start_saleRaw(args: {
-    price?: U128;
+  /**
+  * Update public sale price.
+  * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+  */
+  update_priceRaw(args: {
+    price: U128;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "start_sale", args, ...options});
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_price", args, ...options});
   }
-  start_saleTx(args: {
-    price?: U128;
+  /**
+  * Update public sale price.
+  * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+  */
+  update_priceTx(args: {
+    price: U128;
   }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+    return transactions.functionCall("update_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async update_whitelist_accounts(args: {
-    accounts: AccountId[];
-    allowance_increase: u32;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.update_whitelist_accountsRaw(args, options));
+  /**
+  * Contract wwill
+  */
+  async close_contract(args = {}, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.close_contractRaw(args, options));
   }
-  update_whitelist_accountsRaw(args: {
-    accounts: AccountId[];
-    allowance_increase: u32;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "update_whitelist_accounts", args, ...options});
+  /**
+  * Contract wwill
+  */
+  close_contractRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "close_contract", args, ...options});
   }
-  update_whitelist_accountsTx(args: {
-    accounts: AccountId[];
-    allowance_increase: u32;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("update_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  /**
+  * Contract wwill
+  */
+  close_contractTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("close_contract", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async nft_mint_many(args: {
     num: u32;
@@ -488,7 +474,7 @@ export class Contract {
   }
   async update_uri(args: {
     uri: string;
-  }, options?: ChangeMethodOptions): Promise<void> {
+  }, options?: ChangeMethodOptions): Promise<boolean> {
     return providers.getTransactionLastResult(await this.update_uriRaw(args, options));
   }
   update_uriRaw(args: {
@@ -501,24 +487,6 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_uri", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  /**
-  * Contract wwill
-  */
-  async close_contract(args = {}, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.close_contractRaw(args, options));
-  }
-  /**
-  * Contract wwill
-  */
-  close_contractRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "close_contract", args, ...options});
-  }
-  /**
-  * Contract wwill
-  */
-  close_contractTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("close_contract", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
   nft_payout(args: {
     token_id: string;
     balance: U128;
@@ -526,20 +494,23 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<Payout> {
     return this.account.viewFunction(this.contractId, "nft_payout", args, options);
   }
-  async update_initial_royalties(args: {
-    initial_royalties: Royalties;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.update_initial_royaltiesRaw(args, options));
+  async add_whitelist_accounts(args: {
+    accounts: AccountId[];
+    allowance?: u32;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.add_whitelist_accountsRaw(args, options));
   }
-  update_initial_royaltiesRaw(args: {
-    initial_royalties: Royalties;
+  add_whitelist_accountsRaw(args: {
+    accounts: AccountId[];
+    allowance?: u32;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "update_initial_royalties", args, ...options});
+    return this.account.functionCall({contractId: this.contractId, methodName: "add_whitelist_accounts", args, ...options});
   }
-  update_initial_royaltiesTx(args: {
-    initial_royalties: Royalties;
+  add_whitelist_accountsTx(args: {
+    accounts: AccountId[];
+    allowance?: u32;
   }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("update_initial_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+    return transactions.functionCall("add_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Current cost in NEAR to store one NFT
@@ -554,6 +525,24 @@ export class Contract {
     minter: AccountId;
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
+  }
+  async update_whitelist_accounts(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_whitelist_accountsRaw(args, options));
+  }
+  update_whitelist_accountsRaw(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_whitelist_accounts", args, ...options});
+  }
+  update_whitelist_accountsTx(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Get a list of all tokens
@@ -735,30 +724,6 @@ export class Contract {
     return transactions.functionCall("nft_transfer_payout", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
-  * Update the presale price
-  */
-  async update_presale_price(args: {
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.update_presale_priceRaw(args, options));
-  }
-  /**
-  * Update the presale price
-  */
-  update_presale_priceRaw(args: {
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "update_presale_price", args, ...options});
-  }
-  /**
-  * Update the presale price
-  */
-  update_presale_priceTx(args: {
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("update_presale_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  /**
   * Returns the balance associated with given key.
   */
   get_key_balance(args = {}, options?: ViewFunctionOptions): Promise<U128> {
@@ -848,47 +813,20 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  /**
-  * Add a new admin. Careful who you add!
-  */
-  async add_admin(args: {
-    account_id: AccountId;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.add_adminRaw(args, options));
+  async transfer_ownership(args: {
+    new_owner: AccountId;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.transfer_ownershipRaw(args, options));
   }
-  /**
-  * Add a new admin. Careful who you add!
-  */
-  add_adminRaw(args: {
-    account_id: AccountId;
+  transfer_ownershipRaw(args: {
+    new_owner: AccountId;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "add_admin", args, ...options});
+    return this.account.functionCall({contractId: this.contractId, methodName: "transfer_ownership", args, ...options});
   }
-  /**
-  * Add a new admin. Careful who you add!
-  */
-  add_adminTx(args: {
-    account_id: AccountId;
+  transfer_ownershipTx(args: {
+    new_owner: AccountId;
   }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("add_admin", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  async add_whitelist_accounts(args: {
-    accounts: AccountId[];
-    allowance?: u32;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.add_whitelist_accountsRaw(args, options));
-  }
-  add_whitelist_accountsRaw(args: {
-    accounts: AccountId[];
-    allowance?: u32;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "add_whitelist_accounts", args, ...options});
-  }
-  add_whitelist_accountsTx(args: {
-    accounts: AccountId[];
-    allowance?: u32;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("add_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+    return transactions.functionCall("transfer_ownership", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Returns the token with the given `token_id` or `null` if no such token.
@@ -921,6 +859,21 @@ export class Contract {
     sale: Sale;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("new", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  async update_initial_royalties(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_initial_royaltiesRaw(args, options));
+  }
+  update_initial_royaltiesRaw(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_initial_royalties", args, ...options});
+  }
+  update_initial_royaltiesTx(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_initial_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Returns the total supply of non-fungible tokens as a string representing an
@@ -1030,6 +983,60 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
   }
+  async start_sale(args: {
+    price?: YoctoNear;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.start_saleRaw(args, options));
+  }
+  start_saleRaw(args: {
+    price?: YoctoNear;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "start_sale", args, ...options});
+  }
+  start_saleTx(args: {
+    price?: YoctoNear;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Add a new admin. Careful who you add!
+  */
+  async add_admin(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.add_adminRaw(args, options));
+  }
+  /**
+  * Add a new admin. Careful who you add!
+  */
+  add_adminRaw(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "add_admin", args, ...options});
+  }
+  /**
+  * Add a new admin. Careful who you add!
+  */
+  add_adminTx(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("add_admin", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  async update_royalties(args: {
+    royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_royaltiesRaw(args, options));
+  }
+  update_royaltiesRaw(args: {
+    royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_royalties", args, ...options});
+  }
+  update_royaltiesTx(args: {
+    royalties: Royalties;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   total_cost(args: {
     num: u32;
     minter: AccountId;
@@ -1038,45 +1045,6 @@ export class Contract {
   }
   get_linkdrop_contract(args = {}, options?: ViewFunctionOptions): Promise<AccountId> {
     return this.account.viewFunction(this.contractId, "get_linkdrop_contract", args, options);
-  }
-  /**
-  * Override the current presale start time to start presale now.
-  * Most provide when public sale starts. None, means never.
-  * Can provide new presale price.
-  * Note: you most likely won't need to call this since the presale
-  * starts automatically based on time.
-  */
-  async start_presale(args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.start_presaleRaw(args, options));
-  }
-  /**
-  * Override the current presale start time to start presale now.
-  * Most provide when public sale starts. None, means never.
-  * Can provide new presale price.
-  * Note: you most likely won't need to call this since the presale
-  * starts automatically based on time.
-  */
-  start_presaleRaw(args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "start_presale", args, ...options});
-  }
-  /**
-  * Override the current presale start time to start presale now.
-  * Most provide when public sale starts. None, means never.
-  * Can provide new presale price.
-  * Note: you most likely won't need to call this since the presale
-  * starts automatically based on time.
-  */
-  start_presaleTx(args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("start_presale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async new_default_meta(args: {
     owner_id: AccountId;
@@ -1117,29 +1085,86 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "nft_supply_for_owner", args, options);
   }
-  /**
-  * Update public sale price
-  */
-  async update_price(args: {
-    price: U128;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.update_priceRaw(args, options));
+  async update_allowance(args: {
+    allowance: u32;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_allowanceRaw(args, options));
   }
-  /**
-  * Update public sale price
-  */
-  update_priceRaw(args: {
-    price: U128;
+  update_allowanceRaw(args: {
+    allowance: u32;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "update_price", args, ...options});
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_allowance", args, ...options});
+  }
+  update_allowanceTx(args: {
+    allowance: u32;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_allowance", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
-  * Update public sale price
+  * Update the presale price
+  * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
   */
-  update_priceTx(args: {
-    price: U128;
+  async update_presale_price(args: {
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_presale_priceRaw(args, options));
+  }
+  /**
+  * Update the presale price
+  * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+  */
+  update_presale_priceRaw(args: {
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_presale_price", args, ...options});
+  }
+  /**
+  * Update the presale price
+  * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+  */
+  update_presale_priceTx(args: {
+    presale_price?: U128;
   }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("update_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+    return transactions.functionCall("update_presale_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Override the current presale start time to start presale now.
+  * Most provide when public sale starts. None, means never.
+  * Can provide new presale price.
+  * Note: you most likely won't need to call this since the presale
+  * starts automatically based on time.
+  */
+  async start_presale(args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.start_presaleRaw(args, options));
+  }
+  /**
+  * Override the current presale start time to start presale now.
+  * Most provide when public sale starts. None, means never.
+  * Can provide new presale price.
+  * Note: you most likely won't need to call this since the presale
+  * starts automatically based on time.
+  */
+  start_presaleRaw(args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "start_presale", args, ...options});
+  }
+  /**
+  * Override the current presale start time to start presale now.
+  * Most provide when public sale starts. None, means never.
+  * Can provide new presale price.
+  * Note: you most likely won't need to call this since the presale
+  * starts automatically based on time.
+  */
+  start_presaleTx(args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("start_presale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Get list of all tokens owned by a given account
@@ -1219,21 +1244,6 @@ export class Contract {
   get_sale_info(args = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
     return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
   }
-  async update_royalties(args: {
-    royalties: Royalties;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.update_royaltiesRaw(args, options));
-  }
-  update_royaltiesRaw(args: {
-    royalties: Royalties;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "update_royalties", args, ...options});
-  }
-  update_royaltiesTx(args: {
-    royalties: Royalties;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("update_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
   async nft_mint_one(args = {}, options?: ChangeMethodOptions): Promise<Token> {
     return providers.getTransactionLastResult(await this.nft_mint_oneRaw(args, options));
   }
@@ -1263,28 +1273,6 @@ export interface CheckKey {
   
 }
 export type CheckKey__Result = boolean;
-/**
-* 
-* @contractMethod change
-*/
-export interface UpdateAllowance {
-  args: {
-    allowance: u32;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type UpdateAllowance__Result = void;
 /**
 * Revoke all approved accounts for a specific token.
 * 
@@ -1318,28 +1306,6 @@ export interface NftRevokeAll {
   
 }
 export type NftRevokeAll__Result = void;
-/**
-* 
-* @contractMethod change
-*/
-export interface TransferOwnership {
-  args: {
-    new_owner: AccountId;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type TransferOwnership__Result = void;
 /**
 * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
 * 
@@ -1410,12 +1376,14 @@ export interface NftTransfer {
 }
 export type NftTransfer__Result = void;
 /**
+* Update public sale price.
+* Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
 * 
 * @contractMethod change
 */
-export interface StartSale {
+export interface UpdatePrice {
   args: {
-    price?: U128;
+    price: U128;
   };
   options: {
     /** Units in gas
@@ -1430,16 +1398,14 @@ export interface StartSale {
   }
   
 }
-export type StartSale__Result = void;
+export type UpdatePrice__Result = boolean;
 /**
+* Contract wwill
 * 
 * @contractMethod change
 */
-export interface UpdateWhitelistAccounts {
-  args: {
-    accounts: AccountId[];
-    allowance_increase: u32;
-  };
+export interface CloseContract {
+  args: {};
   options: {
     /** Units in gas
     * @pattern [0-9]+
@@ -1453,7 +1419,7 @@ export interface UpdateWhitelistAccounts {
   }
   
 }
-export type UpdateWhitelistAccounts__Result = void;
+export type CloseContract__Result = boolean;
 /**
 * 
 * @contractMethod change
@@ -1521,28 +1487,7 @@ export interface UpdateUri {
   }
   
 }
-export type UpdateUri__Result = void;
-/**
-* Contract wwill
-* 
-* @contractMethod change
-*/
-export interface CloseContract {
-  args: {};
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type CloseContract__Result = void;
+export type UpdateUri__Result = boolean;
 /**
 * 
 * @contractMethod view
@@ -1560,9 +1505,10 @@ export type NftPayout__Result = Payout;
 * 
 * @contractMethod change
 */
-export interface UpdateInitialRoyalties {
+export interface AddWhitelistAccounts {
   args: {
-    initial_royalties: Royalties;
+    accounts: AccountId[];
+    allowance?: u32;
   };
   options: {
     /** Units in gas
@@ -1577,7 +1523,7 @@ export interface UpdateInitialRoyalties {
   }
   
 }
-export type UpdateInitialRoyalties__Result = void;
+export type AddWhitelistAccounts__Result = boolean;
 /**
 * Current cost in NEAR to store one NFT
 * 
@@ -1600,6 +1546,29 @@ export interface CostOfLinkdrop {
   
 }
 export type CostOfLinkdrop__Result = U128;
+/**
+* 
+* @contractMethod change
+*/
+export interface UpdateWhitelistAccounts {
+  args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateWhitelistAccounts__Result = boolean;
 /**
 * Get a list of all tokens
 * 
@@ -1708,29 +1677,6 @@ export interface NftTransferPayout {
 }
 export type NftTransferPayout__Result = Payout;
 /**
-* Update the presale price
-* 
-* @contractMethod change
-*/
-export interface UpdatePresalePrice {
-  args: {
-    presale_price?: U128;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type UpdatePresalePrice__Result = void;
-/**
 * Returns the balance associated with given key.
 * 
 * @contractMethod view
@@ -1799,13 +1745,12 @@ export interface CreateLinkdrop {
 }
 export type CreateLinkdrop__Result = void;
 /**
-* Add a new admin. Careful who you add!
 * 
 * @contractMethod change
 */
-export interface AddAdmin {
+export interface TransferOwnership {
   args: {
-    account_id: AccountId;
+    new_owner: AccountId;
   };
   options: {
     /** Units in gas
@@ -1820,30 +1765,7 @@ export interface AddAdmin {
   }
   
 }
-export type AddAdmin__Result = void;
-/**
-* 
-* @contractMethod change
-*/
-export interface AddWhitelistAccounts {
-  args: {
-    accounts: AccountId[];
-    allowance?: u32;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type AddWhitelistAccounts__Result = void;
+export type TransferOwnership__Result = boolean;
 /**
 * Returns the token with the given `token_id` or `null` if no such token.
 * 
@@ -1881,6 +1803,28 @@ export interface New {
   
 }
 export type New__Result = void;
+/**
+* 
+* @contractMethod change
+*/
+export interface UpdateInitialRoyalties {
+  args: {
+    initial_royalties: Royalties;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateInitialRoyalties__Result = boolean;
 /**
 * Returns the total supply of non-fungible tokens as a string representing an
 * unsigned 128-bit integer to avoid JSON number limit of 2^53.
@@ -1952,6 +1896,73 @@ export interface CostPerToken {
 export type CostPerToken__Result = U128;
 /**
 * 
+* @contractMethod change
+*/
+export interface StartSale {
+  args: {
+    price?: YoctoNear;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type StartSale__Result = boolean;
+/**
+* Add a new admin. Careful who you add!
+* 
+* @contractMethod change
+*/
+export interface AddAdmin {
+  args: {
+    account_id: AccountId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type AddAdmin__Result = boolean;
+/**
+* 
+* @contractMethod change
+*/
+export interface UpdateRoyalties {
+  args: {
+    royalties: Royalties;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateRoyalties__Result = boolean;
+/**
+* 
 * @contractMethod view
 */
 export interface TotalCost {
@@ -1971,34 +1982,6 @@ export interface GetLinkdropContract {
   
 }
 export type GetLinkdropContract__Result = AccountId;
-/**
-* Override the current presale start time to start presale now.
-* Most provide when public sale starts. None, means never.
-* Can provide new presale price.
-* Note: you most likely won't need to call this since the presale
-* starts automatically based on time.
-* 
-* @contractMethod change
-*/
-export interface StartPresale {
-  args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type StartPresale__Result = void;
 /**
 * 
 * @contractMethod change
@@ -2044,13 +2027,12 @@ export interface NftSupplyForOwner {
 }
 export type NftSupplyForOwner__Result = U128;
 /**
-* Update public sale price
 * 
 * @contractMethod change
 */
-export interface UpdatePrice {
+export interface UpdateAllowance {
   args: {
-    price: U128;
+    allowance: u32;
   };
   options: {
     /** Units in gas
@@ -2065,7 +2047,59 @@ export interface UpdatePrice {
   }
   
 }
-export type UpdatePrice__Result = void;
+export type UpdateAllowance__Result = boolean;
+/**
+* Update the presale price
+* Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+* 
+* @contractMethod change
+*/
+export interface UpdatePresalePrice {
+  args: {
+    presale_price?: U128;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdatePresalePrice__Result = boolean;
+/**
+* Override the current presale start time to start presale now.
+* Most provide when public sale starts. None, means never.
+* Can provide new presale price.
+* Note: you most likely won't need to call this since the presale
+* starts automatically based on time.
+* 
+* @contractMethod change
+*/
+export interface StartPresale {
+  args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type StartPresale__Result = boolean;
 /**
 * Get list of all tokens owned by a given account
 * 
@@ -2175,28 +2209,6 @@ export interface GetSaleInfo {
   
 }
 export type GetSaleInfo__Result = SaleInfo;
-/**
-* 
-* @contractMethod change
-*/
-export interface UpdateRoyalties {
-  args: {
-    royalties: Royalties;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type UpdateRoyalties__Result = void;
 /**
 * 
 * @contractMethod change

@@ -49,7 +49,7 @@
       "type": "object"
     },
     "AddAdmin__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "AddWhitelistAccounts": {
       "additionalProperties": false,
@@ -98,7 +98,7 @@
       "type": "object"
     },
     "AddWhitelistAccounts__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "Admins": {
       "additionalProperties": false,
@@ -191,7 +191,7 @@
       "type": "object"
     },
     "CloseContract__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "CostOfLinkdrop": {
       "additionalProperties": false,
@@ -1478,7 +1478,7 @@
       "type": "object"
     },
     "StartPresale__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "StartSale": {
       "additionalProperties": false,
@@ -1488,7 +1488,7 @@
           "additionalProperties": false,
           "properties": {
             "price": {
-              "$ref": "#/definitions/U128"
+              "$ref": "#/definitions/YoctoNear"
             }
           },
           "type": "object"
@@ -1518,7 +1518,7 @@
       "type": "object"
     },
     "StartSale__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "Status": {
       "description": "Current state of contract",
@@ -1752,7 +1752,7 @@
       "type": "object"
     },
     "TransferOwnership__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "U128": {
       "description": "String representation of a u128-bit integer",
@@ -1800,7 +1800,7 @@
       "type": "object"
     },
     "UpdateAllowance__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdateInitialRoyalties": {
       "additionalProperties": false,
@@ -1843,12 +1843,12 @@
       "type": "object"
     },
     "UpdateInitialRoyalties__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdatePresalePrice": {
       "additionalProperties": false,
       "contractMethod": "change",
-      "description": "Update the presale price",
+      "description": "Update the presale price Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1884,12 +1884,12 @@
       "type": "object"
     },
     "UpdatePresalePrice__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdatePrice": {
       "additionalProperties": false,
       "contractMethod": "change",
-      "description": "Update public sale price",
+      "description": "Update public sale price. Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1928,7 +1928,7 @@
       "type": "object"
     },
     "UpdatePrice__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdateRoyalties": {
       "additionalProperties": false,
@@ -1971,7 +1971,7 @@
       "type": "object"
     },
     "UpdateRoyalties__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdateUri": {
       "additionalProperties": false,
@@ -2014,7 +2014,7 @@
       "type": "object"
     },
     "UpdateUri__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdateWhitelistAccounts": {
       "additionalProperties": false,
@@ -2064,7 +2064,7 @@
       "type": "object"
     },
     "UpdateWhitelistAccounts__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UserSaleInfo": {
       "additionalProperties": false,
@@ -2114,6 +2114,10 @@
     },
     "WrappedDuration": {
       "type": "string"
+    },
+    "YoctoNear": {
+      "$ref": "#/definitions/U128",
+      "description": "String of yocto NEAR; 1N = 1000000000000000000000000 yN"
     },
     "u16": {
       "maximum": 65535,

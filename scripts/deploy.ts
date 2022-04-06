@@ -6,37 +6,36 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
-  name: "Shinto Society",
-  symbol: "Shinto",
+  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
+  name: "TENK NFT",
+  symbol: "TENK",
   icon,
 };
- 
-const presale_price =  NEAR.parse("6 N").toJSON();
-const price = NEAR.parse("7 N").toJSON();
 
+const size = 10_000;
+ 
 const sale: tenk.Sale = {
-  price,
-  presale_price,
+  price: NEAR.parse("1 N").toJSON(),
+  // presale_price: NEAR.parse("6 N").toJSON(),
   mint_rate_limit: 6,
-  presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-  public_sale_start: Date.parse("05 April 2022 5:00 PM UTC"),
-  initial_royalties: {
-    percent: 10_000,
-    accounts: {
-      "tenk.sputnik-dao.near": 2_000,
-      "project.sputnik-dao.near": 2_000,
-      "mistcop.near": 6_000,
-    },
-  },
-  royalties: {
-    percent: 500,
-    accounts: {
-      "tenk.sputnik-dao.near": 4_000,
-      "project.sputnik-dao.near": 2_000,
-      "mistcop.near": 4_000,
-    },
-  },
+  // presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
+  public_sale_start: Date.now(),
+  // initial_royalties: {
+  //   percent: 10_000,
+  //   accounts: {
+  //     "tenk.sputnik-dao.near": 2_000,
+  //     "project.sputnik-dao.near": 2_000,
+  //     "mistcop.near": 6_000,
+  //   },
+  // },
+  // royalties: {
+  //   percent: 500,
+  //   accounts: {
+  //     "tenk.sputnik-dao.near": 4_000,
+  //     "project.sputnik-dao.near": 2_000,
+  //     "mistcop.near": 4_000,
+  //   },
+  // },
 };
 
 
@@ -57,7 +56,7 @@ export async function main({ account, nearAPI, argv, near }: Context) {
   const initialArgs = {
     owner_id: account.accountId,
     metadata,
-    size: 3333,
+    size,
     sale,
   };
 
