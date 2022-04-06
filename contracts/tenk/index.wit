@@ -1,4 +1,4 @@
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.3) 
+// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.4) 
 
 // This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
@@ -103,12 +103,6 @@ check-key: function(public-key: public-key) -> bool
 ///  change
 update-allowance: function(allowance: u32)
 
-whitelisted: function(account-id: account-id) -> bool
-
-
-get-sale-info: function() -> sale-info
-
-
 ///  Revoke all approved accounts for a specific token.
 /// 
 ///  Requirements
@@ -123,17 +117,16 @@ get-sale-info: function() -> sale-info
 ///  change
 nft-revoke-all: function(token-id: token-id)
 
-cost-per-token: function(minter: account-id) -> u128
-
-
 ///  change
 transfer-ownership: function(new-owner: account-id)
 
-///  change
-start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>)
+///  Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+get-user-sale-info: function(account-id: account-id) -> user-sale-info
 
-///  change
-close-contract: function()
+
+///  Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+tokens-left: function() -> u32
+
 
 ///  Simple transfer. Transfer a given `token_id` from current owner to
 ///  `receiver_id`.
@@ -162,6 +155,9 @@ nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id:
 
 ///  change
 start-sale: function(price: option<u128>)
+
+///  change
+update-whitelist-accounts: function(accounts: list<account-id>, allowance-increase: u32)
 
 ///  change
 nft-mint-many: function(num: u32) -> list<token>
@@ -197,7 +193,22 @@ enum status {
 ///  change
 update-uri: function(uri: string)
 
+///  Contract wwill
+///  change
+close-contract: function()
+
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
+
+
+///  change
+update-initial-royalties: function(initial-royalties: royalties)
+
+///  Current cost in NEAR to store one NFT
+token-storage-cost: function() -> u128
+
+
+///  Cost of NFT + fees for linkdrop
+cost-of-linkdrop: function(minter: account-id) -> u128
 
 
 ///  Get a list of all tokens
@@ -259,6 +270,10 @@ record user-sale-info {
     remaining-allowance: option<u32>
 }
 
+///  Update the presale price
+///  change
+update-presale-price: function(presale-price: option<u128>)
+
 ///  Returns the balance associated with given key.
 get-key-balance: function() -> u128
 
@@ -281,6 +296,10 @@ nft-revoke: function(token-id: token-id, account-id: account-id)
 ///  Create a pending token that can be claimed with corresponding private key
 ///  change
 create-linkdrop: function(public-key: public-key)
+
+///  Add a new admin. Careful who you add!
+///  change
+add-admin: function(account-id: account-id)
 
 record royalties {
     accounts: list<tuple<account-id,basis-point>>,
@@ -316,9 +335,6 @@ nft-total-supply: function() -> u128
 ///  milliseconds elapsed since the UNIX epoch
 type timestamp-ms = u64
 
-token-storage-cost: function() -> u128
-
-
 ///  Add an approved account for a specific token.
 /// 
 ///  Requirements
@@ -344,7 +360,8 @@ token-storage-cost: function() -> u128
 ///  change
 nft-approve: function(token-id: token-id, account-id: account-id, msg: option<string>)
 
-cost-of-linkdrop: function(minter: account-id) -> u128
+///  Flat cost of one token
+cost-per-token: function(minter: account-id) -> u128
 
 
 total-cost: function(num: u32, minter: account-id) -> u128
@@ -352,6 +369,14 @@ total-cost: function(num: u32, minter: account-id) -> u128
 
 get-linkdrop-contract: function() -> account-id
 
+
+///  Override the current presale start time to start presale now.
+///  Most provide when public sale starts. None, means never.
+///  Can provide new presale price.
+///  Note: you most likely won't need to call this since the presale
+///  starts automatically based on time.
+///  change
+start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>)
 
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)
@@ -367,14 +392,9 @@ new-default-meta: function(owner-id: account-id, metadata: initial-metadata, siz
 nft-supply-for-owner: function(account-id: account-id) -> u128
 
 
-nft-metadata: function() -> nft-contract-metadata
-
-
-mint-rate-limit: function() -> option<u32>
-
-
-remaining-allowance: function(account-id: account-id) -> option<u32>
-
+///  Update public sale price
+///  change
+update-price: function(price: u128)
 
 record initial-metadata {
     name: string,
@@ -403,13 +423,23 @@ nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>,
 nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadata: token-metadata) -> token
 
 
-get-user-sale-info: function(account-id: account-id) -> user-sale-info
+///  Max number of mints in one transaction. None, means unlimited
+mint-rate-limit: function() -> option<u32>
 
 
+///  Check whether an account is allowed to mint during the presale
+whitelisted: function(account-id: account-id) -> bool
+
+
+///  Initial size of collection. Number left to raffle + current total supply
 initial: function() -> u64
 
 
 type basis-point = u16
+
+///  Part of the NFT metadata standard. Returns the contract's metadata
+nft-metadata: function() -> nft-contract-metadata
+
 
 ///  Information about the current sale
 record sale-info {
@@ -425,8 +455,13 @@ record sale-info {
     price: u128
 }
 
-///  change
-add-whitelist-account-ungaurded: function(account-id: account-id, allowance: u32)
+///  Current set of admins
+admins: function() -> list<account-id>
+
+
+///  Information about the current sale. When in starts, status, price, and how many could be minted.
+get-sale-info: function() -> sale-info
+
 
 ///  Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
 ///  A mapping of NEAR accounts to the amount each should be paid out, in
@@ -439,13 +474,14 @@ record payout {
     payout: list<tuple<account-id,u128>>
 }
 
-tokens-left: function() -> u32
-
-
 ///  change
 update-royalties: function(royalties: royalties)
 
 ///  change
 nft-mint-one: function() -> token
+
+
+///  How many tokens an account is still allowed to mint. None, means unlimited
+remaining-allowance: function(account-id: account-id) -> option<u32>
 
 

@@ -239,14 +239,6 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_allowance", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  whitelisted(args: {
-    account_id: AccountId;
-  }, options?: ViewFunctionOptions): Promise<boolean> {
-    return this.account.viewFunction(this.contractId, "whitelisted", args, options);
-  }
-  get_sale_info(args = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
-    return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
-  }
   /**
   * Revoke all approved accounts for a specific token.
   * 
@@ -301,11 +293,6 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_revoke_all", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  cost_per_token(args: {
-    minter: AccountId;
-  }, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
-  }
   async transfer_ownership(args: {
     new_owner: AccountId;
   }, options?: ChangeMethodOptions): Promise<void> {
@@ -321,32 +308,19 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("transfer_ownership", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  async start_presale(args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.start_presaleRaw(args, options));
+  /**
+  * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+  */
+  get_user_sale_info(args: {
+    account_id: AccountId;
+  }, options?: ViewFunctionOptions): Promise<UserSaleInfo> {
+    return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
   }
-  start_presaleRaw(args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "start_presale", args, ...options});
-  }
-  start_presaleTx(args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("start_presale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  async close_contract(args = {}, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.close_contractRaw(args, options));
-  }
-  close_contractRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "close_contract", args, ...options});
-  }
-  close_contractTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("close_contract", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  /**
+  * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+  */
+  tokens_left(args = {}, options?: ViewFunctionOptions): Promise<u32> {
+    return this.account.viewFunction(this.contractId, "tokens_left", args, options);
   }
   /**
   * Simple transfer. Transfer a given `token_id` from current owner to
@@ -459,6 +433,24 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  async update_whitelist_accounts(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_whitelist_accountsRaw(args, options));
+  }
+  update_whitelist_accountsRaw(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_whitelist_accounts", args, ...options});
+  }
+  update_whitelist_accountsTx(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   async nft_mint_many(args: {
     num: u32;
   }, options?: ChangeMethodOptions): Promise<Token[]> {
@@ -509,12 +501,59 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_uri", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  /**
+  * Contract wwill
+  */
+  async close_contract(args = {}, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.close_contractRaw(args, options));
+  }
+  /**
+  * Contract wwill
+  */
+  close_contractRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "close_contract", args, ...options});
+  }
+  /**
+  * Contract wwill
+  */
+  close_contractTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("close_contract", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   nft_payout(args: {
     token_id: string;
     balance: U128;
     max_len_payout?: u32;
   }, options?: ViewFunctionOptions): Promise<Payout> {
     return this.account.viewFunction(this.contractId, "nft_payout", args, options);
+  }
+  async update_initial_royalties(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_initial_royaltiesRaw(args, options));
+  }
+  update_initial_royaltiesRaw(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_initial_royalties", args, ...options});
+  }
+  update_initial_royaltiesTx(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_initial_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Current cost in NEAR to store one NFT
+  */
+  token_storage_cost(args = {}, options?: ViewFunctionOptions): Promise<U128> {
+    return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
+  }
+  /**
+  * Cost of NFT + fees for linkdrop
+  */
+  cost_of_linkdrop(args: {
+    minter: AccountId;
+  }, options?: ViewFunctionOptions): Promise<U128> {
+    return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
   }
   /**
   * Get a list of all tokens
@@ -696,6 +735,30 @@ export class Contract {
     return transactions.functionCall("nft_transfer_payout", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
+  * Update the presale price
+  */
+  async update_presale_price(args: {
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_presale_priceRaw(args, options));
+  }
+  /**
+  * Update the presale price
+  */
+  update_presale_priceRaw(args: {
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_presale_price", args, ...options});
+  }
+  /**
+  * Update the presale price
+  */
+  update_presale_priceTx(args: {
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_presale_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
   * Returns the balance associated with given key.
   */
   get_key_balance(args = {}, options?: ViewFunctionOptions): Promise<U128> {
@@ -785,6 +848,30 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  /**
+  * Add a new admin. Careful who you add!
+  */
+  async add_admin(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.add_adminRaw(args, options));
+  }
+  /**
+  * Add a new admin. Careful who you add!
+  */
+  add_adminRaw(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "add_admin", args, ...options});
+  }
+  /**
+  * Add a new admin. Careful who you add!
+  */
+  add_adminTx(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("add_admin", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   async add_whitelist_accounts(args: {
     accounts: AccountId[];
     allowance?: u32;
@@ -841,9 +928,6 @@ export class Contract {
   */
   nft_total_supply(args = {}, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "nft_total_supply", args, options);
-  }
-  token_storage_cost(args = {}, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
   }
   /**
   * Add an approved account for a specific token.
@@ -938,10 +1022,13 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_approve", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  cost_of_linkdrop(args: {
+  /**
+  * Flat cost of one token
+  */
+  cost_per_token(args: {
     minter: AccountId;
   }, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
+    return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
   }
   total_cost(args: {
     num: u32;
@@ -951,6 +1038,45 @@ export class Contract {
   }
   get_linkdrop_contract(args = {}, options?: ViewFunctionOptions): Promise<AccountId> {
     return this.account.viewFunction(this.contractId, "get_linkdrop_contract", args, options);
+  }
+  /**
+  * Override the current presale start time to start presale now.
+  * Most provide when public sale starts. None, means never.
+  * Can provide new presale price.
+  * Note: you most likely won't need to call this since the presale
+  * starts automatically based on time.
+  */
+  async start_presale(args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.start_presaleRaw(args, options));
+  }
+  /**
+  * Override the current presale start time to start presale now.
+  * Most provide when public sale starts. None, means never.
+  * Can provide new presale price.
+  * Note: you most likely won't need to call this since the presale
+  * starts automatically based on time.
+  */
+  start_presaleRaw(args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "start_presale", args, ...options});
+  }
+  /**
+  * Override the current presale start time to start presale now.
+  * Most provide when public sale starts. None, means never.
+  * Can provide new presale price.
+  * Note: you most likely won't need to call this since the presale
+  * starts automatically based on time.
+  */
+  start_presaleTx(args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("start_presale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   async new_default_meta(args: {
     owner_id: AccountId;
@@ -991,16 +1117,29 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<U128> {
     return this.account.viewFunction(this.contractId, "nft_supply_for_owner", args, options);
   }
-  nft_metadata(args = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
-    return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
+  /**
+  * Update public sale price
+  */
+  async update_price(args: {
+    price: U128;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_priceRaw(args, options));
   }
-  mint_rate_limit(args = {}, options?: ViewFunctionOptions): Promise<u32 | null> {
-    return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
+  /**
+  * Update public sale price
+  */
+  update_priceRaw(args: {
+    price: U128;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_price", args, ...options});
   }
-  remaining_allowance(args: {
-    account_id: AccountId;
-  }, options?: ViewFunctionOptions): Promise<u32 | null> {
-    return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
+  /**
+  * Update public sale price
+  */
+  update_priceTx(args: {
+    price: U128;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Get list of all tokens owned by a given account
@@ -1042,34 +1181,43 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_mint", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
-  get_user_sale_info(args: {
-    account_id: AccountId;
-  }, options?: ViewFunctionOptions): Promise<UserSaleInfo> {
-    return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
+  /**
+  * Max number of mints in one transaction. None, means unlimited
+  */
+  mint_rate_limit(args = {}, options?: ViewFunctionOptions): Promise<u32 | null> {
+    return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
   }
+  /**
+  * Check whether an account is allowed to mint during the presale
+  */
+  whitelisted(args: {
+    account_id: AccountId;
+  }, options?: ViewFunctionOptions): Promise<boolean> {
+    return this.account.viewFunction(this.contractId, "whitelisted", args, options);
+  }
+  /**
+  * Initial size of collection. Number left to raffle + current total supply
+  */
   initial(args = {}, options?: ViewFunctionOptions): Promise<u64> {
     return this.account.viewFunction(this.contractId, "initial", args, options);
   }
-  async add_whitelist_account_ungaurded(args: {
-    account_id: AccountId;
-    allowance: u32;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.add_whitelist_account_ungaurdedRaw(args, options));
+  /**
+  * Part of the NFT metadata standard. Returns the contract's metadata
+  */
+  nft_metadata(args = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
+    return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
   }
-  add_whitelist_account_ungaurdedRaw(args: {
-    account_id: AccountId;
-    allowance: u32;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "add_whitelist_account_ungaurded", args, ...options});
+  /**
+  * Current set of admins
+  */
+  admins(args = {}, options?: ViewFunctionOptions): Promise<AccountId[]> {
+    return this.account.viewFunction(this.contractId, "admins", args, options);
   }
-  add_whitelist_account_ungaurdedTx(args: {
-    account_id: AccountId;
-    allowance: u32;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("add_whitelist_account_ungaurded", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  tokens_left(args = {}, options?: ViewFunctionOptions): Promise<u32> {
-    return this.account.viewFunction(this.contractId, "tokens_left", args, options);
+  /**
+  * Information about the current sale. When in starts, status, price, and how many could be minted.
+  */
+  get_sale_info(args = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
+    return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
   }
   async update_royalties(args: {
     royalties: Royalties;
@@ -1094,6 +1242,14 @@ export class Contract {
   }
   nft_mint_oneTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_mint_one", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * How many tokens an account is still allowed to mint. None, means unlimited
+  */
+  remaining_allowance(args: {
+    account_id: AccountId;
+  }, options?: ViewFunctionOptions): Promise<u32 | null> {
+    return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
   }
 }
 /**
@@ -1130,26 +1286,6 @@ export interface UpdateAllowance {
 }
 export type UpdateAllowance__Result = void;
 /**
-* 
-* @contractMethod view
-*/
-export interface Whitelisted {
-  args: {
-    account_id: AccountId;
-  };
-  
-}
-export type Whitelisted__Result = boolean;
-/**
-* 
-* @contractMethod view
-*/
-export interface GetSaleInfo {
-  args: {};
-  
-}
-export type GetSaleInfo__Result = SaleInfo;
-/**
 * Revoke all approved accounts for a specific token.
 * 
 * Requirements
@@ -1184,17 +1320,6 @@ export interface NftRevokeAll {
 export type NftRevokeAll__Result = void;
 /**
 * 
-* @contractMethod view
-*/
-export interface CostPerToken {
-  args: {
-    minter: AccountId;
-  };
-  
-}
-export type CostPerToken__Result = U128;
-/**
-* 
 * @contractMethod change
 */
 export interface TransferOwnership {
@@ -1216,48 +1341,27 @@ export interface TransferOwnership {
 }
 export type TransferOwnership__Result = void;
 /**
+* Information about a current user. Whether they are VIP and how many tokens left in their allowance.
 * 
-* @contractMethod change
+* @contractMethod view
 */
-export interface StartPresale {
+export interface GetUserSaleInfo {
   args: {
-    public_sale_start?: TimestampMs;
-    presale_price?: U128;
+    account_id: AccountId;
   };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
   
 }
-export type StartPresale__Result = void;
+export type GetUserSaleInfo__Result = UserSaleInfo;
 /**
+* Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
 * 
-* @contractMethod change
+* @contractMethod view
 */
-export interface CloseContract {
+export interface TokensLeft {
   args: {};
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
   
 }
-export type CloseContract__Result = void;
+export type TokensLeft__Result = u32;
 /**
 * Simple transfer. Transfer a given `token_id` from current owner to
 * `receiver_id`.
@@ -1331,6 +1435,29 @@ export type StartSale__Result = void;
 * 
 * @contractMethod change
 */
+export interface UpdateWhitelistAccounts {
+  args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateWhitelistAccounts__Result = void;
+/**
+* 
+* @contractMethod change
+*/
 export interface NftMintMany {
   args: {
     num: u32;
@@ -1396,6 +1523,27 @@ export interface UpdateUri {
 }
 export type UpdateUri__Result = void;
 /**
+* Contract wwill
+* 
+* @contractMethod change
+*/
+export interface CloseContract {
+  args: {};
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type CloseContract__Result = void;
+/**
 * 
 * @contractMethod view
 */
@@ -1408,6 +1556,50 @@ export interface NftPayout {
   
 }
 export type NftPayout__Result = Payout;
+/**
+* 
+* @contractMethod change
+*/
+export interface UpdateInitialRoyalties {
+  args: {
+    initial_royalties: Royalties;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateInitialRoyalties__Result = void;
+/**
+* Current cost in NEAR to store one NFT
+* 
+* @contractMethod view
+*/
+export interface TokenStorageCost {
+  args: {};
+  
+}
+export type TokenStorageCost__Result = U128;
+/**
+* Cost of NFT + fees for linkdrop
+* 
+* @contractMethod view
+*/
+export interface CostOfLinkdrop {
+  args: {
+    minter: AccountId;
+  };
+  
+}
+export type CostOfLinkdrop__Result = U128;
 /**
 * Get a list of all tokens
 * 
@@ -1516,6 +1708,29 @@ export interface NftTransferPayout {
 }
 export type NftTransferPayout__Result = Payout;
 /**
+* Update the presale price
+* 
+* @contractMethod change
+*/
+export interface UpdatePresalePrice {
+  args: {
+    presale_price?: U128;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdatePresalePrice__Result = void;
+/**
 * Returns the balance associated with given key.
 * 
 * @contractMethod view
@@ -1583,6 +1798,29 @@ export interface CreateLinkdrop {
   
 }
 export type CreateLinkdrop__Result = void;
+/**
+* Add a new admin. Careful who you add!
+* 
+* @contractMethod change
+*/
+export interface AddAdmin {
+  args: {
+    account_id: AccountId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type AddAdmin__Result = void;
 /**
 * 
 * @contractMethod change
@@ -1655,15 +1893,6 @@ export interface NftTotalSupply {
 }
 export type NftTotalSupply__Result = U128;
 /**
-* 
-* @contractMethod view
-*/
-export interface TokenStorageCost {
-  args: {};
-  
-}
-export type TokenStorageCost__Result = U128;
-/**
 * Add an approved account for a specific token.
 * 
 * Requirements
@@ -1710,16 +1939,17 @@ export interface NftApprove {
 }
 export type NftApprove__Result = void;
 /**
+* Flat cost of one token
 * 
 * @contractMethod view
 */
-export interface CostOfLinkdrop {
+export interface CostPerToken {
   args: {
     minter: AccountId;
   };
   
 }
-export type CostOfLinkdrop__Result = U128;
+export type CostPerToken__Result = U128;
 /**
 * 
 * @contractMethod view
@@ -1741,6 +1971,34 @@ export interface GetLinkdropContract {
   
 }
 export type GetLinkdropContract__Result = AccountId;
+/**
+* Override the current presale start time to start presale now.
+* Most provide when public sale starts. None, means never.
+* Can provide new presale price.
+* Note: you most likely won't need to call this since the presale
+* starts automatically based on time.
+* 
+* @contractMethod change
+*/
+export interface StartPresale {
+  args: {
+    public_sale_start?: TimestampMs;
+    presale_price?: U128;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type StartPresale__Result = void;
 /**
 * 
 * @contractMethod change
@@ -1786,34 +2044,28 @@ export interface NftSupplyForOwner {
 }
 export type NftSupplyForOwner__Result = U128;
 /**
+* Update public sale price
 * 
-* @contractMethod view
+* @contractMethod change
 */
-export interface NftMetadata {
-  args: {};
-  
-}
-export type NftMetadata__Result = NftContractMetadata;
-/**
-* 
-* @contractMethod view
-*/
-export interface MintRateLimit {
-  args: {};
-  
-}
-export type MintRateLimit__Result = u32 | null;
-/**
-* 
-* @contractMethod view
-*/
-export interface RemainingAllowance {
+export interface UpdatePrice {
   args: {
-    account_id: AccountId;
+    price: U128;
   };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
   
 }
-export type RemainingAllowance__Result = u32 | null;
+export type UpdatePrice__Result = void;
 /**
 * Get list of all tokens owned by a given account
 * 
@@ -1862,17 +2114,29 @@ export interface NftMint {
 }
 export type NftMint__Result = Token;
 /**
+* Max number of mints in one transaction. None, means unlimited
 * 
 * @contractMethod view
 */
-export interface GetUserSaleInfo {
+export interface MintRateLimit {
+  args: {};
+  
+}
+export type MintRateLimit__Result = u32 | null;
+/**
+* Check whether an account is allowed to mint during the presale
+* 
+* @contractMethod view
+*/
+export interface Whitelisted {
   args: {
     account_id: AccountId;
   };
   
 }
-export type GetUserSaleInfo__Result = UserSaleInfo;
+export type Whitelisted__Result = boolean;
 /**
+* Initial size of collection. Number left to raffle + current total supply
 * 
 * @contractMethod view
 */
@@ -1882,37 +2146,35 @@ export interface Initial {
 }
 export type Initial__Result = u64;
 /**
-* 
-* @contractMethod change
-*/
-export interface AddWhitelistAccountUngaurded {
-  args: {
-    account_id: AccountId;
-    allowance: u32;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type AddWhitelistAccountUngaurded__Result = void;
-/**
+* Part of the NFT metadata standard. Returns the contract's metadata
 * 
 * @contractMethod view
 */
-export interface TokensLeft {
+export interface NftMetadata {
   args: {};
   
 }
-export type TokensLeft__Result = u32;
+export type NftMetadata__Result = NftContractMetadata;
+/**
+* Current set of admins
+* 
+* @contractMethod view
+*/
+export interface Admins {
+  args: {};
+  
+}
+export type Admins__Result = AccountId[];
+/**
+* Information about the current sale. When in starts, status, price, and how many could be minted.
+* 
+* @contractMethod view
+*/
+export interface GetSaleInfo {
+  args: {};
+  
+}
+export type GetSaleInfo__Result = SaleInfo;
 /**
 * 
 * @contractMethod change
@@ -1955,3 +2217,15 @@ export interface NftMintOne {
   
 }
 export type NftMintOne__Result = Token;
+/**
+* How many tokens an account is still allowed to mint. None, means unlimited
+* 
+* @contractMethod view
+*/
+export interface RemainingAllowance {
+  args: {
+    account_id: AccountId;
+  };
+  
+}
+export type RemainingAllowance__Result = u32 | null;

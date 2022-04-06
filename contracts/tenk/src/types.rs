@@ -61,7 +61,7 @@ impl Default for Sale {
             public_sale_start: Default::default(),
             allowance: Default::default(),
             presale_price: Default::default(),
-            mint_rate_limit: Default::default(),
+            mint_rate_limit: Some(10),
         }
     }
 }

@@ -99,13 +99,6 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("update_allowance", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
-    Contract.prototype.whitelisted = function (args, options) {
-        return this.account.viewFunction(this.contractId, "whitelisted", args, options);
-    };
-    Contract.prototype.get_sale_info = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
-    };
     /**
     * Revoke all approved accounts for a specific token.
     *
@@ -165,9 +158,6 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("nft_revoke_all", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
-    Contract.prototype.cost_per_token = function (args, options) {
-        return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
-    };
     Contract.prototype.transfer_ownership = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -188,48 +178,18 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("transfer_ownership", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
-    Contract.prototype.start_presale = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.start_presaleRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
+    /**
+    * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+    */
+    Contract.prototype.get_user_sale_info = function (args, options) {
+        return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
     };
-    Contract.prototype.start_presaleRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "start_presale", args: args }, options));
-    };
-    Contract.prototype.start_presaleTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    Contract.prototype.close_contract = function (args, options) {
+    /**
+    * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+    */
+    Contract.prototype.tokens_left = function (args, options) {
         if (args === void 0) { args = {}; }
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.close_contractRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.close_contractRaw = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "close_contract", args: args }, options));
-    };
-    Contract.prototype.close_contractTx = function (args, options) {
-        var _a, _b;
-        if (args === void 0) { args = {}; }
-        return helper_1.transactions.functionCall("close_contract", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+        return this.account.viewFunction(this.contractId, "tokens_left", args, options);
     };
     /**
     * Simple transfer. Transfer a given `token_id` from current owner to
@@ -343,6 +303,26 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("start_sale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    Contract.prototype.update_whitelist_accounts = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_whitelist_accountsRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.update_whitelist_accountsRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_whitelist_accounts", args: args }, options));
+    };
+    Contract.prototype.update_whitelist_accountsTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_whitelist_accounts", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
     Contract.prototype.nft_mint_many = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -399,8 +379,73 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("update_uri", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * Contract wwill
+    */
+    Contract.prototype.close_contract = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.close_contractRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Contract wwill
+    */
+    Contract.prototype.close_contractRaw = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "close_contract", args: args }, options));
+    };
+    /**
+    * Contract wwill
+    */
+    Contract.prototype.close_contractTx = function (args, options) {
+        var _a, _b;
+        if (args === void 0) { args = {}; }
+        return helper_1.transactions.functionCall("close_contract", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
     Contract.prototype.nft_payout = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_payout", args, options);
+    };
+    Contract.prototype.update_initial_royalties = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_initial_royaltiesRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.update_initial_royaltiesRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_initial_royalties", args: args }, options));
+    };
+    Contract.prototype.update_initial_royaltiesTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_initial_royalties", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Current cost in NEAR to store one NFT
+    */
+    Contract.prototype.token_storage_cost = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
+    };
+    /**
+    * Cost of NFT + fees for linkdrop
+    */
+    Contract.prototype.cost_of_linkdrop = function (args, options) {
+        return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
     };
     /**
     * Get a list of all tokens
@@ -562,6 +607,35 @@ var Contract = /** @class */ (function () {
         return helper_1.transactions.functionCall("nft_transfer_payout", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
+    * Update the presale price
+    */
+    Contract.prototype.update_presale_price = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_presale_priceRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Update the presale price
+    */
+    Contract.prototype.update_presale_priceRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_presale_price", args: args }, options));
+    };
+    /**
+    * Update the presale price
+    */
+    Contract.prototype.update_presale_priceTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_presale_price", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
     * Returns the balance associated with given key.
     */
     Contract.prototype.get_key_balance = function (args, options) {
@@ -659,6 +733,35 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * Add a new admin. Careful who you add!
+    */
+    Contract.prototype.add_admin = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.add_adminRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Add a new admin. Careful who you add!
+    */
+    Contract.prototype.add_adminRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "add_admin", args: args }, options));
+    };
+    /**
+    * Add a new admin. Careful who you add!
+    */
+    Contract.prototype.add_adminTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("add_admin", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
     Contract.prototype.add_whitelist_accounts = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -712,10 +815,6 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_total_supply = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "nft_total_supply", args, options);
-    };
-    Contract.prototype.token_storage_cost = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
     };
     /**
     * Add an approved account for a specific token.
@@ -809,8 +908,11 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("nft_approve", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
-    Contract.prototype.cost_of_linkdrop = function (args, options) {
-        return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
+    /**
+    * Flat cost of one token
+    */
+    Contract.prototype.cost_per_token = function (args, options) {
+        return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
     };
     Contract.prototype.total_cost = function (args, options) {
         return this.account.viewFunction(this.contractId, "total_cost", args, options);
@@ -818,6 +920,47 @@ var Contract = /** @class */ (function () {
     Contract.prototype.get_linkdrop_contract = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "get_linkdrop_contract", args, options);
+    };
+    /**
+    * Override the current presale start time to start presale now.
+    * Most provide when public sale starts. None, means never.
+    * Can provide new presale price.
+    * Note: you most likely won't need to call this since the presale
+    * starts automatically based on time.
+    */
+    Contract.prototype.start_presale = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.start_presaleRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Override the current presale start time to start presale now.
+    * Most provide when public sale starts. None, means never.
+    * Can provide new presale price.
+    * Note: you most likely won't need to call this since the presale
+    * starts automatically based on time.
+    */
+    Contract.prototype.start_presaleRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "start_presale", args: args }, options));
+    };
+    /**
+    * Override the current presale start time to start presale now.
+    * Most provide when public sale starts. None, means never.
+    * Can provide new presale price.
+    * Note: you most likely won't need to call this since the presale
+    * starts automatically based on time.
+    */
+    Contract.prototype.start_presaleTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.new_default_meta = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -852,16 +995,34 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_supply_for_owner = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_supply_for_owner", args, options);
     };
-    Contract.prototype.nft_metadata = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
+    /**
+    * Update public sale price
+    */
+    Contract.prototype.update_price = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_priceRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
     };
-    Contract.prototype.mint_rate_limit = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
+    /**
+    * Update public sale price
+    */
+    Contract.prototype.update_priceRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_price", args: args }, options));
     };
-    Contract.prototype.remaining_allowance = function (args, options) {
-        return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
+    /**
+    * Update public sale price
+    */
+    Contract.prototype.update_priceTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_price", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Get list of all tokens owned by a given account
@@ -898,36 +1059,46 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("nft_mint", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
-    Contract.prototype.get_user_sale_info = function (args, options) {
-        return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
+    /**
+    * Max number of mints in one transaction. None, means unlimited
+    */
+    Contract.prototype.mint_rate_limit = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
     };
+    /**
+    * Check whether an account is allowed to mint during the presale
+    */
+    Contract.prototype.whitelisted = function (args, options) {
+        return this.account.viewFunction(this.contractId, "whitelisted", args, options);
+    };
+    /**
+    * Initial size of collection. Number left to raffle + current total supply
+    */
     Contract.prototype.initial = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "initial", args, options);
     };
-    Contract.prototype.add_whitelist_account_ungaurded = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.add_whitelist_account_ungaurdedRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.add_whitelist_account_ungaurdedRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "add_whitelist_account_ungaurded", args: args }, options));
-    };
-    Contract.prototype.add_whitelist_account_ungaurdedTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("add_whitelist_account_ungaurded", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    Contract.prototype.tokens_left = function (args, options) {
+    /**
+    * Part of the NFT metadata standard. Returns the contract's metadata
+    */
+    Contract.prototype.nft_metadata = function (args, options) {
         if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "tokens_left", args, options);
+        return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
+    };
+    /**
+    * Current set of admins
+    */
+    Contract.prototype.admins = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "admins", args, options);
+    };
+    /**
+    * Information about the current sale. When in starts, status, price, and how many could be minted.
+    */
+    Contract.prototype.get_sale_info = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
     };
     Contract.prototype.update_royalties = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -971,6 +1142,12 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         if (args === void 0) { args = {}; }
         return helper_1.transactions.functionCall("nft_mint_one", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * How many tokens an account is still allowed to mint. None, means unlimited
+    */
+    Contract.prototype.remaining_allowance = function (args, options) {
+        return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
     };
     return Contract;
 }());
