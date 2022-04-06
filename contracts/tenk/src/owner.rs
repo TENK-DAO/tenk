@@ -13,6 +13,12 @@ impl Contract {
         self.tokens.owner_id = new_owner;
     }
 
+    pub fn update_initial_royalties(&mut self, initial_royalties: Royalties) {
+      self.assert_owner();
+      initial_royalties.validate();
+      self.sale.initial_royalties = Some(initial_royalties);
+  }
+
     pub fn update_royalties(&mut self, royalties: Royalties) {
         self.assert_owner();
         royalties.validate();

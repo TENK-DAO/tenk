@@ -1,4 +1,4 @@
-import {createKeyPair, KeyPairEd25519} from "near-willem-workspaces";
+import {createKeyPair, KeyPairEd25519} from "near-workspaces";
 import * as fs from "fs";
 
 const res = process.argv.slice(2);

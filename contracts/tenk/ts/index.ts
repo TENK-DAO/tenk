@@ -459,6 +459,24 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  async update_whitelist_accounts(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_whitelist_accountsRaw(args, options));
+  }
+  update_whitelist_accountsRaw(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_whitelist_accounts", args, ...options});
+  }
+  update_whitelist_accountsTx(args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   async nft_mint_many(args: {
     num: u32;
   }, options?: ChangeMethodOptions): Promise<Token[]> {
@@ -515,6 +533,21 @@ export class Contract {
     max_len_payout?: u32;
   }, options?: ViewFunctionOptions): Promise<Payout> {
     return this.account.viewFunction(this.contractId, "nft_payout", args, options);
+  }
+  async update_initial_royalties(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.update_initial_royaltiesRaw(args, options));
+  }
+  update_initial_royaltiesRaw(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_initial_royalties", args, ...options});
+  }
+  update_initial_royaltiesTx(args: {
+    initial_royalties: Royalties;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_initial_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Get a list of all tokens
@@ -1331,6 +1364,29 @@ export type StartSale__Result = void;
 * 
 * @contractMethod change
 */
+export interface UpdateWhitelistAccounts {
+  args: {
+    accounts: AccountId[];
+    allowance_increase: u32;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateWhitelistAccounts__Result = void;
+/**
+* 
+* @contractMethod change
+*/
 export interface NftMintMany {
   args: {
     num: u32;
@@ -1408,6 +1464,28 @@ export interface NftPayout {
   
 }
 export type NftPayout__Result = Payout;
+/**
+* 
+* @contractMethod change
+*/
+export interface UpdateInitialRoyalties {
+  args: {
+    initial_royalties: Royalties;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateInitialRoyalties__Result = void;
 /**
 * Get a list of all tokens
 * 
