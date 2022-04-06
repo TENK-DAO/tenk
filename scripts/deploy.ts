@@ -6,13 +6,16 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
-  name: "TENK NFT",
-  symbol: "TENK",
-  icon,
+  uri: "https://bafybeiehqz6vklvxkopg3un3avdtevch4cywuihgxrb4oio2qgxf4764bi.ipfs.dweb.link/",
+  name: "MonkeGodz",
+  symbol: "monkegodz",
+  // icon,
 };
+ 
+// const presale_price =  NEAR.parse("8 N").toJSON();
+const price = NEAR.parse("8 N").toJSON();
 
-const size = 10_000;
+const size = 333;
  
 const sale: tenk.Sale = {
   price: NEAR.parse("1 N").toJSON(),
@@ -50,7 +53,7 @@ export async function main({ account, nearAPI, argv, near }: Context) {
   const isTestnet = contractId.endsWith("testnet");
   if (isTestnet) {
     sale.initial_royalties = null;
-    sale.public_sale_start = Date.now();
+    // sale.public_sale_start = Date.now();
   }
 
   const initialArgs = {
