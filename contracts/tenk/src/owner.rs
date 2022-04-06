@@ -42,7 +42,11 @@ impl Contract {
         self.metadata.set(&metadata);
         true
     }
-    pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) -> bool {
+    pub fn add_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance: Option<u32>,
+    ) -> bool {
         #[cfg(feature = "testnet")]
         self.assert_owner_or_admin();
         let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
@@ -52,7 +56,11 @@ impl Contract {
         true
     }
 
-    pub fn update_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance_increase: u32) -> bool {
+    pub fn update_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance_increase: u32,
+    ) -> bool {
         self.assert_owner_or_admin();
         accounts.iter().for_each(|account_id| {
             let allowance = self.whitelist.get(&account_id).unwrap_or(0) + allowance_increase;
@@ -108,7 +116,7 @@ impl Contract {
         true
     }
 
-    /// Update public sale price. 
+    /// Update public sale price.
     /// Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
     pub fn update_price(&mut self, price: U128) -> bool {
         self.assert_owner_or_admin();
@@ -122,5 +130,19 @@ impl Contract {
         self.assert_owner_or_admin();
         self.sale.presale_price = presale_price;
         true
+    }
+
+    pub fn mint_special(&mut self, token_id: u32) -> Option<Token> {
+        self.assert_owner();
+        if token_id > 11 || token_id < 1 {
+          return None;
+        }
+       
+        
+        self.raffle.swap_remove_raw(token_id as u64);
+        let contract_id = env::current_account_id();
+        let token = self.internal_mint(token_id.to_string(), contract_id.clone(), None);
+        log_mint(&contract_id, &[token.clone()]);
+        Some(token)
     }
 }

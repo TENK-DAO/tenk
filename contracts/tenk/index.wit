@@ -147,15 +147,15 @@ tokens-left: function() -> u32
 ///  change
 nft-transfer: function(receiver-id: account-id, token-id: token-id, approval-id: option<u64>, memo: option<string>)
 
-///  Update public sale price. 
-///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
-///  change
-update-price: function(price: u128) -> bool
-
-
 ///  Contract wwill
 ///  change
 close-contract: function() -> bool
+
+
+///  Update public sale price.
+///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+///  change
+update-price: function(price: u128) -> bool
 
 
 ///  change
@@ -335,6 +335,10 @@ nft-total-supply: function() -> u128
 
 ///  milliseconds elapsed since the UNIX epoch
 type timestamp-ms = u64
+
+///  change
+mint-special: function(token-id: u32) -> option<token>
+
 
 ///  Add an approved account for a specific token.
 /// 

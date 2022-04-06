@@ -244,38 +244,6 @@ var Contract = /** @class */ (function () {
         return helper_1.transactions.functionCall("nft_transfer", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
-    * Update public sale price.
-    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
-    */
-    Contract.prototype.update_price = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.update_priceRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    /**
-    * Update public sale price.
-    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
-    */
-    Contract.prototype.update_priceRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_price", args: args }, options));
-    };
-    /**
-    * Update public sale price.
-    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
-    */
-    Contract.prototype.update_priceTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("update_price", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    /**
     * Contract wwill
     */
     Contract.prototype.close_contract = function (args, options) {
@@ -306,6 +274,38 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         if (args === void 0) { args = {}; }
         return helper_1.transactions.functionCall("close_contract", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Update public sale price.
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    Contract.prototype.update_price = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_priceRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Update public sale price.
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    Contract.prototype.update_priceRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_price", args: args }, options));
+    };
+    /**
+    * Update public sale price.
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    Contract.prototype.update_priceTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_price", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_mint_many = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -749,6 +749,26 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_total_supply = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "nft_total_supply", args, options);
+    };
+    Contract.prototype.mint_special = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.mint_specialRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    Contract.prototype.mint_specialRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "mint_special", args: args }, options));
+    };
+    Contract.prototype.mint_specialTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("mint_special", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Add an approved account for a specific token.

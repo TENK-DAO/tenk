@@ -355,6 +355,18 @@ export declare class Contract {
         memo?: string;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
+    * Contract wwill
+    */
+    close_contract(args?: {}, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Contract wwill
+    */
+    close_contractRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Contract wwill
+    */
+    close_contractTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
+    /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
     */
@@ -375,18 +387,6 @@ export declare class Contract {
     update_priceTx(args: {
         price: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Contract wwill
-    */
-    close_contract(args?: {}, options?: ChangeMethodOptions): Promise<boolean>;
-    /**
-    * Contract wwill
-    */
-    close_contractRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Contract wwill
-    */
-    close_contractTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
     nft_mint_many(args: {
         num: u32;
     }, options?: ChangeMethodOptions): Promise<Token[]>;
@@ -750,6 +750,15 @@ export declare class Contract {
     * unsigned 128-bit integer to avoid JSON number limit of 2^53.
     */
     nft_total_supply(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    mint_special(args: {
+        token_id: u32;
+    }, options?: ChangeMethodOptions): Promise<Token | null>;
+    mint_specialRaw(args: {
+        token_id: u32;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    mint_specialTx(args: {
+        token_id: u32;
+    }, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Add an approved account for a specific token.
     *
@@ -1155,6 +1164,26 @@ export interface NftTransfer {
 }
 export declare type NftTransfer__Result = void;
 /**
+* Contract wwill
+*
+* @contractMethod change
+*/
+export interface CloseContract {
+    args: {};
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type CloseContract__Result = boolean;
+/**
 * Update public sale price.
 * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
 *
@@ -1177,26 +1206,6 @@ export interface UpdatePrice {
     };
 }
 export declare type UpdatePrice__Result = boolean;
-/**
-* Contract wwill
-*
-* @contractMethod change
-*/
-export interface CloseContract {
-    args: {};
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type CloseContract__Result = boolean;
 /**
 *
 * @contractMethod change
@@ -1594,6 +1603,27 @@ export interface NftTotalSupply {
     args: {};
 }
 export declare type NftTotalSupply__Result = U128;
+/**
+*
+* @contractMethod change
+*/
+export interface MintSpecial {
+    args: {
+        token_id: u32;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type MintSpecial__Result = Token | null;
 /**
 * Add an approved account for a specific token.
 *
