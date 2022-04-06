@@ -135,7 +135,7 @@ impl Contract {
         }
         let owner_id = &env::signer_account_id();
         let num = self.assert_can_mint(owner_id, num);
-        let tokens = self.nft_mint_many_ungaurded(num, owner_id, false);
+        let tokens = self.nft_mint_many_ungaurded(num, owner_id, self.total_cost(num, owner_id).0 == 0);
         self.use_whitelist_allowance(owner_id, num);
         tokens
     }
