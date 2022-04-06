@@ -1,4 +1,4 @@
-import { Workspace, NEAR } from "near-willem-workspaces";
+import { Workspace, NEAR } from "near-workspaces";
 
 const network = "testnet";
 const args = process.argv.slice(2);
@@ -16,9 +16,7 @@ void Workspace.open(
   { network, rootAccount },
   async ({ root }) => {
     const rootBalance = await root.availableBalance();
-    if (rootBalance.lt(NEAR.parse("350 N"))) {
       // @ts-expect-error is private
-      await root.manager.addFundsFromNetwork();
-    }
+    await root.manager.addFundsFromNetwork();
   }
 );

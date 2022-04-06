@@ -1,4 +1,4 @@
-import { JsonRpcProvider } from "near-willem-workspaces";
+import { JsonRpcProvider } from "near-workspaces";
 import * as path from "path";
 import * as fs from "fs/promises";
 
