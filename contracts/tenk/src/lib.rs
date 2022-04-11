@@ -5,7 +5,7 @@ use near_contract_standards::non_fungible_token::{
 };
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
-    collections::{LazyOption, LookupMap},
+    collections::{LazyOption, LookupMap, UnorderedSet},
     env, ext_contract,
     json_types::{Base64VecU8, U128},
     log, near_bindgen, require,
@@ -46,6 +46,8 @@ pub struct Contract {
     whitelist: LookupMap<AccountId, u32>,
 
     sale: Sale,
+
+    admins: UnorderedSet<AccountId>,
 }
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
@@ -78,6 +80,7 @@ enum StorageKey {
     Raffle,
     LinkdropKeys,
     Whitelist,
+    Admins
 }
 
 #[near_bindgen]
@@ -110,6 +113,7 @@ impl Contract {
             accounts: LookupMap::new(StorageKey::LinkdropKeys),
             whitelist: LookupMap::new(StorageKey::Whitelist),
             sale,
+            admins: UnorderedSet::new(StorageKey::Admins)
         }
     }
 
@@ -233,9 +237,27 @@ impl Contract {
     fn signer_is_owner(&self) -> bool {
         self.is_owner(&env::signer_account_id())
     }
-
+    
     fn is_owner(&self, minter: &AccountId) -> bool {
-        minter.as_str() == self.tokens.owner_id.as_str() || minter.as_str() == TECH_BACKUP_OWNER
+      minter.as_str() == self.tokens.owner_id.as_str() || minter.as_str() == TECH_BACKUP_OWNER
+    }
+
+    fn assert_owner_or_admin(&self) {
+      require!(self.signer_is_owner_or_admin(), "Method is private to owner or admin")
+    }
+
+    #[allow(dead_code)]
+    fn signer_is_admin(&self) -> bool {
+      self.is_admin(&env::signer_account_id())
+    }
+
+    fn signer_is_owner_or_admin(&self) -> bool {
+      let signer = env::signer_account_id();
+      self.is_owner(&signer) || self.is_admin(&signer)
+    }
+    
+    fn is_admin(&self, account_id: &AccountId) -> bool {
+      self.admins.contains(&account_id)
     }
 
     fn full_link_price(&self, minter: &AccountId) -> u128 {

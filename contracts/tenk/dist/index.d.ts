@@ -1,5 +1,103 @@
 import { Account, transactions, providers, u8, u16, u32, u64, ChangeMethodOptions, ViewFunctionOptions } from './helper';
 /**
+* milliseconds elapsed since the UNIX epoch
+*/
+export declare type TimestampMs = u64;
+/**
+* Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
+* A mapping of NEAR accounts to the amount each should be paid out, in
+* the event of a token-sale. The payout mapping MUST be shorter than the
+* maximum length specified by the financial contract obtaining this
+* payout data. Any mapping of length 10 or less MUST be accepted by
+* financial contracts, so 10 is a safe upper limit.
+* This currently deviates from the standard but is in the process of updating to use this type
+*/
+export interface Payout {
+    payout: Record<AccountId, U128>;
+}
+export declare type BasisPoint = u16;
+export interface Royalties {
+    accounts: Record<AccountId, BasisPoint>;
+    percent: BasisPoint;
+}
+/**
+* String of yocto NEAR; 1N = 1000000000000000000000000 yN
+*/
+export declare type YoctoNear = U128;
+export interface InitialMetadata {
+    name: string;
+    symbol: string;
+    uri: string;
+    icon?: string;
+    spec?: string;
+    reference?: string;
+    reference_hash?: Base64VecU8;
+}
+export interface Sale {
+    royalties?: Royalties;
+    initial_royalties?: Royalties;
+    presale_start?: TimestampMs;
+    public_sale_start?: TimestampMs;
+    allowance?: u32;
+    presale_price?: U128;
+    price: U128;
+    mint_rate_limit?: u32;
+}
+/**
+* Current state of contract
+*/
+export declare enum Status {
+    /**
+    * Not open for any sales
+    */
+    Closed = "Closed",
+    /**
+    * VIP accounts can mint
+    */
+    Presale = "Presale",
+    /**
+    * Any account can mint
+    */
+    Open = "Open",
+    /**
+    * No more tokens to be minted
+    */
+    SoldOut = "SoldOut"
+}
+/**
+* Information about the current sale from user perspective
+*/
+export interface UserSaleInfo {
+    sale_info: SaleInfo;
+    is_vip: boolean;
+    remaining_allowance?: u32;
+}
+/**
+* Information about the current sale
+*/
+export interface SaleInfo {
+    /**
+    * Current state of contract
+    */
+    status: Status;
+    /**
+    * Start of the VIP sale
+    */
+    presale_start: TimestampMs;
+    /**
+    * Start of public sale
+    */
+    sale_start: TimestampMs;
+    /**
+    * Total tokens that could be minted
+    */
+    token_final_supply: u64;
+    /**
+    * Current price for one token
+    */
+    price: U128;
+}
+/**
 * StorageUsage is used to count the amount of storage used by a contract.
 */
 export declare type StorageUsage = u64;
@@ -101,558 +199,10 @@ export interface StorageBalance {
     available: U128;
 }
 export declare type WrappedDuration = string;
-/**
-* Current state of contract
-*/
-export declare enum Status {
-    /**
-    * Not open for any sales
-    */
-    Closed = "Closed",
-    /**
-    * VIP accounts can mint
-    */
-    Presale = "Presale",
-    /**
-    * Any account can mint
-    */
-    Open = "Open",
-    /**
-    * No more tokens to be minted
-    */
-    SoldOut = "SoldOut"
-}
-/**
-* Information about the current sale from user perspective
-*/
-export interface UserSaleInfo {
-    sale_info: SaleInfo;
-    is_vip: boolean;
-    remaining_allowance?: u32;
-}
-export interface Royalties {
-    accounts: Record<AccountId, BasisPoint>;
-    percent: BasisPoint;
-}
-export interface Sale {
-    royalties?: Royalties;
-    initial_royalties?: Royalties;
-    presale_start?: TimestampMs;
-    public_sale_start?: TimestampMs;
-    allowance?: u32;
-    presale_price?: U128;
-    price: U128;
-    mint_rate_limit?: u32;
-}
-/**
-* milliseconds elapsed since the UNIX epoch
-*/
-export declare type TimestampMs = u64;
-export interface InitialMetadata {
-    name: string;
-    symbol: string;
-    uri: string;
-    icon?: string;
-    spec?: string;
-    reference?: string;
-    reference_hash?: Base64VecU8;
-}
-export declare type BasisPoint = u16;
-/**
-* Information about the current sale
-*/
-export interface SaleInfo {
-    /**
-    * Current state of contract
-    */
-    status: Status;
-    /**
-    * Start of the VIP sale
-    */
-    presale_start: TimestampMs;
-    /**
-    * Start of public sale
-    */
-    sale_start: TimestampMs;
-    /**
-    * Total tokens that could be minted
-    */
-    token_final_supply: u64;
-    /**
-    * Current price for one token
-    */
-    price: U128;
-}
-/**
-* Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation
-* A mapping of NEAR accounts to the amount each should be paid out, in
-* the event of a token-sale. The payout mapping MUST be shorter than the
-* maximum length specified by the financial contract obtaining this
-* payout data. Any mapping of length 10 or less MUST be accepted by
-* financial contracts, so 10 is a safe upper limit.
-* This currently deviates from the standard but is in the process of updating to use this type
-*/
-export interface Payout {
-    payout: Record<AccountId, U128>;
-}
 export declare class Contract {
     account: Account;
     readonly contractId: string;
     constructor(account: Account, contractId: string);
-    check_key(args: {
-        public_key: PublicKey;
-    }, options?: ViewFunctionOptions): Promise<boolean>;
-    update_allowance(args: {
-        allowance: u32;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    update_allowanceRaw(args: {
-        allowance: u32;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    update_allowanceTx(args: {
-        allowance: u32;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    whitelisted(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<boolean>;
-    get_sale_info(args?: {}, options?: ViewFunctionOptions): Promise<SaleInfo>;
-    /**
-    * Revoke all approved accounts for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * If contract requires >1yN deposit on `nft_approve`, contract
-    * MUST refund all associated storage deposit when owner revokes approvals
-    * * Contract MUST panic if called by someone other than token owner
-    *
-    * Arguments:
-    * * `token_id`: the token with approvals to revoke
-    */
-    nft_revoke_all(args: {
-        token_id: TokenId;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * Revoke all approved accounts for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * If contract requires >1yN deposit on `nft_approve`, contract
-    * MUST refund all associated storage deposit when owner revokes approvals
-    * * Contract MUST panic if called by someone other than token owner
-    *
-    * Arguments:
-    * * `token_id`: the token with approvals to revoke
-    */
-    nft_revoke_allRaw(args: {
-        token_id: TokenId;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Revoke all approved accounts for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * If contract requires >1yN deposit on `nft_approve`, contract
-    * MUST refund all associated storage deposit when owner revokes approvals
-    * * Contract MUST panic if called by someone other than token owner
-    *
-    * Arguments:
-    * * `token_id`: the token with approvals to revoke
-    */
-    nft_revoke_allTx(args: {
-        token_id: TokenId;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    cost_per_token(args: {
-        minter: AccountId;
-    }, options?: ViewFunctionOptions): Promise<U128>;
-    transfer_ownership(args: {
-        new_owner: AccountId;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    transfer_ownershipRaw(args: {
-        new_owner: AccountId;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    transfer_ownershipTx(args: {
-        new_owner: AccountId;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    start_presale(args: {
-        public_sale_start?: TimestampMs;
-        presale_price?: U128;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    start_presaleRaw(args: {
-        public_sale_start?: TimestampMs;
-        presale_price?: U128;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    start_presaleTx(args: {
-        public_sale_start?: TimestampMs;
-        presale_price?: U128;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    close_contract(args?: {}, options?: ChangeMethodOptions): Promise<void>;
-    close_contractRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    close_contractTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Simple transfer. Transfer a given `token_id` from current owner to
-    * `receiver_id`.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
-    * * Contract MUST panic if called by someone other than token owner or,
-    * if using Approval Management, one of the approved accounts
-    * * `approval_id` is for use with Approval Management,
-    * see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
-    * * If using Approval Management, contract MUST nullify approved accounts on
-    * successful transfer.
-    * * TODO: needed? Both accounts must be registered with the contract for transfer to
-    * succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
-    *
-    * Arguments:
-    * * `receiver_id`: the valid NEAR account receiving the token
-    * * `token_id`: the token to transfer
-    * * `approval_id`: expected approval ID. A number smaller than
-    * 2^53, and therefore representable as JSON. See Approval Management
-    * standard for full explanation.
-    * * `memo` (optional): for use cases that may benefit from indexing or
-    * providing information for a transfer
-    */
-    nft_transfer(args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * Simple transfer. Transfer a given `token_id` from current owner to
-    * `receiver_id`.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
-    * * Contract MUST panic if called by someone other than token owner or,
-    * if using Approval Management, one of the approved accounts
-    * * `approval_id` is for use with Approval Management,
-    * see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
-    * * If using Approval Management, contract MUST nullify approved accounts on
-    * successful transfer.
-    * * TODO: needed? Both accounts must be registered with the contract for transfer to
-    * succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
-    *
-    * Arguments:
-    * * `receiver_id`: the valid NEAR account receiving the token
-    * * `token_id`: the token to transfer
-    * * `approval_id`: expected approval ID. A number smaller than
-    * 2^53, and therefore representable as JSON. See Approval Management
-    * standard for full explanation.
-    * * `memo` (optional): for use cases that may benefit from indexing or
-    * providing information for a transfer
-    */
-    nft_transferRaw(args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Simple transfer. Transfer a given `token_id` from current owner to
-    * `receiver_id`.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
-    * * Contract MUST panic if called by someone other than token owner or,
-    * if using Approval Management, one of the approved accounts
-    * * `approval_id` is for use with Approval Management,
-    * see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
-    * * If using Approval Management, contract MUST nullify approved accounts on
-    * successful transfer.
-    * * TODO: needed? Both accounts must be registered with the contract for transfer to
-    * succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
-    *
-    * Arguments:
-    * * `receiver_id`: the valid NEAR account receiving the token
-    * * `token_id`: the token to transfer
-    * * `approval_id`: expected approval ID. A number smaller than
-    * 2^53, and therefore representable as JSON. See Approval Management
-    * standard for full explanation.
-    * * `memo` (optional): for use cases that may benefit from indexing or
-    * providing information for a transfer
-    */
-    nft_transferTx(args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    start_sale(args: {
-        price?: U128;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    start_saleRaw(args: {
-        price?: U128;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    start_saleTx(args: {
-        price?: U128;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    nft_mint_many(args: {
-        num: u32;
-    }, options?: ChangeMethodOptions): Promise<Token[]>;
-    nft_mint_manyRaw(args: {
-        num: u32;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    nft_mint_manyTx(args: {
-        num: u32;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Check if a token is approved for transfer by a given account, optionally
-    * checking an approval_id
-    *
-    * Arguments:
-    * * `token_id`: the token for which to revoke an approval
-    * * `approved_account_id`: the account to check the existence of in `approvals`
-    * * `approval_id`: an optional approval ID to check against current approval ID for given account
-    *
-    * Returns:
-    * if `approval_id` given, `true` if `approved_account_id` is approved with given `approval_id`
-    * otherwise, `true` if `approved_account_id` is in list of approved accounts
-    */
-    nft_is_approved(args: {
-        token_id: TokenId;
-        approved_account_id: AccountId;
-        approval_id?: u64;
-    }, options?: ViewFunctionOptions): Promise<boolean>;
-    update_uri(args: {
-        uri: string;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    update_uriRaw(args: {
-        uri: string;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    update_uriTx(args: {
-        uri: string;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    nft_payout(args: {
-        token_id: string;
-        balance: U128;
-        max_len_payout?: u32;
-    }, options?: ViewFunctionOptions): Promise<Payout>;
-    /**
-    * Get a list of all tokens
-    *
-    * Arguments:
-    * * `from_index`: a string representing an unsigned 128-bit integer,
-    * representing the starting index of tokens to return. (default 0)
-    * * `limit`: the maximum number of tokens to return (default total supply)
-    * Could fail on gas
-    *
-    * Returns an array of Token objects, as described in Core standard
-    */
-    nft_tokens(args: {
-        from_index?: U128;
-        limit?: u64;
-    }, options?: ViewFunctionOptions): Promise<Token[]>;
-    /**
-    * Transfer token and call a method on a receiver contract. A successful
-    * workflow will end in a success execution outcome to the callback on the NFT
-    * contract at the method `nft_resolve_transfer`.
-    *
-    * You can think of this as being similar to attaching native NEAR tokens to a
-    * function call. It allows you to attach any Non-Fungible Token in a call to a
-    * receiver contract.
-    *
-    * Requirements:
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * Contract MUST panic if called by someone other than token owner or,
-    * if using Approval Management, one of the approved accounts
-    * * The receiving contract must implement `ft_on_transfer` according to the
-    * standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
-    * with the resulting failed cross-contract call and roll back the transfer.
-    * * Contract MUST implement the behavior described in `ft_resolve_transfer`
-    * * `approval_id` is for use with Approval Management extension, see
-    * that document for full explanation.
-    * * If using Approval Management, contract MUST nullify approved accounts on
-    * successful transfer.
-    *
-    * Arguments:
-    * * `receiver_id`: the valid NEAR account receiving the token.
-    * * `token_id`: the token to send.
-    * * `approval_id`: expected approval ID. A number smaller than
-    * 2^53, and therefore representable as JSON. See Approval Management
-    * standard for full explanation.
-    * * `memo` (optional): for use cases that may benefit from indexing or
-    * providing information for a transfer.
-    * * `msg`: specifies information needed by the receiving contract in
-    * order to properly handle the transfer. Can indicate both a function to
-    * call and the parameters to pass to that function.
-    */
-    nft_transfer_call(args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-        msg: string;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * Transfer token and call a method on a receiver contract. A successful
-    * workflow will end in a success execution outcome to the callback on the NFT
-    * contract at the method `nft_resolve_transfer`.
-    *
-    * You can think of this as being similar to attaching native NEAR tokens to a
-    * function call. It allows you to attach any Non-Fungible Token in a call to a
-    * receiver contract.
-    *
-    * Requirements:
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * Contract MUST panic if called by someone other than token owner or,
-    * if using Approval Management, one of the approved accounts
-    * * The receiving contract must implement `ft_on_transfer` according to the
-    * standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
-    * with the resulting failed cross-contract call and roll back the transfer.
-    * * Contract MUST implement the behavior described in `ft_resolve_transfer`
-    * * `approval_id` is for use with Approval Management extension, see
-    * that document for full explanation.
-    * * If using Approval Management, contract MUST nullify approved accounts on
-    * successful transfer.
-    *
-    * Arguments:
-    * * `receiver_id`: the valid NEAR account receiving the token.
-    * * `token_id`: the token to send.
-    * * `approval_id`: expected approval ID. A number smaller than
-    * 2^53, and therefore representable as JSON. See Approval Management
-    * standard for full explanation.
-    * * `memo` (optional): for use cases that may benefit from indexing or
-    * providing information for a transfer.
-    * * `msg`: specifies information needed by the receiving contract in
-    * order to properly handle the transfer. Can indicate both a function to
-    * call and the parameters to pass to that function.
-    */
-    nft_transfer_callRaw(args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-        msg: string;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Transfer token and call a method on a receiver contract. A successful
-    * workflow will end in a success execution outcome to the callback on the NFT
-    * contract at the method `nft_resolve_transfer`.
-    *
-    * You can think of this as being similar to attaching native NEAR tokens to a
-    * function call. It allows you to attach any Non-Fungible Token in a call to a
-    * receiver contract.
-    *
-    * Requirements:
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * Contract MUST panic if called by someone other than token owner or,
-    * if using Approval Management, one of the approved accounts
-    * * The receiving contract must implement `ft_on_transfer` according to the
-    * standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
-    * with the resulting failed cross-contract call and roll back the transfer.
-    * * Contract MUST implement the behavior described in `ft_resolve_transfer`
-    * * `approval_id` is for use with Approval Management extension, see
-    * that document for full explanation.
-    * * If using Approval Management, contract MUST nullify approved accounts on
-    * successful transfer.
-    *
-    * Arguments:
-    * * `receiver_id`: the valid NEAR account receiving the token.
-    * * `token_id`: the token to send.
-    * * `approval_id`: expected approval ID. A number smaller than
-    * 2^53, and therefore representable as JSON. See Approval Management
-    * standard for full explanation.
-    * * `memo` (optional): for use cases that may benefit from indexing or
-    * providing information for a transfer.
-    * * `msg`: specifies information needed by the receiving contract in
-    * order to properly handle the transfer. Can indicate both a function to
-    * call and the parameters to pass to that function.
-    */
-    nft_transfer_callTx(args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-        msg: string;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    nft_transfer_payout(args: {
-        receiver_id: AccountId;
-        token_id: string;
-        approval_id?: u64;
-        memo?: string;
-        balance: U128;
-        max_len_payout?: u32;
-    }, options?: ChangeMethodOptions): Promise<Payout>;
-    nft_transfer_payoutRaw(args: {
-        receiver_id: AccountId;
-        token_id: string;
-        approval_id?: u64;
-        memo?: string;
-        balance: U128;
-        max_len_payout?: u32;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    nft_transfer_payoutTx(args: {
-        receiver_id: AccountId;
-        token_id: string;
-        approval_id?: u64;
-        memo?: string;
-        balance: U128;
-        max_len_payout?: u32;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Returns the balance associated with given key.
-    */
-    get_key_balance(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
-    /**
-    * Revoke an approved account for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * If contract requires >1yN deposit on `nft_approve`, contract
-    * MUST refund associated storage deposit when owner revokes approval
-    * * Contract MUST panic if called by someone other than token owner
-    *
-    * Arguments:
-    * * `token_id`: the token for which to revoke an approval
-    * * `account_id`: the account to remove from `approvals`
-    */
-    nft_revoke(args: {
-        token_id: TokenId;
-        account_id: AccountId;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * Revoke an approved account for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * If contract requires >1yN deposit on `nft_approve`, contract
-    * MUST refund associated storage deposit when owner revokes approval
-    * * Contract MUST panic if called by someone other than token owner
-    *
-    * Arguments:
-    * * `token_id`: the token for which to revoke an approval
-    * * `account_id`: the account to remove from `approvals`
-    */
-    nft_revokeRaw(args: {
-        token_id: TokenId;
-        account_id: AccountId;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Revoke an approved account for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-    * purposes
-    * * If contract requires >1yN deposit on `nft_approve`, contract
-    * MUST refund associated storage deposit when owner revokes approval
-    * * Contract MUST panic if called by someone other than token owner
-    *
-    * Arguments:
-    * * `token_id`: the token for which to revoke an approval
-    * * `account_id`: the account to remove from `approvals`
-    */
-    nft_revokeTx(args: {
-        token_id: TokenId;
-        account_id: AccountId;
-    }, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Create a pending token that can be claimed with corresponding private key
     */
@@ -671,10 +221,117 @@ export declare class Contract {
     create_linkdropTx(args: {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Allows given public key to claim sent balance.
+    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
+    * Claim tokens for specific account that are attached to the public key this tx is signed with.
+    */
+    claim(args: {
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Allows given public key to claim sent balance.
+    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
+    * Claim tokens for specific account that are attached to the public key this tx is signed with.
+    */
+    claimRaw(args: {
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Allows given public key to claim sent balance.
+    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
+    * Claim tokens for specific account that are attached to the public key this tx is signed with.
+    */
+    claimTx(args: {
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Create new account and and claim tokens to it.
+    */
+    create_account_and_claim(args: {
+        new_account_id: AccountId;
+        new_public_key: PublicKey;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Create new account and and claim tokens to it.
+    */
+    create_account_and_claimRaw(args: {
+        new_account_id: AccountId;
+        new_public_key: PublicKey;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Create new account and and claim tokens to it.
+    */
+    create_account_and_claimTx(args: {
+        new_account_id: AccountId;
+        new_public_key: PublicKey;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Returns the balance associated with given key.
+    */
+    get_key_balance(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    check_key(args: {
+        public_key: PublicKey;
+    }, options?: ViewFunctionOptions): Promise<boolean>;
+    on_create_and_claim(args: {
+        mint_for_free: boolean;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    on_create_and_claimRaw(args: {
+        mint_for_free: boolean;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    on_create_and_claimTx(args: {
+        mint_for_free: boolean;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    get_linkdrop_contract(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
+    transfer_ownership(args: {
+        new_owner: AccountId;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    transfer_ownershipRaw(args: {
+        new_owner: AccountId;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    transfer_ownershipTx(args: {
+        new_owner: AccountId;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    update_initial_royalties(args: {
+        initial_royalties: Royalties;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    update_initial_royaltiesRaw(args: {
+        initial_royalties: Royalties;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_initial_royaltiesTx(args: {
+        initial_royalties: Royalties;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    update_royalties(args: {
+        royalties: Royalties;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    update_royaltiesRaw(args: {
+        royalties: Royalties;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_royaltiesTx(args: {
+        royalties: Royalties;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    update_allowance(args: {
+        allowance: u32;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    update_allowanceRaw(args: {
+        allowance: u32;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_allowanceTx(args: {
+        allowance: u32;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    update_uri(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    update_uriRaw(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    update_uriTx(args: {
+        uri: string;
+    }, options?: ChangeMethodOptions): transactions.Action;
     add_whitelist_accounts(args: {
         accounts: AccountId[];
         allowance?: u32;
-    }, options?: ChangeMethodOptions): Promise<void>;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
     add_whitelist_accountsRaw(args: {
         accounts: AccountId[];
         allowance?: u32;
@@ -683,123 +340,141 @@ export declare class Contract {
         accounts: AccountId[];
         allowance?: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Returns the token with the given `token_id` or `null` if no such token.
-    */
-    nft_token(args: {
-        token_id: TokenId;
-    }, options?: ViewFunctionOptions): Promise<Token | null>;
-    new(args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: u32;
-        sale: Sale;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    newRaw(args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: u32;
-        sale: Sale;
+    update_whitelist_accounts(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    update_whitelist_accountsRaw(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    newTx(args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: u32;
-        sale: Sale;
+    update_whitelist_accountsTx(args: {
+        accounts: AccountId[];
+        allowance_increase: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
-    * Returns the total supply of non-fungible tokens as a string representing an
-    * unsigned 128-bit integer to avoid JSON number limit of 2^53.
+    * Contract wwill
     */
-    nft_total_supply(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
-    token_storage_cost(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    close_contract(args?: {}, options?: ChangeMethodOptions): Promise<boolean>;
     /**
-    * Add an approved account for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
-    * security purposes
-    * * Contract MAY require caller to attach larger deposit, to cover cost of
-    * storing approver data
-    * * Contract MUST panic if called by someone other than token owner
-    * * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
-    * single-block gas limit
-    * * Contract MUST increment approval ID even if re-approving an account
-    * * If successfully approved or if had already been approved, and if `msg` is
-    * present, contract MUST call `nft_on_approve` on `account_id`. See
-    * `nft_on_approve` description below for details.
-    *
-    * Arguments:
-    * * `token_id`: the token for which to add an approval
-    * * `account_id`: the account to add to `approvals`
-    * * `msg`: optional string to be passed to `nft_on_approve`
-    *
-    * Returns void, if no `msg` given. Otherwise, returns promise call to
-    * `nft_on_approve`, which can resolve with whatever it wants.
+    * Contract wwill
     */
-    nft_approve(args: {
-        token_id: TokenId;
-        account_id: AccountId;
-        msg?: string;
-    }, options?: ChangeMethodOptions): Promise<void>;
+    close_contractRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     /**
-    * Add an approved account for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
-    * security purposes
-    * * Contract MAY require caller to attach larger deposit, to cover cost of
-    * storing approver data
-    * * Contract MUST panic if called by someone other than token owner
-    * * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
-    * single-block gas limit
-    * * Contract MUST increment approval ID even if re-approving an account
-    * * If successfully approved or if had already been approved, and if `msg` is
-    * present, contract MUST call `nft_on_approve` on `account_id`. See
-    * `nft_on_approve` description below for details.
-    *
-    * Arguments:
-    * * `token_id`: the token for which to add an approval
-    * * `account_id`: the account to add to `approvals`
-    * * `msg`: optional string to be passed to `nft_on_approve`
-    *
-    * Returns void, if no `msg` given. Otherwise, returns promise call to
-    * `nft_on_approve`, which can resolve with whatever it wants.
+    * Contract wwill
     */
-    nft_approveRaw(args: {
-        token_id: TokenId;
-        account_id: AccountId;
-        msg?: string;
+    close_contractTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Override the current presale start time to start presale now.
+    * Most provide when public sale starts. None, means never.
+    * Can provide new presale price.
+    * Note: you most likely won't need to call this since the presale
+    * starts automatically based on time.
+    */
+    start_presale(args: {
+        public_sale_start?: TimestampMs;
+        presale_price?: U128;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Override the current presale start time to start presale now.
+    * Most provide when public sale starts. None, means never.
+    * Can provide new presale price.
+    * Note: you most likely won't need to call this since the presale
+    * starts automatically based on time.
+    */
+    start_presaleRaw(args: {
+        public_sale_start?: TimestampMs;
+        presale_price?: U128;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     /**
-    * Add an approved account for a specific token.
-    *
-    * Requirements
-    * * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
-    * security purposes
-    * * Contract MAY require caller to attach larger deposit, to cover cost of
-    * storing approver data
-    * * Contract MUST panic if called by someone other than token owner
-    * * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
-    * single-block gas limit
-    * * Contract MUST increment approval ID even if re-approving an account
-    * * If successfully approved or if had already been approved, and if `msg` is
-    * present, contract MUST call `nft_on_approve` on `account_id`. See
-    * `nft_on_approve` description below for details.
-    *
-    * Arguments:
-    * * `token_id`: the token for which to add an approval
-    * * `account_id`: the account to add to `approvals`
-    * * `msg`: optional string to be passed to `nft_on_approve`
-    *
-    * Returns void, if no `msg` given. Otherwise, returns promise call to
-    * `nft_on_approve`, which can resolve with whatever it wants.
+    * Override the current presale start time to start presale now.
+    * Most provide when public sale starts. None, means never.
+    * Can provide new presale price.
+    * Note: you most likely won't need to call this since the presale
+    * starts automatically based on time.
     */
-    nft_approveTx(args: {
-        token_id: TokenId;
-        account_id: AccountId;
-        msg?: string;
+    start_presaleTx(args: {
+        public_sale_start?: TimestampMs;
+        presale_price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
+    start_sale(args: {
+        price?: YoctoNear;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    start_saleRaw(args: {
+        price?: YoctoNear;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    start_saleTx(args: {
+        price?: YoctoNear;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Add a new admin. Careful who you add!
+    */
+    add_admin(args: {
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Add a new admin. Careful who you add!
+    */
+    add_adminRaw(args: {
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Add a new admin. Careful who you add!
+    */
+    add_adminTx(args: {
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Update public sale price.
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    update_price(args: {
+        price: U128;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Update public sale price.
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    update_priceRaw(args: {
+        price: U128;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Update public sale price.
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    update_priceTx(args: {
+        price: U128;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Update the presale price
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    update_presale_price(args: {
+        presale_price?: U128;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Update the presale price
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    update_presale_priceRaw(args: {
+        presale_price?: U128;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Update the presale price
+    * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    */
+    update_presale_priceTx(args: {
+        presale_price?: U128;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Check whether an account is allowed to mint during the presale
+    */
+    whitelisted(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<boolean>;
+    /**
+    * Cost of NFT + fees for linkdrop
+    */
     cost_of_linkdrop(args: {
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
@@ -807,7 +482,52 @@ export declare class Contract {
         num: u32;
         minter: AccountId;
     }, options?: ViewFunctionOptions): Promise<U128>;
-    get_linkdrop_contract(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
+    /**
+    * Flat cost of one token
+    */
+    cost_per_token(args: {
+        minter: AccountId;
+    }, options?: ViewFunctionOptions): Promise<U128>;
+    /**
+    * Current cost in NEAR to store one NFT
+    */
+    token_storage_cost(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    /**
+    * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+    */
+    tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<u32>;
+    /**
+    * Part of the NFT metadata standard. Returns the contract's metadata
+    */
+    nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
+    /**
+    * How many tokens an account is still allowed to mint. None, means unlimited
+    */
+    remaining_allowance(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<u32 | null>;
+    /**
+    * Max number of mints in one transaction. None, means unlimited
+    */
+    mint_rate_limit(args?: {}, options?: ViewFunctionOptions): Promise<u32 | null>;
+    /**
+    * Information about the current sale. When in starts, status, price, and how many could be minted.
+    */
+    get_sale_info(args?: {}, options?: ViewFunctionOptions): Promise<SaleInfo>;
+    /**
+    * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+    */
+    get_user_sale_info(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<UserSaleInfo>;
+    /**
+    * Initial size of collection. Number left to raffle + current total supply
+    */
+    initial(args?: {}, options?: ViewFunctionOptions): Promise<u64>;
+    /**
+    * Current set of admins
+    */
+    admins(args?: {}, options?: ViewFunctionOptions): Promise<AccountId[]>;
     new_default_meta(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
@@ -826,41 +546,24 @@ export declare class Contract {
         size: u32;
         sale?: Sale;
     }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Get number of tokens owned by a given account
-    *
-    * Arguments:
-    * * `account_id`: a valid NEAR account
-    *
-    * Returns the number of non-fungible tokens owned by given `account_id` as
-    * a string representing the value as an unsigned 128-bit integer to avoid JSON
-    * number limit of 2^53.
-    */
-    nft_supply_for_owner(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<U128>;
-    nft_metadata(args?: {}, options?: ViewFunctionOptions): Promise<NftContractMetadata>;
-    mint_rate_limit(args?: {}, options?: ViewFunctionOptions): Promise<u32 | null>;
-    remaining_allowance(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<u32 | null>;
-    /**
-    * Get list of all tokens owned by a given account
-    *
-    * Arguments:
-    * * `account_id`: a valid NEAR account
-    * * `from_index`: a string representing an unsigned 128-bit integer,
-    * representing the starting index of tokens to return. (default 0)
-    * * `limit`: the maximum number of tokens to return. (default unlimited)
-    * Could fail on gas
-    *
-    * Returns a paginated list of all tokens owned by this account
-    */
-    nft_tokens_for_owner(args: {
-        account_id: AccountId;
-        from_index?: U128;
-        limit?: u64;
-    }, options?: ViewFunctionOptions): Promise<Token[]>;
+    new(args: {
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: u32;
+        sale: Sale;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    newRaw(args: {
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: u32;
+        sale: Sale;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    newTx(args: {
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: u32;
+        sale: Sale;
+    }, options?: ChangeMethodOptions): transactions.Action;
     nft_mint(args: {
         token_id: TokenId;
         token_owner_id: AccountId;
@@ -876,480 +579,34 @@ export declare class Contract {
         token_owner_id: AccountId;
         token_metadata: TokenMetadata;
     }, options?: ChangeMethodOptions): transactions.Action;
-    get_user_sale_info(args: {
-        account_id: AccountId;
-    }, options?: ViewFunctionOptions): Promise<UserSaleInfo>;
-    initial(args?: {}, options?: ViewFunctionOptions): Promise<u64>;
-    add_whitelist_account_ungaurded(args: {
-        account_id: AccountId;
-        allowance: u32;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    add_whitelist_account_ungaurdedRaw(args: {
-        account_id: AccountId;
-        allowance: u32;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    add_whitelist_account_ungaurdedTx(args: {
-        account_id: AccountId;
-        allowance: u32;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    tokens_left(args?: {}, options?: ViewFunctionOptions): Promise<u32>;
-    update_royalties(args: {
-        royalties: Royalties;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    update_royaltiesRaw(args: {
-        royalties: Royalties;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    update_royaltiesTx(args: {
-        royalties: Royalties;
-    }, options?: ChangeMethodOptions): transactions.Action;
     nft_mint_one(args?: {}, options?: ChangeMethodOptions): Promise<Token>;
     nft_mint_oneRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     nft_mint_oneTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
-}
-/**
-*
-* @contractMethod view
-*/
-export interface CheckKey {
-    args: {
-        public_key: PublicKey;
-    };
-}
-export declare type CheckKey__Result = boolean;
-/**
-*
-* @contractMethod change
-*/
-export interface UpdateAllowance {
-    args: {
-        allowance: u32;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type UpdateAllowance__Result = void;
-/**
-*
-* @contractMethod view
-*/
-export interface Whitelisted {
-    args: {
-        account_id: AccountId;
-    };
-}
-export declare type Whitelisted__Result = boolean;
-/**
-*
-* @contractMethod view
-*/
-export interface GetSaleInfo {
-    args: {};
-}
-export declare type GetSaleInfo__Result = SaleInfo;
-/**
-* Revoke all approved accounts for a specific token.
-*
-* Requirements
-* * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-* purposes
-* * If contract requires >1yN deposit on `nft_approve`, contract
-* MUST refund all associated storage deposit when owner revokes approvals
-* * Contract MUST panic if called by someone other than token owner
-*
-* Arguments:
-* * `token_id`: the token with approvals to revoke
-*
-* @contractMethod change
-*/
-export interface NftRevokeAll {
-    args: {
-        token_id: TokenId;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type NftRevokeAll__Result = void;
-/**
-*
-* @contractMethod view
-*/
-export interface CostPerToken {
-    args: {
-        minter: AccountId;
-    };
-}
-export declare type CostPerToken__Result = U128;
-/**
-*
-* @contractMethod change
-*/
-export interface TransferOwnership {
-    args: {
-        new_owner: AccountId;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type TransferOwnership__Result = void;
-/**
-*
-* @contractMethod change
-*/
-export interface StartPresale {
-    args: {
-        public_sale_start?: TimestampMs;
-        presale_price?: U128;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type StartPresale__Result = void;
-/**
-*
-* @contractMethod change
-*/
-export interface CloseContract {
-    args: {};
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type CloseContract__Result = void;
-/**
-* Simple transfer. Transfer a given `token_id` from current owner to
-* `receiver_id`.
-*
-* Requirements
-* * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
-* * Contract MUST panic if called by someone other than token owner or,
-* if using Approval Management, one of the approved accounts
-* * `approval_id` is for use with Approval Management,
-* see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
-* * If using Approval Management, contract MUST nullify approved accounts on
-* successful transfer.
-* * TODO: needed? Both accounts must be registered with the contract for transfer to
-* succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
-*
-* Arguments:
-* * `receiver_id`: the valid NEAR account receiving the token
-* * `token_id`: the token to transfer
-* * `approval_id`: expected approval ID. A number smaller than
-* 2^53, and therefore representable as JSON. See Approval Management
-* standard for full explanation.
-* * `memo` (optional): for use cases that may benefit from indexing or
-* providing information for a transfer
-*
-* @contractMethod change
-*/
-export interface NftTransfer {
-    args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type NftTransfer__Result = void;
-/**
-*
-* @contractMethod change
-*/
-export interface StartSale {
-    args: {
-        price?: U128;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type StartSale__Result = void;
-/**
-*
-* @contractMethod change
-*/
-export interface NftMintMany {
-    args: {
+    nft_mint_many(args: {
         num: u32;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type NftMintMany__Result = Token[];
-/**
-* Check if a token is approved for transfer by a given account, optionally
-* checking an approval_id
-*
-* Arguments:
-* * `token_id`: the token for which to revoke an approval
-* * `approved_account_id`: the account to check the existence of in `approvals`
-* * `approval_id`: an optional approval ID to check against current approval ID for given account
-*
-* Returns:
-* if `approval_id` given, `true` if `approved_account_id` is approved with given `approval_id`
-* otherwise, `true` if `approved_account_id` is in list of approved accounts
-*
-* @contractMethod view
-*/
-export interface NftIsApproved {
-    args: {
-        token_id: TokenId;
-        approved_account_id: AccountId;
-        approval_id?: u64;
-    };
-}
-export declare type NftIsApproved__Result = boolean;
-/**
-*
-* @contractMethod change
-*/
-export interface UpdateUri {
-    args: {
-        uri: string;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type UpdateUri__Result = void;
-/**
-*
-* @contractMethod view
-*/
-export interface NftPayout {
-    args: {
-        token_id: string;
-        balance: U128;
-        max_len_payout?: u32;
-    };
-}
-export declare type NftPayout__Result = Payout;
-/**
-* Get a list of all tokens
-*
-* Arguments:
-* * `from_index`: a string representing an unsigned 128-bit integer,
-* representing the starting index of tokens to return. (default 0)
-* * `limit`: the maximum number of tokens to return (default total supply)
-* Could fail on gas
-*
-* Returns an array of Token objects, as described in Core standard
-*
-* @contractMethod view
-*/
-export interface NftTokens {
-    args: {
-        from_index?: U128;
-        limit?: u64;
-    };
-}
-export declare type NftTokens__Result = Token[];
-/**
-* Transfer token and call a method on a receiver contract. A successful
-* workflow will end in a success execution outcome to the callback on the NFT
-* contract at the method `nft_resolve_transfer`.
-*
-* You can think of this as being similar to attaching native NEAR tokens to a
-* function call. It allows you to attach any Non-Fungible Token in a call to a
-* receiver contract.
-*
-* Requirements:
-* * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-* purposes
-* * Contract MUST panic if called by someone other than token owner or,
-* if using Approval Management, one of the approved accounts
-* * The receiving contract must implement `ft_on_transfer` according to the
-* standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
-* with the resulting failed cross-contract call and roll back the transfer.
-* * Contract MUST implement the behavior described in `ft_resolve_transfer`
-* * `approval_id` is for use with Approval Management extension, see
-* that document for full explanation.
-* * If using Approval Management, contract MUST nullify approved accounts on
-* successful transfer.
-*
-* Arguments:
-* * `receiver_id`: the valid NEAR account receiving the token.
-* * `token_id`: the token to send.
-* * `approval_id`: expected approval ID. A number smaller than
-* 2^53, and therefore representable as JSON. See Approval Management
-* standard for full explanation.
-* * `memo` (optional): for use cases that may benefit from indexing or
-* providing information for a transfer.
-* * `msg`: specifies information needed by the receiving contract in
-* order to properly handle the transfer. Can indicate both a function to
-* call and the parameters to pass to that function.
-*
-* @contractMethod change
-*/
-export interface NftTransferCall {
-    args: {
-        receiver_id: AccountId;
-        token_id: TokenId;
-        approval_id?: u64;
-        memo?: string;
-        msg: string;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type NftTransferCall__Result = void;
-/**
-*
-* @contractMethod change
-*/
-export interface NftTransferPayout {
-    args: {
-        receiver_id: AccountId;
-        token_id: string;
-        approval_id?: u64;
-        memo?: string;
-        balance: U128;
-        max_len_payout?: u32;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type NftTransferPayout__Result = Payout;
-/**
-* Returns the balance associated with given key.
-*
-* @contractMethod view
-*/
-export interface GetKeyBalance {
-    args: {};
-}
-export declare type GetKeyBalance__Result = U128;
-/**
-* Revoke an approved account for a specific token.
-*
-* Requirements
-* * Caller of the method must attach a deposit of 1 yoctoⓃ for security
-* purposes
-* * If contract requires >1yN deposit on `nft_approve`, contract
-* MUST refund associated storage deposit when owner revokes approval
-* * Contract MUST panic if called by someone other than token owner
-*
-* Arguments:
-* * `token_id`: the token for which to revoke an approval
-* * `account_id`: the account to remove from `approvals`
-*
-* @contractMethod change
-*/
-export interface NftRevoke {
-    args: {
-        token_id: TokenId;
+    }, options?: ChangeMethodOptions): Promise<Token[]>;
+    nft_mint_manyRaw(args: {
+        num: u32;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    nft_mint_manyTx(args: {
+        num: u32;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    on_send_with_callback(args?: {}, options?: ChangeMethodOptions): Promise<void>;
+    on_send_with_callbackRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    on_send_with_callbackTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
+    link_callback(args: {
         account_id: AccountId;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
+        mint_for_free: boolean;
+    }, options?: ChangeMethodOptions): Promise<Token>;
+    link_callbackRaw(args: {
+        account_id: AccountId;
+        mint_for_free: boolean;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    link_callbackTx(args: {
+        account_id: AccountId;
+        mint_for_free: boolean;
+    }, options?: ChangeMethodOptions): transactions.Action;
 }
-export declare type NftRevoke__Result = void;
 /**
 * Create a pending token that can be claimed with corresponding private key
 *
@@ -1373,6 +630,206 @@ export interface CreateLinkdrop {
 }
 export declare type CreateLinkdrop__Result = void;
 /**
+* Allows given public key to claim sent balance.
+* Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
+* Claim tokens for specific account that are attached to the public key this tx is signed with.
+*
+* @contractMethod change
+*/
+export interface Claim {
+    args: {
+        account_id: AccountId;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type Claim__Result = void;
+/**
+* Create new account and and claim tokens to it.
+*
+* @contractMethod change
+*/
+export interface CreateAccountAndClaim {
+    args: {
+        new_account_id: AccountId;
+        new_public_key: PublicKey;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type CreateAccountAndClaim__Result = void;
+/**
+* Returns the balance associated with given key.
+*
+* @contractMethod view
+*/
+export interface GetKeyBalance {
+    args: {};
+}
+export declare type GetKeyBalance__Result = U128;
+/**
+*
+* @contractMethod view
+*/
+export interface CheckKey {
+    args: {
+        public_key: PublicKey;
+    };
+}
+export declare type CheckKey__Result = boolean;
+/**
+*
+* @contractMethod change
+*/
+export interface OnCreateAndClaim {
+    args: {
+        mint_for_free: boolean;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type OnCreateAndClaim__Result = void;
+/**
+*
+* @contractMethod view
+*/
+export interface GetLinkdropContract {
+    args: {};
+}
+export declare type GetLinkdropContract__Result = AccountId;
+/**
+*
+* @contractMethod change
+*/
+export interface TransferOwnership {
+    args: {
+        new_owner: AccountId;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type TransferOwnership__Result = boolean;
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateInitialRoyalties {
+    args: {
+        initial_royalties: Royalties;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdateInitialRoyalties__Result = boolean;
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateRoyalties {
+    args: {
+        royalties: Royalties;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdateRoyalties__Result = boolean;
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateAllowance {
+    args: {
+        allowance: u32;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdateAllowance__Result = boolean;
+/**
+*
+* @contractMethod change
+*/
+export interface UpdateUri {
+    args: {
+        uri: string;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdateUri__Result = boolean;
+/**
 *
 * @contractMethod change
 */
@@ -1393,28 +850,15 @@ export interface AddWhitelistAccounts {
         attachedDeposit?: Balance;
     };
 }
-export declare type AddWhitelistAccounts__Result = void;
-/**
-* Returns the token with the given `token_id` or `null` if no such token.
-*
-* @contractMethod view
-*/
-export interface NftToken {
-    args: {
-        token_id: TokenId;
-    };
-}
-export declare type NftToken__Result = Token | null;
+export declare type AddWhitelistAccounts__Result = boolean;
 /**
 *
 * @contractMethod change
 */
-export interface New {
+export interface UpdateWhitelistAccounts {
     args: {
-        owner_id: AccountId;
-        metadata: NftContractMetadata;
-        size: u32;
-        sale: Sale;
+        accounts: AccountId[];
+        allowance_increase: u32;
     };
     options: {
         /** Units in gas
@@ -1428,56 +872,83 @@ export interface New {
         attachedDeposit?: Balance;
     };
 }
-export declare type New__Result = void;
+export declare type UpdateWhitelistAccounts__Result = boolean;
 /**
-* Returns the total supply of non-fungible tokens as a string representing an
-* unsigned 128-bit integer to avoid JSON number limit of 2^53.
-*
-* @contractMethod view
-*/
-export interface NftTotalSupply {
-    args: {};
-}
-export declare type NftTotalSupply__Result = U128;
-/**
-*
-* @contractMethod view
-*/
-export interface TokenStorageCost {
-    args: {};
-}
-export declare type TokenStorageCost__Result = U128;
-/**
-* Add an approved account for a specific token.
-*
-* Requirements
-* * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
-* security purposes
-* * Contract MAY require caller to attach larger deposit, to cover cost of
-* storing approver data
-* * Contract MUST panic if called by someone other than token owner
-* * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
-* single-block gas limit
-* * Contract MUST increment approval ID even if re-approving an account
-* * If successfully approved or if had already been approved, and if `msg` is
-* present, contract MUST call `nft_on_approve` on `account_id`. See
-* `nft_on_approve` description below for details.
-*
-* Arguments:
-* * `token_id`: the token for which to add an approval
-* * `account_id`: the account to add to `approvals`
-* * `msg`: optional string to be passed to `nft_on_approve`
-*
-* Returns void, if no `msg` given. Otherwise, returns promise call to
-* `nft_on_approve`, which can resolve with whatever it wants.
+* Contract wwill
 *
 * @contractMethod change
 */
-export interface NftApprove {
+export interface CloseContract {
+    args: {};
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type CloseContract__Result = boolean;
+/**
+* Override the current presale start time to start presale now.
+* Most provide when public sale starts. None, means never.
+* Can provide new presale price.
+* Note: you most likely won't need to call this since the presale
+* starts automatically based on time.
+*
+* @contractMethod change
+*/
+export interface StartPresale {
     args: {
-        token_id: TokenId;
+        public_sale_start?: TimestampMs;
+        presale_price?: U128;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type StartPresale__Result = boolean;
+/**
+*
+* @contractMethod change
+*/
+export interface StartSale {
+    args: {
+        price?: YoctoNear;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type StartSale__Result = boolean;
+/**
+* Add a new admin. Careful who you add!
+*
+* @contractMethod change
+*/
+export interface AddAdmin {
+    args: {
         account_id: AccountId;
-        msg?: string;
     };
     options: {
         /** Units in gas
@@ -1491,8 +962,66 @@ export interface NftApprove {
         attachedDeposit?: Balance;
     };
 }
-export declare type NftApprove__Result = void;
+export declare type AddAdmin__Result = boolean;
 /**
+* Update public sale price.
+* Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+*
+* @contractMethod change
+*/
+export interface UpdatePrice {
+    args: {
+        price: U128;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdatePrice__Result = boolean;
+/**
+* Update the presale price
+* Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+*
+* @contractMethod change
+*/
+export interface UpdatePresalePrice {
+    args: {
+        presale_price?: U128;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdatePresalePrice__Result = boolean;
+/**
+* Check whether an account is allowed to mint during the presale
+*
+* @contractMethod view
+*/
+export interface Whitelisted {
+    args: {
+        account_id: AccountId;
+    };
+}
+export declare type Whitelisted__Result = boolean;
+/**
+* Cost of NFT + fees for linkdrop
 *
 * @contractMethod view
 */
@@ -1514,13 +1043,101 @@ export interface TotalCost {
 }
 export declare type TotalCost__Result = U128;
 /**
+* Flat cost of one token
 *
 * @contractMethod view
 */
-export interface GetLinkdropContract {
+export interface CostPerToken {
+    args: {
+        minter: AccountId;
+    };
+}
+export declare type CostPerToken__Result = U128;
+/**
+* Current cost in NEAR to store one NFT
+*
+* @contractMethod view
+*/
+export interface TokenStorageCost {
     args: {};
 }
-export declare type GetLinkdropContract__Result = AccountId;
+export declare type TokenStorageCost__Result = U128;
+/**
+* Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+*
+* @contractMethod view
+*/
+export interface TokensLeft {
+    args: {};
+}
+export declare type TokensLeft__Result = u32;
+/**
+* Part of the NFT metadata standard. Returns the contract's metadata
+*
+* @contractMethod view
+*/
+export interface NftMetadata {
+    args: {};
+}
+export declare type NftMetadata__Result = NftContractMetadata;
+/**
+* How many tokens an account is still allowed to mint. None, means unlimited
+*
+* @contractMethod view
+*/
+export interface RemainingAllowance {
+    args: {
+        account_id: AccountId;
+    };
+}
+export declare type RemainingAllowance__Result = u32 | null;
+/**
+* Max number of mints in one transaction. None, means unlimited
+*
+* @contractMethod view
+*/
+export interface MintRateLimit {
+    args: {};
+}
+export declare type MintRateLimit__Result = u32 | null;
+/**
+* Information about the current sale. When in starts, status, price, and how many could be minted.
+*
+* @contractMethod view
+*/
+export interface GetSaleInfo {
+    args: {};
+}
+export declare type GetSaleInfo__Result = SaleInfo;
+/**
+* Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+*
+* @contractMethod view
+*/
+export interface GetUserSaleInfo {
+    args: {
+        account_id: AccountId;
+    };
+}
+export declare type GetUserSaleInfo__Result = UserSaleInfo;
+/**
+* Initial size of collection. Number left to raffle + current total supply
+*
+* @contractMethod view
+*/
+export interface Initial {
+    args: {};
+}
+export declare type Initial__Result = u64;
+/**
+* Current set of admins
+*
+* @contractMethod view
+*/
+export interface Admins {
+    args: {};
+}
+export declare type Admins__Result = AccountId[];
 /**
 *
 * @contractMethod change
@@ -1546,71 +1163,29 @@ export interface NewDefaultMeta {
 }
 export declare type NewDefaultMeta__Result = void;
 /**
-* Get number of tokens owned by a given account
 *
-* Arguments:
-* * `account_id`: a valid NEAR account
-*
-* Returns the number of non-fungible tokens owned by given `account_id` as
-* a string representing the value as an unsigned 128-bit integer to avoid JSON
-* number limit of 2^53.
-*
-* @contractMethod view
+* @contractMethod change
 */
-export interface NftSupplyForOwner {
+export interface New {
     args: {
-        account_id: AccountId;
+        owner_id: AccountId;
+        metadata: NftContractMetadata;
+        size: u32;
+        sale: Sale;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
     };
 }
-export declare type NftSupplyForOwner__Result = U128;
-/**
-*
-* @contractMethod view
-*/
-export interface NftMetadata {
-    args: {};
-}
-export declare type NftMetadata__Result = NftContractMetadata;
-/**
-*
-* @contractMethod view
-*/
-export interface MintRateLimit {
-    args: {};
-}
-export declare type MintRateLimit__Result = u32 | null;
-/**
-*
-* @contractMethod view
-*/
-export interface RemainingAllowance {
-    args: {
-        account_id: AccountId;
-    };
-}
-export declare type RemainingAllowance__Result = u32 | null;
-/**
-* Get list of all tokens owned by a given account
-*
-* Arguments:
-* * `account_id`: a valid NEAR account
-* * `from_index`: a string representing an unsigned 128-bit integer,
-* representing the starting index of tokens to return. (default 0)
-* * `limit`: the maximum number of tokens to return. (default unlimited)
-* Could fail on gas
-*
-* Returns a paginated list of all tokens owned by this account
-*
-* @contractMethod view
-*/
-export interface NftTokensForOwner {
-    args: {
-        account_id: AccountId;
-        from_index?: U128;
-        limit?: u64;
-    };
-}
-export declare type NftTokensForOwner__Result = Token[];
+export declare type New__Result = void;
 /**
 *
 * @contractMethod change
@@ -1636,75 +1211,6 @@ export interface NftMint {
 export declare type NftMint__Result = Token;
 /**
 *
-* @contractMethod view
-*/
-export interface GetUserSaleInfo {
-    args: {
-        account_id: AccountId;
-    };
-}
-export declare type GetUserSaleInfo__Result = UserSaleInfo;
-/**
-*
-* @contractMethod view
-*/
-export interface Initial {
-    args: {};
-}
-export declare type Initial__Result = u64;
-/**
-*
-* @contractMethod change
-*/
-export interface AddWhitelistAccountUngaurded {
-    args: {
-        account_id: AccountId;
-        allowance: u32;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type AddWhitelistAccountUngaurded__Result = void;
-/**
-*
-* @contractMethod view
-*/
-export interface TokensLeft {
-    args: {};
-}
-export declare type TokensLeft__Result = u32;
-/**
-*
-* @contractMethod change
-*/
-export interface UpdateRoyalties {
-    args: {
-        royalties: Royalties;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type UpdateRoyalties__Result = void;
-/**
-*
 * @contractMethod change
 */
 export interface NftMintOne {
@@ -1722,3 +1228,65 @@ export interface NftMintOne {
     };
 }
 export declare type NftMintOne__Result = Token;
+/**
+*
+* @contractMethod change
+*/
+export interface NftMintMany {
+    args: {
+        num: u32;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftMintMany__Result = Token[];
+/**
+*
+* @contractMethod change
+*/
+export interface OnSendWithCallback {
+    args: {};
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type OnSendWithCallback__Result = void;
+/**
+*
+* @contractMethod change
+*/
+export interface LinkCallback {
+    args: {
+        account_id: AccountId;
+        mint_for_free: boolean;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type LinkCallback__Result = Token;

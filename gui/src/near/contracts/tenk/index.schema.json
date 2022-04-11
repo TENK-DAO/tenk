@@ -7,23 +7,20 @@
       "pattern": "^(([a-z\\d]+[-_])*[a-z\\d]+\\.)*([a-z\\d]+[-_])*[a-z\\d]+$",
       "type": "string"
     },
-    "AddWhitelistAccountUngaurded": {
+    "AddAdmin": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Add a new admin. Careful who you add!",
       "properties": {
         "args": {
           "additionalProperties": false,
           "properties": {
             "account_id": {
               "$ref": "#/definitions/AccountId"
-            },
-            "allowance": {
-              "$ref": "#/definitions/u32"
             }
           },
           "required": [
-            "account_id",
-            "allowance"
+            "account_id"
           ],
           "type": "object"
         },
@@ -51,8 +48,8 @@
       ],
       "type": "object"
     },
-    "AddWhitelistAccountUngaurded__Result": {
-      "type": "null"
+    "AddAdmin__Result": {
+      "type": "boolean"
     },
     "AddWhitelistAccounts": {
       "additionalProperties": false,
@@ -101,7 +98,28 @@
       "type": "object"
     },
     "AddWhitelistAccounts__Result": {
-      "type": "null"
+      "type": "boolean"
+    },
+    "Admins": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "description": "Current set of admins",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "Admins__Result": {
+      "items": {
+        "$ref": "#/definitions/AccountId"
+      },
+      "type": "array"
     },
     "Balance": {
       "$ref": "#/definitions/U128",
@@ -142,6 +160,7 @@
     "CloseContract": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Contract wwill",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -172,11 +191,12 @@
       "type": "object"
     },
     "CloseContract__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "CostOfLinkdrop": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Cost of NFT + fees for linkdrop",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -202,6 +222,7 @@
     "CostPerToken": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Flat cost of one token",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -347,6 +368,7 @@
     "GetSaleInfo": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Information about the current sale. When in starts, status, price, and how many could be minted.",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -364,6 +386,7 @@
     "GetUserSaleInfo": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Information about a current user. Whether they are VIP and how many tokens left in their allowance.",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -389,6 +412,7 @@
     "Initial": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Initial size of collection. Number left to raffle + current total supply",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -438,6 +462,7 @@
     "MintRateLimit": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Max number of mints in one transaction. None, means unlimited",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -688,6 +713,7 @@
     "NftMetadata": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Part of the NFT metadata standard. Returns the contract's metadata",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1294,6 +1320,7 @@
     "RemainingAllowance": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "How many tokens an account is still allowed to mint. None, means unlimited",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1412,6 +1439,7 @@
     "StartPresale": {
       "additionalProperties": false,
       "contractMethod": "change",
+      "description": "Override the current presale start time to start presale now. Most provide when public sale starts. None, means never. Can provide new presale price. Note: you most likely won't need to call this since the presale starts automatically based on time.",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1450,7 +1478,7 @@
       "type": "object"
     },
     "StartPresale__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "StartSale": {
       "additionalProperties": false,
@@ -1460,7 +1488,7 @@
           "additionalProperties": false,
           "properties": {
             "price": {
-              "$ref": "#/definitions/U128"
+              "$ref": "#/definitions/YoctoNear"
             }
           },
           "type": "object"
@@ -1490,7 +1518,7 @@
       "type": "object"
     },
     "StartSale__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "Status": {
       "description": "Current state of contract",
@@ -1621,6 +1649,7 @@
     "TokenStorageCost": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Current cost in NEAR to store one NFT",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1638,6 +1667,7 @@
     "TokensLeft": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1722,7 +1752,7 @@
       "type": "object"
     },
     "TransferOwnership__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "U128": {
       "description": "String representation of a u128-bit integer",
@@ -1770,7 +1800,135 @@
       "type": "object"
     },
     "UpdateAllowance__Result": {
-      "type": "null"
+      "type": "boolean"
+    },
+    "UpdateInitialRoyalties": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "initial_royalties": {
+              "$ref": "#/definitions/Royalties"
+            }
+          },
+          "required": [
+            "initial_royalties"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdateInitialRoyalties__Result": {
+      "type": "boolean"
+    },
+    "UpdatePresalePrice": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "description": "Update the presale price Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "presale_price": {
+              "$ref": "#/definitions/U128"
+            }
+          },
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdatePresalePrice__Result": {
+      "type": "boolean"
+    },
+    "UpdatePrice": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "description": "Update public sale price. Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "price": {
+              "$ref": "#/definitions/U128"
+            }
+          },
+          "required": [
+            "price"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdatePrice__Result": {
+      "type": "boolean"
     },
     "UpdateRoyalties": {
       "additionalProperties": false,
@@ -1813,7 +1971,7 @@
       "type": "object"
     },
     "UpdateRoyalties__Result": {
-      "type": "null"
+      "type": "boolean"
     },
     "UpdateUri": {
       "additionalProperties": false,
@@ -1856,7 +2014,57 @@
       "type": "object"
     },
     "UpdateUri__Result": {
-      "type": "null"
+      "type": "boolean"
+    },
+    "UpdateWhitelistAccounts": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "accounts": {
+              "items": {
+                "$ref": "#/definitions/AccountId"
+              },
+              "type": "array"
+            },
+            "allowance_increase": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "accounts",
+            "allowance_increase"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdateWhitelistAccounts__Result": {
+      "type": "boolean"
     },
     "UserSaleInfo": {
       "additionalProperties": false,
@@ -1881,6 +2089,7 @@
     "Whitelisted": {
       "additionalProperties": false,
       "contractMethod": "view",
+      "description": "Check whether an account is allowed to mint during the presale",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1905,6 +2114,10 @@
     },
     "WrappedDuration": {
       "type": "string"
+    },
+    "YoctoNear": {
+      "$ref": "#/definitions/U128",
+      "description": "String of yocto NEAR; 1N = 1000000000000000000000000 yN"
     },
     "u16": {
       "maximum": 65535,

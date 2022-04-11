@@ -1,5 +1,9 @@
 use crate::*;
 
+/// String of yocto NEAR; 1N = 1000000000000000000000000 yN
+#[witgen]
+pub type YoctoNEAR = U128;
+
 #[derive(Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
 #[witgen]
@@ -61,7 +65,7 @@ impl Default for Sale {
             public_sale_start: Default::default(),
             allowance: Default::default(),
             presale_price: Default::default(),
-            mint_rate_limit: Default::default(),
+            mint_rate_limit: Some(10),
         }
     }
 }
