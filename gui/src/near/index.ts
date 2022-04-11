@@ -1,5 +1,5 @@
 import * as naj from "near-api-js"
-import { Contract } from "tenk-nft"
+import { Contract } from "./contracts/tenk"
 
 // TODO: remove pending https://github.com/near/near-api-js/issues/757
 import { Buffer } from "buffer"
