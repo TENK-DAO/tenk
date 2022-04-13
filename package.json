@@ -25,8 +25,8 @@
     "schema": "(cd contracts/tenk; witme near json -o ../../gui/src/near/contracts/tenk)",
     "wit:schema": "npm run wit && npm run schema",
     "docs": "npm run wit && typedoc contracts/tenk/ts/index.ts --tsconfig contracts/tenk/tsconfig.json --out gui/public/docs",
-    "gui:start": "npm run docs && cd gui && npm run && npm run start",
-    "gui:build": "npm run docs && cd gui && npm run && npm run build",
+    "gui:start": "npm run docs && cd gui && npm install && npm run start",
+    "gui:build": "npm run docs && cd gui && npm install && npm run build",
     "gui:lint": "cd gui && npm run lint",
     "start": "npm run gui:start"
   },
