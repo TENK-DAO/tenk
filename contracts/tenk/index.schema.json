@@ -1,0 +1,1462 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "AccountId": {
+      "maxLength": 64,
+      "minLength": 2,
+      "pattern": "^(([a-z\\d]+[-_])*[a-z\\d]+\\.)*([a-z\\d]+[-_])*[a-z\\d]+$",
+      "type": "string"
+    },
+    "AddWhitelistAccountUngaurded": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "allowance": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "account_id",
+            "allowance"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "AddWhitelistAccountUngaurded__Result": {
+      "type": "null"
+    },
+    "AddWhitelistAccounts": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "accounts": {
+              "items": {
+                "$ref": "#/definitions/AccountId"
+              },
+              "type": "array"
+            },
+            "allowance": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "accounts"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "AddWhitelistAccounts__Result": {
+      "type": "null"
+    },
+    "Balance": {
+      "$ref": "#/definitions/U128",
+      "description": "Balance is a type for storing amounts of tokens, specified in yoctoNEAR."
+    },
+    "Base64VecU8": {
+      "description": "base64 string.",
+      "type": "string"
+    },
+    "BasisPoint": {
+      "$ref": "#/definitions/u16"
+    },
+    "CheckKey": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "public_key": {
+              "$ref": "#/definitions/PublicKey"
+            }
+          },
+          "required": [
+            "public_key"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "CheckKey__Result": {
+      "type": "boolean"
+    },
+    "CloseContract": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "CloseContract__Result": {
+      "type": "null"
+    },
+    "CostOfLinkdrop": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "minter": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "minter"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "CostOfLinkdrop__Result": {
+      "$ref": "#/definitions/U128"
+    },
+    "CostPerToken": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "minter": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "minter"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "CostPerToken__Result": {
+      "$ref": "#/definitions/U128"
+    },
+    "CreateLinkdrop": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "description": "Create a pending token that can be claimed with corresponding private key",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "public_key": {
+              "$ref": "#/definitions/PublicKey"
+            }
+          },
+          "required": [
+            "public_key"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "CreateLinkdrop__Result": {
+      "type": "null"
+    },
+    "Duration": {
+      "$ref": "#/definitions/u64",
+      "description": "Raw type for duration in nanoseconds"
+    },
+    "FungibleTokenMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "decimals": {
+          "$ref": "#/definitions/u8"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "reference_hash": {
+          "$ref": "#/definitions/Base64VecU8"
+        },
+        "spec": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spec",
+        "name",
+        "symbol",
+        "decimals"
+      ],
+      "type": "object"
+    },
+    "Gas": {
+      "$ref": "#/definitions/u64",
+      "description": "Represents the amount of NEAR tokens in \"gas units\" which are used to fund transactions."
+    },
+    "GetKeyBalance": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "description": "Returns the balance associated with given key.",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "GetKeyBalance__Result": {
+      "$ref": "#/definitions/U128"
+    },
+    "GetLinkdropContract": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "GetLinkdropContract__Result": {
+      "$ref": "#/definitions/AccountId"
+    },
+    "GetSaleInfo": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "GetSaleInfo__Result": {
+      "$ref": "#/definitions/SaleInfo"
+    },
+    "GetUserSaleInfo": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "account_id"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "GetUserSaleInfo__Result": {
+      "$ref": "#/definitions/UserSaleInfo"
+    },
+    "Initial": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "InitialMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "icon": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "reference_hash": {
+          "$ref": "#/definitions/Base64VecU8"
+        },
+        "spec": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "uri": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "symbol",
+        "uri"
+      ],
+      "type": "object"
+    },
+    "Initial__Result": {
+      "$ref": "#/definitions/u64"
+    },
+    "MintSpecial": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "MintSpecial__Result": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/definitions/Token"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "New": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "metadata": {
+              "$ref": "#/definitions/NftContractMetadata"
+            },
+            "owner_id": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "sale": {
+              "$ref": "#/definitions/Sale"
+            },
+            "size": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "owner_id",
+            "metadata",
+            "size",
+            "sale"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "NewDefaultMeta": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "metadata": {
+              "$ref": "#/definitions/InitialMetadata"
+            },
+            "owner_id": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "sale": {
+              "$ref": "#/definitions/Sale"
+            },
+            "size": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "owner_id",
+            "metadata",
+            "size"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "NewDefaultMeta__Result": {
+      "type": "null"
+    },
+    "New__Result": {
+      "type": "null"
+    },
+    "NftBurn": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "token_id": {
+              "$ref": "#/definitions/TokenId"
+            }
+          },
+          "required": [
+            "token_id"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "NftBurn__Result": {
+      "type": "null"
+    },
+    "NftContractMetadata": {
+      "additionalProperties": false,
+      "description": "Metadata for the NFT contract itself.",
+      "properties": {
+        "base_uri": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "reference_hash": {
+          "$ref": "#/definitions/Base64VecU8"
+        },
+        "spec": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "spec",
+        "name",
+        "symbol"
+      ],
+      "type": "object"
+    },
+    "NftMetadata": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "NftMetadata__Result": {
+      "$ref": "#/definitions/NftContractMetadata"
+    },
+    "NftMint": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "num": {
+              "$ref": "#/definitions/u32"
+            },
+            "token_owner_id": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "num",
+            "token_owner_id"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "NftMintMany": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "num": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "num"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "NftMintMany__Result": {
+      "items": {
+        "$ref": "#/definitions/Token"
+      },
+      "type": "array"
+    },
+    "NftMintOne": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "NftMintOne__Result": {
+      "$ref": "#/definitions/Token"
+    },
+    "NftMint__Result": {
+      "$ref": "#/definitions/Token"
+    },
+    "Payout": {
+      "additionalProperties": false,
+      "description": "Copied from https://github.com/near/NEPs/blob/6170aba1c6f4cd4804e9ad442caeae9dc47e7d44/specs/Standards/NonFungibleToken/Payout.md#reference-level-explanation A mapping of NEAR accounts to the amount each should be paid out, in the event of a token-sale. The payout mapping MUST be shorter than the maximum length specified by the financial contract obtaining this payout data. Any mapping of length 10 or less MUST be accepted by financial contracts, so 10 is a safe upper limit. This currently deviates from the standard but is in the process of updating to use this type",
+      "properties": {
+        "payout": {
+          "additionalProperties": {
+            "$ref": "#/definitions/U128"
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "payout"
+      ],
+      "type": "object"
+    },
+    "PublicKey": {
+      "description": "Public key in a binary format with base58 string serialization with human-readable curve. The key types currently supported are `secp256k1` and `ed25519`.\n\nEd25519 public keys accepted are 32 bytes and secp256k1 keys are the uncompressed 64 format.",
+      "type": "string"
+    },
+    "RemainingAllowance": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "account_id"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "RemainingAllowance__Result": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/u32"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "Royalties": {
+      "additionalProperties": false,
+      "properties": {
+        "accounts": {
+          "additionalProperties": {
+            "$ref": "#/definitions/BasisPoint"
+          },
+          "type": "object"
+        },
+        "percent": {
+          "$ref": "#/definitions/BasisPoint"
+        }
+      },
+      "required": [
+        "accounts",
+        "percent"
+      ],
+      "type": "object"
+    },
+    "Sale": {
+      "additionalProperties": false,
+      "properties": {
+        "allowance": {
+          "$ref": "#/definitions/u32"
+        },
+        "initial_royalties": {
+          "$ref": "#/definitions/Royalties"
+        },
+        "presale_price": {
+          "$ref": "#/definitions/U128"
+        },
+        "presale_start": {
+          "$ref": "#/definitions/Duration"
+        },
+        "price": {
+          "$ref": "#/definitions/U128"
+        },
+        "public_sale_start": {
+          "$ref": "#/definitions/Duration"
+        },
+        "royalties": {
+          "$ref": "#/definitions/Royalties"
+        }
+      },
+      "required": [
+        "price"
+      ],
+      "type": "object"
+    },
+    "SaleInfo": {
+      "additionalProperties": false,
+      "description": "Information about the current sale",
+      "properties": {
+        "presale_start": {
+          "$ref": "#/definitions/Duration",
+          "description": "Start of the VIP sale"
+        },
+        "price": {
+          "$ref": "#/definitions/U128",
+          "description": "Current price for one token"
+        },
+        "sale_start": {
+          "$ref": "#/definitions/Duration",
+          "description": "Start of public sale"
+        },
+        "status": {
+          "$ref": "#/definitions/Status",
+          "description": "Current state of contract"
+        },
+        "token_final_supply": {
+          "$ref": "#/definitions/u64",
+          "description": "Total tokens that could be minted"
+        }
+      },
+      "required": [
+        "status",
+        "presale_start",
+        "sale_start",
+        "token_final_supply",
+        "price"
+      ],
+      "type": "object"
+    },
+    "StartPresale": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "presale_price": {
+              "$ref": "#/definitions/U128"
+            },
+            "public_sale_start": {
+              "$ref": "#/definitions/Duration"
+            }
+          },
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "StartPresale__Result": {
+      "type": "null"
+    },
+    "StartSale": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "price": {
+              "$ref": "#/definitions/U128"
+            }
+          },
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "StartSale__Result": {
+      "type": "null"
+    },
+    "Status": {
+      "description": "Current state of contract",
+      "enum": [
+        "Closed",
+        "Presale",
+        "Open",
+        "SoldOut"
+      ],
+      "type": "string"
+    },
+    "StorageBalance": {
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "$ref": "#/definitions/U128"
+        },
+        "total": {
+          "$ref": "#/definitions/U128"
+        }
+      },
+      "required": [
+        "total",
+        "available"
+      ],
+      "type": "object"
+    },
+    "StorageBalanceBounds": {
+      "additionalProperties": false,
+      "properties": {
+        "max": {
+          "$ref": "#/definitions/U128"
+        },
+        "min": {
+          "$ref": "#/definitions/U128"
+        }
+      },
+      "required": [
+        "min"
+      ],
+      "type": "object"
+    },
+    "StorageUsage": {
+      "$ref": "#/definitions/u64",
+      "description": "StorageUsage is used to count the amount of storage used by a contract."
+    },
+    "Timestamp": {
+      "$ref": "#/definitions/u64",
+      "description": "Raw type for timestamp in nanoseconds"
+    },
+    "Token": {
+      "additionalProperties": false,
+      "description": "In this implementation, the Token struct takes two extensions standards (metadata and approval) as optional fields, as they are frequently used in modern NFTs.",
+      "properties": {
+        "approved_account_ids": {
+          "additionalProperties": {
+            "$ref": "#/definitions/u64"
+          },
+          "type": "object"
+        },
+        "metadata": {
+          "$ref": "#/definitions/TokenMetadata"
+        },
+        "owner_id": {
+          "$ref": "#/definitions/AccountId"
+        },
+        "token_id": {
+          "$ref": "#/definitions/TokenId"
+        }
+      },
+      "required": [
+        "token_id",
+        "owner_id"
+      ],
+      "type": "object"
+    },
+    "TokenId": {
+      "description": "Note that token IDs for NFTs are strings on NEAR. It's still fine to use autoincrementing numbers as unique IDs if desired, but they should be stringified. This is to make IDs more future-proof as chain-agnostic conventions and standards arise, and allows for more flexibility with considerations like bridging NFTs across chains, etc.",
+      "type": "string"
+    },
+    "TokenMetadata": {
+      "additionalProperties": false,
+      "description": "Metadata on the individual token level.",
+      "properties": {
+        "copies": {
+          "$ref": "#/definitions/u64"
+        },
+        "description": {
+          "type": "string"
+        },
+        "expires_at": {
+          "type": "string"
+        },
+        "extra": {
+          "type": "string"
+        },
+        "issued_at": {
+          "type": "string"
+        },
+        "media": {
+          "type": "string"
+        },
+        "media_hash": {
+          "$ref": "#/definitions/Base64VecU8"
+        },
+        "reference": {
+          "type": "string"
+        },
+        "reference_hash": {
+          "$ref": "#/definitions/Base64VecU8"
+        },
+        "starts_at": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "TokenStorageCost": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "TokenStorageCost__Result": {
+      "$ref": "#/definitions/U128"
+    },
+    "TokensLeft": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "TokensLeft__Result": {
+      "$ref": "#/definitions/u32"
+    },
+    "TotalCost": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "minter": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "num": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "num",
+            "minter"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "TotalCost__Result": {
+      "$ref": "#/definitions/U128"
+    },
+    "TransferOwnership": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "new_owner": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "new_owner"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "TransferOwnership__Result": {
+      "type": "null"
+    },
+    "U128": {
+      "description": "String representation of a u128-bit integer",
+      "pattern": "^[0-9]+$",
+      "type": "string"
+    },
+    "UpdateAllowance": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "allowance": {
+              "$ref": "#/definitions/u32"
+            }
+          },
+          "required": [
+            "allowance"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdateAllowance__Result": {
+      "type": "null"
+    },
+    "UpdateRoyalties": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "royalties": {
+              "$ref": "#/definitions/Royalties"
+            }
+          },
+          "required": [
+            "royalties"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdateRoyalties__Result": {
+      "type": "null"
+    },
+    "UpdateUri": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "uri": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "uri"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdateUri__Result": {
+      "type": "null"
+    },
+    "UserSaleInfo": {
+      "additionalProperties": false,
+      "description": "Information about the current sale from user perspective",
+      "properties": {
+        "is_vip": {
+          "type": "boolean"
+        },
+        "remaining_allowance": {
+          "$ref": "#/definitions/u32"
+        },
+        "sale_info": {
+          "$ref": "#/definitions/SaleInfo"
+        }
+      },
+      "required": [
+        "sale_info",
+        "is_vip"
+      ],
+      "type": "object"
+    },
+    "Whitelisted": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "account_id"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "Whitelisted__Result": {
+      "type": "boolean"
+    },
+    "WrappedDuration": {
+      "type": "string"
+    },
+    "u16": {
+      "maximum": 65535,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "u32": {
+      "maximum": 4294967295,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "u64": {
+      "maximum": 18446744073709552000,
+      "minimum": 0,
+      "type": "integer"
+    },
+    "u8": {
+      "maximum": 255,
+      "minimum": 0,
+      "type": "integer"
+    }
+  }
+}
