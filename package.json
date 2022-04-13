@@ -20,7 +20,7 @@
     "addWhitelist": "near repl -s ./scripts/add-whitelist.js",
     "test:unit": "cargo test",
     "test:ci": "npm run test:unit && npm run test",
-    "lint": "npm run eslint . --ext .ts && npm run gui:lint",
+    "lint": "eslint . --ext .ts && npm run gui:lint",
     "wit": "(cd contracts/tenk; witme near wit -t ts/ --standards && tsc && cp ts/* ../../gui/src/near/contracts/tenk/)",
     "schema": "(cd contracts/tenk; witme near json -o ../../gui/src/near/contracts/tenk)",
     "wit:schema": "npm run wit && npm run schema",
