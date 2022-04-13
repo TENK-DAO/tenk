@@ -24,10 +24,9 @@ jobs:
         args: witme --version 0.2.3
     - uses: actions/setup-node@v1
       with:
-        node-version: '16.x'
+        node-version: '14.x'
     - name: Install and Build
       run: |
-        yarn cache clean
         yarn install --frozen-lockfile
         yarn gui:build
     - name: Deploy 🚀
