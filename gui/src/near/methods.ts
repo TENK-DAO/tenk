@@ -8,7 +8,11 @@ function hasContractMethodProperty(obj: {}): obj is {contractMethod: "change" | 
   return 'contractMethod' in obj
 }
 
-function hasContractMethod(m: MethodName, equalTo?: "change" | "view") {
+function hasAllowProperty(obj: {}): obj is { allow: string[] } {
+  return 'allow' in obj
+}
+
+function hasContractMethod(m: MethodName, equalTo?: "change" | "view"): boolean {
   const def = topLevelSchema.definitions[m]
   const hasField = hasContractMethodProperty(def)
   if (!hasField) return false
@@ -16,12 +20,25 @@ function hasContractMethod(m: MethodName, equalTo?: "change" | "view") {
   return def.contractMethod === equalTo
 }
 
-export const changeMethods = Object.keys(topLevelSchema.definitions).filter(
-  m => hasContractMethod(m as MethodName, "change")
+function allowsAdmin(m: MethodName): boolean {
+  const def = topLevelSchema.definitions[m]
+  const hasField = hasAllowProperty(def)
+  if (!hasField) return false
+  return def.allow.includes('::admins')
+}
+
+export const adminMethods = Object.keys(topLevelSchema.definitions).filter(m =>
+  allowsAdmin(m as MethodName)
 ) as MethodName[]
 
-export const viewMethods = Object.keys(topLevelSchema.definitions).filter(
-  m => hasContractMethod(m as MethodName, "view")
+export const changeMethods = Object.keys(topLevelSchema.definitions).filter(m =>
+  hasContractMethod(m as MethodName, "change") &&
+    !adminMethods.includes(m as MethodName) &&
+    !['New', 'NewDefaultMeta'].includes(m)
+) as MethodName[]
+
+export const viewMethods = Object.keys(topLevelSchema.definitions).filter(m =>
+  hasContractMethod(m as MethodName, "view")
 ) as MethodName[]
 
 export const methods = Object.keys(topLevelSchema.definitions).filter(

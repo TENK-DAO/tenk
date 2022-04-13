@@ -4,6 +4,7 @@ use crate::*;
 impl Contract {
     // Owner private methods
 
+    /// @allow ["::admins", "::owner"]
     pub fn transfer_ownership(&mut self, new_owner: AccountId) -> bool {
         self.assert_owner();
         env::log_str(&format!(
@@ -14,6 +15,7 @@ impl Contract {
         true
     }
 
+    /// @allow ["::admins", "::owner"]
     pub fn update_initial_royalties(&mut self, initial_royalties: Royalties) -> bool {
         self.assert_owner_or_admin();
         initial_royalties.validate();
@@ -21,6 +23,7 @@ impl Contract {
         true
     }
 
+    /// @allow ["::admins", "::owner"]
     pub fn update_royalties(&mut self, royalties: Royalties) -> bool {
         self.assert_owner_or_admin();
         royalties.validate();
@@ -28,12 +31,14 @@ impl Contract {
         true
     }
 
+    /// @allow ["::admins", "::owner"]
     pub fn update_allowance(&mut self, allowance: u32) -> bool {
         self.assert_owner_or_admin();
         self.sale.allowance = Some(allowance);
         true
     }
 
+    /// @allow ["::admins", "::owner"]
     pub fn update_uri(&mut self, uri: String) -> bool {
         self.assert_owner_or_admin();
         let mut metadata = self.metadata.get().unwrap();
@@ -42,6 +47,8 @@ impl Contract {
         self.metadata.set(&metadata);
         true
     }
+
+    /// @allow ["::admins", "::owner"]
     pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) -> bool {
         #[cfg(feature = "testnet")]
         self.assert_owner_or_admin();
@@ -52,6 +59,7 @@ impl Contract {
         true
     }
 
+    /// @allow ["::admins", "::owner"]
     pub fn update_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance_increase: u32) -> bool {
         self.assert_owner_or_admin();
         accounts.iter().for_each(|account_id| {
@@ -61,8 +69,9 @@ impl Contract {
         true
     }
 
-    /// Contract wwill
-    pub fn close_contract(&mut self) -> bool {
+    /// End public sale/minting, going back to the pre-presale state in which no one can mint.
+    /// @allow ["::admins", "::owner"]
+    pub fn close_sale(&mut self) -> bool {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner_or_admin();
         self.sale.presale_start = None;
@@ -75,6 +84,7 @@ impl Contract {
     /// Can provide new presale price.
     /// Note: you most likely won't need to call this since the presale
     /// starts automatically based on time.
+    /// @allow ["::admins", "::owner"]
     pub fn start_presale(
         &mut self,
         public_sale_start: Option<TimestampMs>,
@@ -91,6 +101,7 @@ impl Contract {
         true
     }
 
+    /// @allow ["::admins", "::owner"]
     pub fn start_sale(&mut self, price: Option<YoctoNEAR>) -> bool {
         #[cfg(not(feature = "testnet"))]
         self.assert_owner_or_admin();
@@ -102,6 +113,7 @@ impl Contract {
     }
 
     /// Add a new admin. Careful who you add!
+    /// @allow ["::admins", "::owner"]
     pub fn add_admin(&mut self, account_id: AccountId) -> bool {
         self.assert_owner_or_admin();
         self.admins.insert(&account_id);
@@ -110,6 +122,7 @@ impl Contract {
 
     /// Update public sale price. 
     /// Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    /// @allow ["::admins", "::owner"]
     pub fn update_price(&mut self, price: U128) -> bool {
         self.assert_owner_or_admin();
         self.sale.price = price;
@@ -118,6 +131,7 @@ impl Contract {
 
     /// Update the presale price
     /// Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    /// @allow ["::admins", "::owner"]
     pub fn update_presale_price(&mut self, presale_price: Option<U128>) -> bool {
         self.assert_owner_or_admin();
         self.sale.presale_price = presale_price;

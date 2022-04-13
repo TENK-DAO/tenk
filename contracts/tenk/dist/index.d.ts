@@ -222,154 +222,167 @@ export declare class Contract {
         public_key: PublicKey;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
-    * Allows given public key to claim sent balance.
-    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-    * Claim tokens for specific account that are attached to the public key this tx is signed with.
-    */
-    claim(args: {
-        account_id: AccountId;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * Allows given public key to claim sent balance.
-    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-    * Claim tokens for specific account that are attached to the public key this tx is signed with.
-    */
-    claimRaw(args: {
-        account_id: AccountId;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Allows given public key to claim sent balance.
-    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-    * Claim tokens for specific account that are attached to the public key this tx is signed with.
-    */
-    claimTx(args: {
-        account_id: AccountId;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    /**
-    * Create new account and and claim tokens to it.
-    */
-    create_account_and_claim(args: {
-        new_account_id: AccountId;
-        new_public_key: PublicKey;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    /**
-    * Create new account and and claim tokens to it.
-    */
-    create_account_and_claimRaw(args: {
-        new_account_id: AccountId;
-        new_public_key: PublicKey;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    /**
-    * Create new account and and claim tokens to it.
-    */
-    create_account_and_claimTx(args: {
-        new_account_id: AccountId;
-        new_public_key: PublicKey;
-    }, options?: ChangeMethodOptions): transactions.Action;
-    /**
     * Returns the balance associated with given key.
     */
     get_key_balance(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
     check_key(args: {
         public_key: PublicKey;
     }, options?: ViewFunctionOptions): Promise<boolean>;
-    on_create_and_claim(args: {
-        mint_for_free: boolean;
-    }, options?: ChangeMethodOptions): Promise<void>;
-    on_create_and_claimRaw(args: {
-        mint_for_free: boolean;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    on_create_and_claimTx(args: {
-        mint_for_free: boolean;
-    }, options?: ChangeMethodOptions): transactions.Action;
     get_linkdrop_contract(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     transfer_ownership(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     transfer_ownershipRaw(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     transfer_ownershipTx(args: {
         new_owner: AccountId;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_initial_royalties(args: {
         initial_royalties: Royalties;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_initial_royaltiesRaw(args: {
         initial_royalties: Royalties;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_initial_royaltiesTx(args: {
         initial_royalties: Royalties;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_royalties(args: {
         royalties: Royalties;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_royaltiesRaw(args: {
         royalties: Royalties;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_royaltiesTx(args: {
         royalties: Royalties;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_allowance(args: {
         allowance: u32;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_allowanceRaw(args: {
         allowance: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_allowanceTx(args: {
         allowance: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_uri(args: {
         uri: string;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_uriRaw(args: {
         uri: string;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_uriTx(args: {
         uri: string;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     add_whitelist_accounts(args: {
         accounts: AccountId[];
         allowance?: u32;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     add_whitelist_accountsRaw(args: {
         accounts: AccountId[];
         allowance?: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     add_whitelist_accountsTx(args: {
         accounts: AccountId[];
         allowance?: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_whitelist_accounts(args: {
         accounts: AccountId[];
         allowance_increase: u32;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_whitelist_accountsRaw(args: {
         accounts: AccountId[];
         allowance_increase: u32;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     update_whitelist_accountsTx(args: {
         accounts: AccountId[];
         allowance_increase: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
-    * Contract wwill
+    * End public sale/minting, going back to the pre-presale state in which no one can mint.
+    * @allow ["::admins", "::owner"]
     */
-    close_contract(args?: {}, options?: ChangeMethodOptions): Promise<boolean>;
+    close_sale(args?: {}, options?: ChangeMethodOptions): Promise<boolean>;
     /**
-    * Contract wwill
+    * End public sale/minting, going back to the pre-presale state in which no one can mint.
+    * @allow ["::admins", "::owner"]
     */
-    close_contractRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    close_saleRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     /**
-    * Contract wwill
+    * End public sale/minting, going back to the pre-presale state in which no one can mint.
+    * @allow ["::admins", "::owner"]
     */
-    close_contractTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
+    close_saleTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Override the current presale start time to start presale now.
     * Most provide when public sale starts. None, means never.
     * Can provide new presale price.
     * Note: you most likely won't need to call this since the presale
     * starts automatically based on time.
+    * @allow ["::admins", "::owner"]
     */
     start_presale(args: {
         public_sale_start?: TimestampMs;
@@ -381,6 +394,7 @@ export declare class Contract {
     * Can provide new presale price.
     * Note: you most likely won't need to call this since the presale
     * starts automatically based on time.
+    * @allow ["::admins", "::owner"]
     */
     start_presaleRaw(args: {
         public_sale_start?: TimestampMs;
@@ -392,34 +406,47 @@ export declare class Contract {
     * Can provide new presale price.
     * Note: you most likely won't need to call this since the presale
     * starts automatically based on time.
+    * @allow ["::admins", "::owner"]
     */
     start_presaleTx(args: {
         public_sale_start?: TimestampMs;
         presale_price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     start_sale(args: {
         price?: YoctoNear;
     }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     start_saleRaw(args: {
         price?: YoctoNear;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     start_saleTx(args: {
         price?: YoctoNear;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Add a new admin. Careful who you add!
+    * @allow ["::admins", "::owner"]
     */
     add_admin(args: {
         account_id: AccountId;
     }, options?: ChangeMethodOptions): Promise<boolean>;
     /**
     * Add a new admin. Careful who you add!
+    * @allow ["::admins", "::owner"]
     */
     add_adminRaw(args: {
         account_id: AccountId;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     /**
     * Add a new admin. Careful who you add!
+    * @allow ["::admins", "::owner"]
     */
     add_adminTx(args: {
         account_id: AccountId;
@@ -427,6 +454,7 @@ export declare class Contract {
     /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     update_price(args: {
         price: U128;
@@ -434,6 +462,7 @@ export declare class Contract {
     /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     update_priceRaw(args: {
         price: U128;
@@ -441,6 +470,7 @@ export declare class Contract {
     /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     update_priceTx(args: {
         price: U128;
@@ -448,6 +478,7 @@ export declare class Contract {
     /**
     * Update the presale price
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     update_presale_price(args: {
         presale_price?: U128;
@@ -455,6 +486,7 @@ export declare class Contract {
     /**
     * Update the presale price
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     update_presale_priceRaw(args: {
         presale_price?: U128;
@@ -462,10 +494,19 @@ export declare class Contract {
     /**
     * Update the presale price
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     update_presale_priceTx(args: {
         presale_price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Current contract owner
+    */
+    owner(args?: {}, options?: ViewFunctionOptions): Promise<AccountId>;
+    /**
+    * Current set of admins
+    */
+    admins(args?: {}, options?: ViewFunctionOptions): Promise<AccountId[]>;
     /**
     * Check whether an account is allowed to mint during the presale
     */
@@ -524,10 +565,6 @@ export declare class Contract {
     * Initial size of collection. Number left to raffle + current total supply
     */
     initial(args?: {}, options?: ViewFunctionOptions): Promise<u64>;
-    /**
-    * Current set of admins
-    */
-    admins(args?: {}, options?: ViewFunctionOptions): Promise<AccountId[]>;
     new_default_meta(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
@@ -591,21 +628,6 @@ export declare class Contract {
     nft_mint_manyTx(args: {
         num: u32;
     }, options?: ChangeMethodOptions): transactions.Action;
-    on_send_with_callback(args?: {}, options?: ChangeMethodOptions): Promise<void>;
-    on_send_with_callbackRaw(args?: {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    on_send_with_callbackTx(args?: {}, options?: ChangeMethodOptions): transactions.Action;
-    link_callback(args: {
-        account_id: AccountId;
-        mint_for_free: boolean;
-    }, options?: ChangeMethodOptions): Promise<Token>;
-    link_callbackRaw(args: {
-        account_id: AccountId;
-        mint_for_free: boolean;
-    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
-    link_callbackTx(args: {
-        account_id: AccountId;
-        mint_for_free: boolean;
-    }, options?: ChangeMethodOptions): transactions.Action;
 }
 /**
 * Create a pending token that can be claimed with corresponding private key
@@ -630,53 +652,6 @@ export interface CreateLinkdrop {
 }
 export declare type CreateLinkdrop__Result = void;
 /**
-* Allows given public key to claim sent balance.
-* Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-* Claim tokens for specific account that are attached to the public key this tx is signed with.
-*
-* @contractMethod change
-*/
-export interface Claim {
-    args: {
-        account_id: AccountId;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type Claim__Result = void;
-/**
-* Create new account and and claim tokens to it.
-*
-* @contractMethod change
-*/
-export interface CreateAccountAndClaim {
-    args: {
-        new_account_id: AccountId;
-        new_public_key: PublicKey;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type CreateAccountAndClaim__Result = void;
-/**
 * Returns the balance associated with given key.
 *
 * @contractMethod view
@@ -697,27 +672,6 @@ export interface CheckKey {
 export declare type CheckKey__Result = boolean;
 /**
 *
-* @contractMethod change
-*/
-export interface OnCreateAndClaim {
-    args: {
-        mint_for_free: boolean;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type OnCreateAndClaim__Result = void;
-/**
-*
 * @contractMethod view
 */
 export interface GetLinkdropContract {
@@ -725,6 +679,7 @@ export interface GetLinkdropContract {
 }
 export declare type GetLinkdropContract__Result = AccountId;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -746,6 +701,7 @@ export interface TransferOwnership {
 }
 export declare type TransferOwnership__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -767,6 +723,7 @@ export interface UpdateInitialRoyalties {
 }
 export declare type UpdateInitialRoyalties__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -788,6 +745,7 @@ export interface UpdateRoyalties {
 }
 export declare type UpdateRoyalties__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -809,6 +767,7 @@ export interface UpdateAllowance {
 }
 export declare type UpdateAllowance__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -830,6 +789,7 @@ export interface UpdateUri {
 }
 export declare type UpdateUri__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -852,6 +812,7 @@ export interface AddWhitelistAccounts {
 }
 export declare type AddWhitelistAccounts__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -874,11 +835,12 @@ export interface UpdateWhitelistAccounts {
 }
 export declare type UpdateWhitelistAccounts__Result = boolean;
 /**
-* Contract wwill
+* End public sale/minting, going back to the pre-presale state in which no one can mint.
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
-export interface CloseContract {
+export interface CloseSale {
     args: {};
     options: {
         /** Units in gas
@@ -892,13 +854,14 @@ export interface CloseContract {
         attachedDeposit?: Balance;
     };
 }
-export declare type CloseContract__Result = boolean;
+export declare type CloseSale__Result = boolean;
 /**
 * Override the current presale start time to start presale now.
 * Most provide when public sale starts. None, means never.
 * Can provide new presale price.
 * Note: you most likely won't need to call this since the presale
 * starts automatically based on time.
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -921,6 +884,7 @@ export interface StartPresale {
 }
 export declare type StartPresale__Result = boolean;
 /**
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -943,6 +907,7 @@ export interface StartSale {
 export declare type StartSale__Result = boolean;
 /**
 * Add a new admin. Careful who you add!
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -966,6 +931,7 @@ export declare type AddAdmin__Result = boolean;
 /**
 * Update public sale price.
 * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -989,6 +955,7 @@ export declare type UpdatePrice__Result = boolean;
 /**
 * Update the presale price
 * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+* @allow ["::admins", "::owner"]
 *
 * @contractMethod change
 */
@@ -1009,6 +976,24 @@ export interface UpdatePresalePrice {
     };
 }
 export declare type UpdatePresalePrice__Result = boolean;
+/**
+* Current contract owner
+*
+* @contractMethod view
+*/
+export interface Owner {
+    args: {};
+}
+export declare type Owner__Result = AccountId;
+/**
+* Current set of admins
+*
+* @contractMethod view
+*/
+export interface Admins {
+    args: {};
+}
+export declare type Admins__Result = AccountId[];
 /**
 * Check whether an account is allowed to mint during the presale
 *
@@ -1130,15 +1115,6 @@ export interface Initial {
 }
 export declare type Initial__Result = u64;
 /**
-* Current set of admins
-*
-* @contractMethod view
-*/
-export interface Admins {
-    args: {};
-}
-export declare type Admins__Result = AccountId[];
-/**
 *
 * @contractMethod change
 */
@@ -1249,44 +1225,3 @@ export interface NftMintMany {
     };
 }
 export declare type NftMintMany__Result = Token[];
-/**
-*
-* @contractMethod change
-*/
-export interface OnSendWithCallback {
-    args: {};
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type OnSendWithCallback__Result = void;
-/**
-*
-* @contractMethod change
-*/
-export interface LinkCallback {
-    args: {
-        account_id: AccountId;
-        mint_for_free: boolean;
-    };
-    options: {
-        /** Units in gas
-        * @pattern [0-9]+
-        * @default "30000000000000"
-        */
-        gas?: string;
-        /** Units in yoctoNear
-        * @default "0"
-        */
-        attachedDeposit?: Balance;
-    };
-}
-export declare type LinkCallback__Result = Token;

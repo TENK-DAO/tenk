@@ -106,70 +106,6 @@ var Contract = /** @class */ (function () {
         return helper_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
-    * Allows given public key to claim sent balance.
-    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-    * Claim tokens for specific account that are attached to the public key this tx is signed with.
-    */
-    Contract.prototype.claim = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.claimRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    /**
-    * Allows given public key to claim sent balance.
-    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-    * Claim tokens for specific account that are attached to the public key this tx is signed with.
-    */
-    Contract.prototype.claimRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "claim", args: args }, options));
-    };
-    /**
-    * Allows given public key to claim sent balance.
-    * Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-    * Claim tokens for specific account that are attached to the public key this tx is signed with.
-    */
-    Contract.prototype.claimTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("claim", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    /**
-    * Create new account and and claim tokens to it.
-    */
-    Contract.prototype.create_account_and_claim = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.create_account_and_claimRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    /**
-    * Create new account and and claim tokens to it.
-    */
-    Contract.prototype.create_account_and_claimRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "create_account_and_claim", args: args }, options));
-    };
-    /**
-    * Create new account and and claim tokens to it.
-    */
-    Contract.prototype.create_account_and_claimTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("create_account_and_claim", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    /**
     * Returns the balance associated with given key.
     */
     Contract.prototype.get_key_balance = function (args, options) {
@@ -179,30 +115,13 @@ var Contract = /** @class */ (function () {
     Contract.prototype.check_key = function (args, options) {
         return this.account.viewFunction(this.contractId, "check_key", args, options);
     };
-    Contract.prototype.on_create_and_claim = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.on_create_and_claimRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.on_create_and_claimRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "on_create_and_claim", args: args }, options));
-    };
-    Contract.prototype.on_create_and_claimTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("on_create_and_claim", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
     Contract.prototype.get_linkdrop_contract = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "get_linkdrop_contract", args, options);
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.transfer_ownership = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -216,13 +135,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.transfer_ownershipRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "transfer_ownership", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.transfer_ownershipTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("transfer_ownership", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_initial_royalties = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -236,13 +164,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_initial_royaltiesRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_initial_royalties", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_initial_royaltiesTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_initial_royalties", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_royalties = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -256,13 +193,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_royaltiesRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_royalties", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_royaltiesTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_royalties", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_allowance = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -276,13 +222,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_allowanceRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_allowance", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_allowanceTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_allowance", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_uri = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -296,13 +251,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_uriRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_uri", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_uriTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_uri", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.add_whitelist_accounts = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -316,13 +280,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.add_whitelist_accountsRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "add_whitelist_accounts", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.add_whitelist_accountsTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("add_whitelist_accounts", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_whitelist_accounts = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -336,17 +309,24 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_whitelist_accountsRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_whitelist_accounts", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.update_whitelist_accountsTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_whitelist_accounts", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
-    * Contract wwill
+    * End public sale/minting, going back to the pre-presale state in which no one can mint.
+    * @allow ["::admins", "::owner"]
     */
-    Contract.prototype.close_contract = function (args, options) {
+    Contract.prototype.close_sale = function (args, options) {
         if (args === void 0) { args = {}; }
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -354,26 +334,28 @@ var Contract = /** @class */ (function () {
                 switch (_c.label) {
                     case 0:
                         _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.close_contractRaw(args, options)];
+                        return [4 /*yield*/, this.close_saleRaw(args, options)];
                     case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
                 }
             });
         });
     };
     /**
-    * Contract wwill
+    * End public sale/minting, going back to the pre-presale state in which no one can mint.
+    * @allow ["::admins", "::owner"]
     */
-    Contract.prototype.close_contractRaw = function (args, options) {
+    Contract.prototype.close_saleRaw = function (args, options) {
         if (args === void 0) { args = {}; }
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "close_contract", args: args }, options));
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "close_sale", args: args }, options));
     };
     /**
-    * Contract wwill
+    * End public sale/minting, going back to the pre-presale state in which no one can mint.
+    * @allow ["::admins", "::owner"]
     */
-    Contract.prototype.close_contractTx = function (args, options) {
+    Contract.prototype.close_saleTx = function (args, options) {
         var _a, _b;
         if (args === void 0) { args = {}; }
-        return helper_1.transactions.functionCall("close_contract", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+        return helper_1.transactions.functionCall("close_sale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Override the current presale start time to start presale now.
@@ -381,6 +363,7 @@ var Contract = /** @class */ (function () {
     * Can provide new presale price.
     * Note: you most likely won't need to call this since the presale
     * starts automatically based on time.
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.start_presale = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -401,6 +384,7 @@ var Contract = /** @class */ (function () {
     * Can provide new presale price.
     * Note: you most likely won't need to call this since the presale
     * starts automatically based on time.
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.start_presaleRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "start_presale", args: args }, options));
@@ -411,11 +395,15 @@ var Contract = /** @class */ (function () {
     * Can provide new presale price.
     * Note: you most likely won't need to call this since the presale
     * starts automatically based on time.
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.start_presaleTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("start_presale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.start_sale = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
             var _a, _b;
@@ -429,15 +417,22 @@ var Contract = /** @class */ (function () {
             });
         });
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.start_saleRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "start_sale", args: args }, options));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
     Contract.prototype.start_saleTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("start_sale", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Add a new admin. Careful who you add!
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.add_admin = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -454,12 +449,14 @@ var Contract = /** @class */ (function () {
     };
     /**
     * Add a new admin. Careful who you add!
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.add_adminRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "add_admin", args: args }, options));
     };
     /**
     * Add a new admin. Careful who you add!
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.add_adminTx = function (args, options) {
         var _a, _b;
@@ -468,6 +465,7 @@ var Contract = /** @class */ (function () {
     /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_price = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -485,6 +483,7 @@ var Contract = /** @class */ (function () {
     /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_priceRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_price", args: args }, options));
@@ -492,6 +491,7 @@ var Contract = /** @class */ (function () {
     /**
     * Update public sale price.
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_priceTx = function (args, options) {
         var _a, _b;
@@ -500,6 +500,7 @@ var Contract = /** @class */ (function () {
     /**
     * Update the presale price
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_presale_price = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -517,6 +518,7 @@ var Contract = /** @class */ (function () {
     /**
     * Update the presale price
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_presale_priceRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_presale_price", args: args }, options));
@@ -524,10 +526,25 @@ var Contract = /** @class */ (function () {
     /**
     * Update the presale price
     * Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+    * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_presale_priceTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_presale_price", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Current contract owner
+    */
+    Contract.prototype.owner = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "owner", args, options);
+    };
+    /**
+    * Current set of admins
+    */
+    Contract.prototype.admins = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "admins", args, options);
     };
     /**
     * Check whether an account is allowed to mint during the presale
@@ -603,13 +620,6 @@ var Contract = /** @class */ (function () {
     Contract.prototype.initial = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "initial", args, options);
-    };
-    /**
-    * Current set of admins
-    */
-    Contract.prototype.admins = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "admins", args, options);
     };
     Contract.prototype.new_default_meta = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {
@@ -713,49 +723,6 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_mint_manyTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("nft_mint_many", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    Contract.prototype.on_send_with_callback = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.on_send_with_callbackRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.on_send_with_callbackRaw = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "on_send_with_callback", args: args }, options));
-    };
-    Contract.prototype.on_send_with_callbackTx = function (args, options) {
-        var _a, _b;
-        if (args === void 0) { args = {}; }
-        return helper_1.transactions.functionCall("on_send_with_callback", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    Contract.prototype.link_callback = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.link_callbackRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    Contract.prototype.link_callbackRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "link_callback", args: args }, options));
-    };
-    Contract.prototype.link_callbackTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("link_callback", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     return Contract;
 }());

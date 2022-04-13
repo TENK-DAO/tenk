@@ -7,70 +7,73 @@ type timestamp-ms = u64
 ///  Create a pending token that can be claimed with corresponding private key
 ///  change
 create-linkdrop: function(public-key: public-key)
-///  Allows given public key to claim sent balance.
-///  Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
-///  Claim tokens for specific account that are attached to the public key this tx is signed with.
-///  change
-claim: function(account-id: account-id)
-///  Create new account and and claim tokens to it.
-///  change
-create-account-and-claim: function(new-account-id: account-id, new-public-key: public-key)
 ///  Returns the balance associated with given key.
 get-key-balance: function() -> u128
 
 check-key: function(public-key: public-key) -> bool
 
-///  change
-on-create-and-claim: function(mint-for-free: bool)
 get-linkdrop-contract: function() -> account-id
 
+///  @allow ["::admins", "::owner"]
 ///  change
 transfer-ownership: function(new-owner: account-id) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 update-initial-royalties: function(initial-royalties: royalties) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 update-royalties: function(royalties: royalties) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 update-allowance: function(allowance: u32) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 update-uri: function(uri: string) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 add-whitelist-accounts: function(accounts: list<account-id>, allowance: option<u32>) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 update-whitelist-accounts: function(accounts: list<account-id>, allowance-increase: u32) -> bool
 
-///  Contract wwill
+///  End public sale/minting, going back to the pre-presale state in which no one can mint.
+///  @allow ["::admins", "::owner"]
 ///  change
-close-contract: function() -> bool
+close-sale: function() -> bool
 
 ///  Override the current presale start time to start presale now.
 ///  Most provide when public sale starts. None, means never.
 ///  Can provide new presale price.
 ///  Note: you most likely won't need to call this since the presale
 ///  starts automatically based on time.
+///  @allow ["::admins", "::owner"]
 ///  change
 start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: option<u128>) -> bool
 
+///  @allow ["::admins", "::owner"]
 ///  change
 start-sale: function(price: option<yocto-near>) -> bool
 
 ///  Add a new admin. Careful who you add!
+///  @allow ["::admins", "::owner"]
 ///  change
 add-admin: function(account-id: account-id) -> bool
 
 ///  Update public sale price. 
 ///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+///  @allow ["::admins", "::owner"]
 ///  change
 update-price: function(price: u128) -> bool
 
 ///  Update the presale price
 ///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
+///  @allow ["::admins", "::owner"]
 ///  change
 update-presale-price: function(presale-price: option<u128>) -> bool
 
@@ -153,6 +156,12 @@ record sale-info {
 
 
 
+///  Current contract owner
+owner: function() -> account-id
+
+///  Current set of admins
+admins: function() -> list<account-id>
+
 ///  Check whether an account is allowed to mint during the presale
 whitelisted: function(account-id: account-id) -> bool
 
@@ -188,9 +197,6 @@ get-user-sale-info: function(account-id: account-id) -> user-sale-info
 ///  Initial size of collection. Number left to raffle + current total supply
 initial: function() -> u64
 
-///  Current set of admins
-admins: function() -> list<account-id>
-
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)
 ///  change
@@ -203,11 +209,6 @@ nft-mint-one: function() -> token
 
 ///  change
 nft-mint-many: function(num: u32) -> list<token>
-
-///  change
-on-send-with-callback: function()
-///  change
-link-callback: function(account-id: account-id, mint-for-free: bool) -> token
 // This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
 ///  StorageUsage is used to count the amount of storage used by a contract.

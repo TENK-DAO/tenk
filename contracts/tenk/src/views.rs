@@ -2,6 +2,16 @@ use crate::*;
 
 #[near_bindgen]
 impl Contract {
+    /// Current contract owner
+    pub fn owner(&self) -> AccountId {
+        self.tokens.owner_id.clone()
+    }
+
+    /// Current set of admins
+    pub fn admins(&self) -> Vec<AccountId> {
+        self.admins.to_vec()
+    }
+
     /// Check whether an account is allowed to mint during the presale
     pub fn whitelisted(&self, account_id: &AccountId) -> bool {
         self.whitelist.contains_key(account_id)
@@ -81,10 +91,5 @@ impl Contract {
     /// Initial size of collection. Number left to raffle + current total supply
     pub fn initial(&self) -> u64 {
       self.raffle.len() + self.nft_total_supply().0 as u64
-  }
-
-  /// Current set of admins
-  pub fn admins(&self) -> Vec<AccountId> {
-    self.admins.to_vec()
   }
 }
