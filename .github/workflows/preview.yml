@@ -29,9 +29,8 @@ jobs:
 
       - name: Install and Build
         run: |
-          yarn cache clean
-          yarn install --frozen-lockfile
-          yarn gui:build
+          npm ci
+          npm run gui:build
 
       - name: Deploy preview
         uses: rossjrw/pr-preview-action@v1

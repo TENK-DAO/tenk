@@ -22,4 +22,4 @@ jobs:
         with:
           node-version: '16'
       - name: Run tests
-        run: npm i && npm run test:testnet ${{ matrix.set }}
+        run: npm ci && npm run test:testnet ${{ matrix.set }}

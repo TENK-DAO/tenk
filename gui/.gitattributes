@@ -1,2 +1,5 @@
 package-lock.json linguist-generated=true -diff
-yarn.lock linguist-generated=true -diff
+gui/package-lock.json linguist-generated=true -diff
+contracts/tenk/dist/**/* linguist-generated=true -diff
+contracts/tenk/ts/**/* linguist-generated=true -diff
+contracts/tenk/index.wit linguist-generated=true -diff
