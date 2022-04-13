@@ -38,6 +38,7 @@
     "acquit-markdown": "^0.1.0",
     "eslint": "^8.13.0",
     "glob": "^8.0.1",
+    "lodash": "^4.17.21",
     "near-cli": "git+https://github.com/ahalabs/near-cli#betav1",
     "near-workspaces-ava": "^1.1.0",
     "nft.storage": "^6.2.0",
