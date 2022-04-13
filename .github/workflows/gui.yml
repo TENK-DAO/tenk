@@ -25,9 +25,9 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'
+        cache: 'yarn'
     - name: Install and Build
       run: |
-        yarn cache clean
         yarn install --frozen-lockfile
         yarn gui:build
     - name: Deploy 🚀
