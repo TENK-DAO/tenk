@@ -7,7 +7,7 @@
   "scripts": {
     "pretest": "npm run build:testnet && npm run lint",
     "upload:nft": "ts-node ./scripts/nft-uploader.ts",
-    "build:testnet": "npm run build --features testnet",
+    "build:testnet": "npm run build -- --features testnet",
     "build": "cargo build --target wasm32-unknown-unknown --release",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet npm run test",
