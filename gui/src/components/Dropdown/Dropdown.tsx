@@ -2,10 +2,10 @@ import React from "react"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
 import css from "./dropdown.module.css"
 
-export const Dropdown: React.FC<{
+export const Dropdown: React.FC<React.PropsWithChildren<{
   trigger: React.ReactChild
   items: DropdownMenu.MenuItemProps[] | Record<string, DropdownMenu.MenuItemProps[]>
-}> = ({ trigger, items }) => {
+}>> = ({ trigger, items }) => {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger className={css.trigger}>

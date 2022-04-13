@@ -32,21 +32,22 @@
   },
   "devDependencies": {
     "@types/glob": "^7.2.0",
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
+    "@typescript-eslint/eslint-plugin": "^5.19.0",
+    "@typescript-eslint/parser": "^5.19.0",
     "acquit": "^1.2.1",
     "acquit-markdown": "^0.1.0",
-    "eslint": "^7.29.0",
-    "glob": "^7.2.0",
+    "eslint": "^8.13.0",
+    "glob": "^8.0.1",
+    "lodash": "^4.17.21",
     "near-cli": "git+https://github.com/ahalabs/near-cli#betav1",
     "near-workspaces-ava": "^1.1.0",
-    "nft.storage": "^5.0.0",
+    "nft.storage": "^6.2.0",
     "ts-node": "^10.4.0",
-    "typedoc": "^0.22.11",
+    "typedoc": "^0.22.15",
     "typescript": "^4.5.5"
   },
   "dependencies": {
-    "ipfs-car": "^0.6.2",
+    "ipfs-car": "^0.7.0",
     "near-api-js": "git+https://github.com/ahalabs/near-api-js#betav1"
   }
 }

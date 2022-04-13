@@ -21,10 +21,10 @@ type WrappedFormData = {
 
 const FormComponent = withTheme({})
 
-const Display: React.FC<{
+const Display: React.FC<React.PropsWithChildren<{
   result?: string
   error?: string
-}> = ({ result, error }) => {
+}>> = ({ result, error }) => {
   if (!result && !error) return null
 
   return (

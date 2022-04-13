@@ -3,10 +3,10 @@ import snake from "to-snake-case";
 import { MethodName, changeMethods, viewMethods } from "../../near/methods";
 import { Dropdown } from ".."
 
-export const Selector: React.FC<{
+export const Selector: React.FC<React.PropsWithChildren<{
   value?: string
   onSelected: (method: MethodName) => void
-}> = ({ value, onSelected }) => {
+}>> = ({ value, onSelected }) => {
   const toItem = (method: MethodName) => ({
     children: snake(method),
     onSelect: () => {
