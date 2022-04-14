@@ -499,6 +499,35 @@ export declare class Contract {
     update_presale_priceTx(args: {
         presale_price?: U128;
     }, options?: ChangeMethodOptions): transactions.Action;
+    nft_payout(args: {
+        token_id: string;
+        balance: U128;
+        max_len_payout?: u32;
+    }, options?: ViewFunctionOptions): Promise<Payout>;
+    nft_transfer_payout(args: {
+        receiver_id: AccountId;
+        token_id: string;
+        approval_id?: u64;
+        memo?: string;
+        balance: U128;
+        max_len_payout?: u32;
+    }, options?: ChangeMethodOptions): Promise<Payout>;
+    nft_transfer_payoutRaw(args: {
+        receiver_id: AccountId;
+        token_id: string;
+        approval_id?: u64;
+        memo?: string;
+        balance: U128;
+        max_len_payout?: u32;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    nft_transfer_payoutTx(args: {
+        receiver_id: AccountId;
+        token_id: string;
+        approval_id?: u64;
+        memo?: string;
+        balance: U128;
+        max_len_payout?: u32;
+    }, options?: ChangeMethodOptions): transactions.Action;
     /**
     * Current contract owner
     */
@@ -565,6 +594,485 @@ export declare class Contract {
     * Initial size of collection. Number left to raffle + current total supply
     */
     initial(args?: {}, options?: ViewFunctionOptions): Promise<u64>;
+    /**
+    * Simple transfer. Transfer a given `token_id` from current owner to
+    * `receiver_id`.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
+    * * Contract MUST panic if called by someone other than token owner or,
+    * if using Approval Management, one of the approved accounts
+    * * `approval_id` is for use with Approval Management,
+    * see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
+    * * If using Approval Management, contract MUST nullify approved accounts on
+    * successful transfer.
+    * * TODO: needed? Both accounts must be registered with the contract for transfer to
+    * succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
+    *
+    * Arguments:
+    * * `receiver_id`: the valid NEAR account receiving the token
+    * * `token_id`: the token to transfer
+    * * `approval_id`: expected approval ID. A number smaller than
+    * 2^53, and therefore representable as JSON. See Approval Management
+    * standard for full explanation.
+    * * `memo` (optional): for use cases that may benefit from indexing or
+    * providing information for a transfer
+    */
+    nft_transfer(args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Simple transfer. Transfer a given `token_id` from current owner to
+    * `receiver_id`.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
+    * * Contract MUST panic if called by someone other than token owner or,
+    * if using Approval Management, one of the approved accounts
+    * * `approval_id` is for use with Approval Management,
+    * see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
+    * * If using Approval Management, contract MUST nullify approved accounts on
+    * successful transfer.
+    * * TODO: needed? Both accounts must be registered with the contract for transfer to
+    * succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
+    *
+    * Arguments:
+    * * `receiver_id`: the valid NEAR account receiving the token
+    * * `token_id`: the token to transfer
+    * * `approval_id`: expected approval ID. A number smaller than
+    * 2^53, and therefore representable as JSON. See Approval Management
+    * standard for full explanation.
+    * * `memo` (optional): for use cases that may benefit from indexing or
+    * providing information for a transfer
+    */
+    nft_transferRaw(args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Simple transfer. Transfer a given `token_id` from current owner to
+    * `receiver_id`.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
+    * * Contract MUST panic if called by someone other than token owner or,
+    * if using Approval Management, one of the approved accounts
+    * * `approval_id` is for use with Approval Management,
+    * see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
+    * * If using Approval Management, contract MUST nullify approved accounts on
+    * successful transfer.
+    * * TODO: needed? Both accounts must be registered with the contract for transfer to
+    * succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
+    *
+    * Arguments:
+    * * `receiver_id`: the valid NEAR account receiving the token
+    * * `token_id`: the token to transfer
+    * * `approval_id`: expected approval ID. A number smaller than
+    * 2^53, and therefore representable as JSON. See Approval Management
+    * standard for full explanation.
+    * * `memo` (optional): for use cases that may benefit from indexing or
+    * providing information for a transfer
+    */
+    nft_transferTx(args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Transfer token and call a method on a receiver contract. A successful
+    * workflow will end in a success execution outcome to the callback on the NFT
+    * contract at the method `nft_resolve_transfer`.
+    *
+    * You can think of this as being similar to attaching native NEAR tokens to a
+    * function call. It allows you to attach any Non-Fungible Token in a call to a
+    * receiver contract.
+    *
+    * Requirements:
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * Contract MUST panic if called by someone other than token owner or,
+    * if using Approval Management, one of the approved accounts
+    * * The receiving contract must implement `ft_on_transfer` according to the
+    * standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
+    * with the resulting failed cross-contract call and roll back the transfer.
+    * * Contract MUST implement the behavior described in `ft_resolve_transfer`
+    * * `approval_id` is for use with Approval Management extension, see
+    * that document for full explanation.
+    * * If using Approval Management, contract MUST nullify approved accounts on
+    * successful transfer.
+    *
+    * Arguments:
+    * * `receiver_id`: the valid NEAR account receiving the token.
+    * * `token_id`: the token to send.
+    * * `approval_id`: expected approval ID. A number smaller than
+    * 2^53, and therefore representable as JSON. See Approval Management
+    * standard for full explanation.
+    * * `memo` (optional): for use cases that may benefit from indexing or
+    * providing information for a transfer.
+    * * `msg`: specifies information needed by the receiving contract in
+    * order to properly handle the transfer. Can indicate both a function to
+    * call and the parameters to pass to that function.
+    */
+    nft_transfer_call(args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+        msg: string;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Transfer token and call a method on a receiver contract. A successful
+    * workflow will end in a success execution outcome to the callback on the NFT
+    * contract at the method `nft_resolve_transfer`.
+    *
+    * You can think of this as being similar to attaching native NEAR tokens to a
+    * function call. It allows you to attach any Non-Fungible Token in a call to a
+    * receiver contract.
+    *
+    * Requirements:
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * Contract MUST panic if called by someone other than token owner or,
+    * if using Approval Management, one of the approved accounts
+    * * The receiving contract must implement `ft_on_transfer` according to the
+    * standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
+    * with the resulting failed cross-contract call and roll back the transfer.
+    * * Contract MUST implement the behavior described in `ft_resolve_transfer`
+    * * `approval_id` is for use with Approval Management extension, see
+    * that document for full explanation.
+    * * If using Approval Management, contract MUST nullify approved accounts on
+    * successful transfer.
+    *
+    * Arguments:
+    * * `receiver_id`: the valid NEAR account receiving the token.
+    * * `token_id`: the token to send.
+    * * `approval_id`: expected approval ID. A number smaller than
+    * 2^53, and therefore representable as JSON. See Approval Management
+    * standard for full explanation.
+    * * `memo` (optional): for use cases that may benefit from indexing or
+    * providing information for a transfer.
+    * * `msg`: specifies information needed by the receiving contract in
+    * order to properly handle the transfer. Can indicate both a function to
+    * call and the parameters to pass to that function.
+    */
+    nft_transfer_callRaw(args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+        msg: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Transfer token and call a method on a receiver contract. A successful
+    * workflow will end in a success execution outcome to the callback on the NFT
+    * contract at the method `nft_resolve_transfer`.
+    *
+    * You can think of this as being similar to attaching native NEAR tokens to a
+    * function call. It allows you to attach any Non-Fungible Token in a call to a
+    * receiver contract.
+    *
+    * Requirements:
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * Contract MUST panic if called by someone other than token owner or,
+    * if using Approval Management, one of the approved accounts
+    * * The receiving contract must implement `ft_on_transfer` according to the
+    * standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
+    * with the resulting failed cross-contract call and roll back the transfer.
+    * * Contract MUST implement the behavior described in `ft_resolve_transfer`
+    * * `approval_id` is for use with Approval Management extension, see
+    * that document for full explanation.
+    * * If using Approval Management, contract MUST nullify approved accounts on
+    * successful transfer.
+    *
+    * Arguments:
+    * * `receiver_id`: the valid NEAR account receiving the token.
+    * * `token_id`: the token to send.
+    * * `approval_id`: expected approval ID. A number smaller than
+    * 2^53, and therefore representable as JSON. See Approval Management
+    * standard for full explanation.
+    * * `memo` (optional): for use cases that may benefit from indexing or
+    * providing information for a transfer.
+    * * `msg`: specifies information needed by the receiving contract in
+    * order to properly handle the transfer. Can indicate both a function to
+    * call and the parameters to pass to that function.
+    */
+    nft_transfer_callTx(args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+        msg: string;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Returns the token with the given `token_id` or `null` if no such token.
+    */
+    nft_token(args: {
+        token_id: TokenId;
+    }, options?: ViewFunctionOptions): Promise<Token | null>;
+    /**
+    * Add an approved account for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
+    * security purposes
+    * * Contract MAY require caller to attach larger deposit, to cover cost of
+    * storing approver data
+    * * Contract MUST panic if called by someone other than token owner
+    * * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
+    * single-block gas limit
+    * * Contract MUST increment approval ID even if re-approving an account
+    * * If successfully approved or if had already been approved, and if `msg` is
+    * present, contract MUST call `nft_on_approve` on `account_id`. See
+    * `nft_on_approve` description below for details.
+    *
+    * Arguments:
+    * * `token_id`: the token for which to add an approval
+    * * `account_id`: the account to add to `approvals`
+    * * `msg`: optional string to be passed to `nft_on_approve`
+    *
+    * Returns void, if no `msg` given. Otherwise, returns promise call to
+    * `nft_on_approve`, which can resolve with whatever it wants.
+    */
+    nft_approve(args: {
+        token_id: TokenId;
+        account_id: AccountId;
+        msg?: string;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Add an approved account for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
+    * security purposes
+    * * Contract MAY require caller to attach larger deposit, to cover cost of
+    * storing approver data
+    * * Contract MUST panic if called by someone other than token owner
+    * * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
+    * single-block gas limit
+    * * Contract MUST increment approval ID even if re-approving an account
+    * * If successfully approved or if had already been approved, and if `msg` is
+    * present, contract MUST call `nft_on_approve` on `account_id`. See
+    * `nft_on_approve` description below for details.
+    *
+    * Arguments:
+    * * `token_id`: the token for which to add an approval
+    * * `account_id`: the account to add to `approvals`
+    * * `msg`: optional string to be passed to `nft_on_approve`
+    *
+    * Returns void, if no `msg` given. Otherwise, returns promise call to
+    * `nft_on_approve`, which can resolve with whatever it wants.
+    */
+    nft_approveRaw(args: {
+        token_id: TokenId;
+        account_id: AccountId;
+        msg?: string;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Add an approved account for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
+    * security purposes
+    * * Contract MAY require caller to attach larger deposit, to cover cost of
+    * storing approver data
+    * * Contract MUST panic if called by someone other than token owner
+    * * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
+    * single-block gas limit
+    * * Contract MUST increment approval ID even if re-approving an account
+    * * If successfully approved or if had already been approved, and if `msg` is
+    * present, contract MUST call `nft_on_approve` on `account_id`. See
+    * `nft_on_approve` description below for details.
+    *
+    * Arguments:
+    * * `token_id`: the token for which to add an approval
+    * * `account_id`: the account to add to `approvals`
+    * * `msg`: optional string to be passed to `nft_on_approve`
+    *
+    * Returns void, if no `msg` given. Otherwise, returns promise call to
+    * `nft_on_approve`, which can resolve with whatever it wants.
+    */
+    nft_approveTx(args: {
+        token_id: TokenId;
+        account_id: AccountId;
+        msg?: string;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Revoke an approved account for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * If contract requires >1yN deposit on `nft_approve`, contract
+    * MUST refund associated storage deposit when owner revokes approval
+    * * Contract MUST panic if called by someone other than token owner
+    *
+    * Arguments:
+    * * `token_id`: the token for which to revoke an approval
+    * * `account_id`: the account to remove from `approvals`
+    */
+    nft_revoke(args: {
+        token_id: TokenId;
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Revoke an approved account for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * If contract requires >1yN deposit on `nft_approve`, contract
+    * MUST refund associated storage deposit when owner revokes approval
+    * * Contract MUST panic if called by someone other than token owner
+    *
+    * Arguments:
+    * * `token_id`: the token for which to revoke an approval
+    * * `account_id`: the account to remove from `approvals`
+    */
+    nft_revokeRaw(args: {
+        token_id: TokenId;
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Revoke an approved account for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * If contract requires >1yN deposit on `nft_approve`, contract
+    * MUST refund associated storage deposit when owner revokes approval
+    * * Contract MUST panic if called by someone other than token owner
+    *
+    * Arguments:
+    * * `token_id`: the token for which to revoke an approval
+    * * `account_id`: the account to remove from `approvals`
+    */
+    nft_revokeTx(args: {
+        token_id: TokenId;
+        account_id: AccountId;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Revoke all approved accounts for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * If contract requires >1yN deposit on `nft_approve`, contract
+    * MUST refund all associated storage deposit when owner revokes approvals
+    * * Contract MUST panic if called by someone other than token owner
+    *
+    * Arguments:
+    * * `token_id`: the token with approvals to revoke
+    */
+    nft_revoke_all(args: {
+        token_id: TokenId;
+    }, options?: ChangeMethodOptions): Promise<void>;
+    /**
+    * Revoke all approved accounts for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * If contract requires >1yN deposit on `nft_approve`, contract
+    * MUST refund all associated storage deposit when owner revokes approvals
+    * * Contract MUST panic if called by someone other than token owner
+    *
+    * Arguments:
+    * * `token_id`: the token with approvals to revoke
+    */
+    nft_revoke_allRaw(args: {
+        token_id: TokenId;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Revoke all approved accounts for a specific token.
+    *
+    * Requirements
+    * * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+    * purposes
+    * * If contract requires >1yN deposit on `nft_approve`, contract
+    * MUST refund all associated storage deposit when owner revokes approvals
+    * * Contract MUST panic if called by someone other than token owner
+    *
+    * Arguments:
+    * * `token_id`: the token with approvals to revoke
+    */
+    nft_revoke_allTx(args: {
+        token_id: TokenId;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Check if a token is approved for transfer by a given account, optionally
+    * checking an approval_id
+    *
+    * Arguments:
+    * * `token_id`: the token for which to revoke an approval
+    * * `approved_account_id`: the account to check the existence of in `approvals`
+    * * `approval_id`: an optional approval ID to check against current approval ID for given account
+    *
+    * Returns:
+    * if `approval_id` given, `true` if `approved_account_id` is approved with given `approval_id`
+    * otherwise, `true` if `approved_account_id` is in list of approved accounts
+    */
+    nft_is_approved(args: {
+        token_id: TokenId;
+        approved_account_id: AccountId;
+        approval_id?: u64;
+    }, options?: ViewFunctionOptions): Promise<boolean>;
+    /**
+    * Returns the total supply of non-fungible tokens as a string representing an
+    * unsigned 128-bit integer to avoid JSON number limit of 2^53.
+    */
+    nft_total_supply(args?: {}, options?: ViewFunctionOptions): Promise<U128>;
+    /**
+    * Get a list of all tokens
+    *
+    * Arguments:
+    * * `from_index`: a string representing an unsigned 128-bit integer,
+    * representing the starting index of tokens to return. (default 0)
+    * * `limit`: the maximum number of tokens to return (default total supply)
+    * Could fail on gas
+    *
+    * Returns an array of Token objects, as described in Core standard
+    */
+    nft_tokens(args: {
+        from_index?: U128;
+        limit?: u64;
+    }, options?: ViewFunctionOptions): Promise<Token[]>;
+    /**
+    * Get number of tokens owned by a given account
+    *
+    * Arguments:
+    * * `account_id`: a valid NEAR account
+    *
+    * Returns the number of non-fungible tokens owned by given `account_id` as
+    * a string representing the value as an unsigned 128-bit integer to avoid JSON
+    * number limit of 2^53.
+    */
+    nft_supply_for_owner(args: {
+        account_id: AccountId;
+    }, options?: ViewFunctionOptions): Promise<U128>;
+    /**
+    * Get list of all tokens owned by a given account
+    *
+    * Arguments:
+    * * `account_id`: a valid NEAR account
+    * * `from_index`: a string representing an unsigned 128-bit integer,
+    * representing the starting index of tokens to return. (default 0)
+    * * `limit`: the maximum number of tokens to return. (default unlimited)
+    * Could fail on gas
+    *
+    * Returns a paginated list of all tokens owned by this account
+    */
+    nft_tokens_for_owner(args: {
+        account_id: AccountId;
+        from_index?: U128;
+        limit?: u64;
+    }, options?: ViewFunctionOptions): Promise<Token[]>;
     new_default_meta(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
@@ -977,6 +1485,44 @@ export interface UpdatePresalePrice {
 }
 export declare type UpdatePresalePrice__Result = boolean;
 /**
+*
+* @contractMethod view
+*/
+export interface NftPayout {
+    args: {
+        token_id: string;
+        balance: U128;
+        max_len_payout?: u32;
+    };
+}
+export declare type NftPayout__Result = Payout;
+/**
+*
+* @contractMethod change
+*/
+export interface NftTransferPayout {
+    args: {
+        receiver_id: AccountId;
+        token_id: string;
+        approval_id?: u64;
+        memo?: string;
+        balance: U128;
+        max_len_payout?: u32;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftTransferPayout__Result = Payout;
+/**
 * Current contract owner
 *
 * @contractMethod view
@@ -1114,6 +1660,325 @@ export interface Initial {
     args: {};
 }
 export declare type Initial__Result = u64;
+/**
+* Simple transfer. Transfer a given `token_id` from current owner to
+* `receiver_id`.
+*
+* Requirements
+* * Caller of the method must attach a deposit of 1 yoctoⓃ for security purposes
+* * Contract MUST panic if called by someone other than token owner or,
+* if using Approval Management, one of the approved accounts
+* * `approval_id` is for use with Approval Management,
+* see <https://nomicon.io/Standards/NonFungibleToken/ApprovalManagement.html>
+* * If using Approval Management, contract MUST nullify approved accounts on
+* successful transfer.
+* * TODO: needed? Both accounts must be registered with the contract for transfer to
+* succeed. See see <https://nomicon.io/Standards/StorageManagement.html>
+*
+* Arguments:
+* * `receiver_id`: the valid NEAR account receiving the token
+* * `token_id`: the token to transfer
+* * `approval_id`: expected approval ID. A number smaller than
+* 2^53, and therefore representable as JSON. See Approval Management
+* standard for full explanation.
+* * `memo` (optional): for use cases that may benefit from indexing or
+* providing information for a transfer
+*
+* @contractMethod change
+*/
+export interface NftTransfer {
+    args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftTransfer__Result = void;
+/**
+* Transfer token and call a method on a receiver contract. A successful
+* workflow will end in a success execution outcome to the callback on the NFT
+* contract at the method `nft_resolve_transfer`.
+*
+* You can think of this as being similar to attaching native NEAR tokens to a
+* function call. It allows you to attach any Non-Fungible Token in a call to a
+* receiver contract.
+*
+* Requirements:
+* * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+* purposes
+* * Contract MUST panic if called by someone other than token owner or,
+* if using Approval Management, one of the approved accounts
+* * The receiving contract must implement `ft_on_transfer` according to the
+* standard. If it does not, FT contract's `ft_resolve_transfer` MUST deal
+* with the resulting failed cross-contract call and roll back the transfer.
+* * Contract MUST implement the behavior described in `ft_resolve_transfer`
+* * `approval_id` is for use with Approval Management extension, see
+* that document for full explanation.
+* * If using Approval Management, contract MUST nullify approved accounts on
+* successful transfer.
+*
+* Arguments:
+* * `receiver_id`: the valid NEAR account receiving the token.
+* * `token_id`: the token to send.
+* * `approval_id`: expected approval ID. A number smaller than
+* 2^53, and therefore representable as JSON. See Approval Management
+* standard for full explanation.
+* * `memo` (optional): for use cases that may benefit from indexing or
+* providing information for a transfer.
+* * `msg`: specifies information needed by the receiving contract in
+* order to properly handle the transfer. Can indicate both a function to
+* call and the parameters to pass to that function.
+*
+* @contractMethod change
+*/
+export interface NftTransferCall {
+    args: {
+        receiver_id: AccountId;
+        token_id: TokenId;
+        approval_id?: u64;
+        memo?: string;
+        msg: string;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftTransferCall__Result = void;
+/**
+* Returns the token with the given `token_id` or `null` if no such token.
+*
+* @contractMethod view
+*/
+export interface NftToken {
+    args: {
+        token_id: TokenId;
+    };
+}
+export declare type NftToken__Result = Token | null;
+/**
+* Add an approved account for a specific token.
+*
+* Requirements
+* * Caller of the method must attach a deposit of at least 1 yoctoⓃ for
+* security purposes
+* * Contract MAY require caller to attach larger deposit, to cover cost of
+* storing approver data
+* * Contract MUST panic if called by someone other than token owner
+* * Contract MUST panic if addition would cause `nft_revoke_all` to exceed
+* single-block gas limit
+* * Contract MUST increment approval ID even if re-approving an account
+* * If successfully approved or if had already been approved, and if `msg` is
+* present, contract MUST call `nft_on_approve` on `account_id`. See
+* `nft_on_approve` description below for details.
+*
+* Arguments:
+* * `token_id`: the token for which to add an approval
+* * `account_id`: the account to add to `approvals`
+* * `msg`: optional string to be passed to `nft_on_approve`
+*
+* Returns void, if no `msg` given. Otherwise, returns promise call to
+* `nft_on_approve`, which can resolve with whatever it wants.
+*
+* @contractMethod change
+*/
+export interface NftApprove {
+    args: {
+        token_id: TokenId;
+        account_id: AccountId;
+        msg?: string;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftApprove__Result = void;
+/**
+* Revoke an approved account for a specific token.
+*
+* Requirements
+* * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+* purposes
+* * If contract requires >1yN deposit on `nft_approve`, contract
+* MUST refund associated storage deposit when owner revokes approval
+* * Contract MUST panic if called by someone other than token owner
+*
+* Arguments:
+* * `token_id`: the token for which to revoke an approval
+* * `account_id`: the account to remove from `approvals`
+*
+* @contractMethod change
+*/
+export interface NftRevoke {
+    args: {
+        token_id: TokenId;
+        account_id: AccountId;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftRevoke__Result = void;
+/**
+* Revoke all approved accounts for a specific token.
+*
+* Requirements
+* * Caller of the method must attach a deposit of 1 yoctoⓃ for security
+* purposes
+* * If contract requires >1yN deposit on `nft_approve`, contract
+* MUST refund all associated storage deposit when owner revokes approvals
+* * Contract MUST panic if called by someone other than token owner
+*
+* Arguments:
+* * `token_id`: the token with approvals to revoke
+*
+* @contractMethod change
+*/
+export interface NftRevokeAll {
+    args: {
+        token_id: TokenId;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type NftRevokeAll__Result = void;
+/**
+* Check if a token is approved for transfer by a given account, optionally
+* checking an approval_id
+*
+* Arguments:
+* * `token_id`: the token for which to revoke an approval
+* * `approved_account_id`: the account to check the existence of in `approvals`
+* * `approval_id`: an optional approval ID to check against current approval ID for given account
+*
+* Returns:
+* if `approval_id` given, `true` if `approved_account_id` is approved with given `approval_id`
+* otherwise, `true` if `approved_account_id` is in list of approved accounts
+*
+* @contractMethod view
+*/
+export interface NftIsApproved {
+    args: {
+        token_id: TokenId;
+        approved_account_id: AccountId;
+        approval_id?: u64;
+    };
+}
+export declare type NftIsApproved__Result = boolean;
+/**
+* Returns the total supply of non-fungible tokens as a string representing an
+* unsigned 128-bit integer to avoid JSON number limit of 2^53.
+*
+* @contractMethod view
+*/
+export interface NftTotalSupply {
+    args: {};
+}
+export declare type NftTotalSupply__Result = U128;
+/**
+* Get a list of all tokens
+*
+* Arguments:
+* * `from_index`: a string representing an unsigned 128-bit integer,
+* representing the starting index of tokens to return. (default 0)
+* * `limit`: the maximum number of tokens to return (default total supply)
+* Could fail on gas
+*
+* Returns an array of Token objects, as described in Core standard
+*
+* @contractMethod view
+*/
+export interface NftTokens {
+    args: {
+        from_index?: U128;
+        limit?: u64;
+    };
+}
+export declare type NftTokens__Result = Token[];
+/**
+* Get number of tokens owned by a given account
+*
+* Arguments:
+* * `account_id`: a valid NEAR account
+*
+* Returns the number of non-fungible tokens owned by given `account_id` as
+* a string representing the value as an unsigned 128-bit integer to avoid JSON
+* number limit of 2^53.
+*
+* @contractMethod view
+*/
+export interface NftSupplyForOwner {
+    args: {
+        account_id: AccountId;
+    };
+}
+export declare type NftSupplyForOwner__Result = U128;
+/**
+* Get list of all tokens owned by a given account
+*
+* Arguments:
+* * `account_id`: a valid NEAR account
+* * `from_index`: a string representing an unsigned 128-bit integer,
+* representing the starting index of tokens to return. (default 0)
+* * `limit`: the maximum number of tokens to return. (default unlimited)
+* Could fail on gas
+*
+* Returns a paginated list of all tokens owned by this account
+*
+* @contractMethod view
+*/
+export interface NftTokensForOwner {
+    args: {
+        account_id: AccountId;
+        from_index?: U128;
+        limit?: u64;
+    };
+}
+export declare type NftTokensForOwner__Result = Token[];
 /**
 *
 * @contractMethod change
