@@ -4,6 +4,7 @@ use near_contract_standards::non_fungible_token::{
     refund_deposit_to_account, NearEvent, NonFungibleToken, Token, TokenId,
 };
 use near_sdk::{
+    assert_one_yocto,
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::{LazyOption, LookupMap},
     env, ext_contract,
@@ -284,6 +285,50 @@ impl Contract {
     // }
 
     #[payable]
+    pub fn nft_burn(&mut self, token_id: TokenId) {
+        assert_one_yocto();
+        let owner_id = self.tokens.owner_by_id.remove(&token_id).unwrap();
+        require!(
+            owner_id == env::predecessor_account_id(),
+            "Token owner only"
+        );
+        if cfg!(feature = "mainnet") {
+            require!(
+                owner_id.as_str() == "meekburn.near",
+                "only meekburn.near can burn"
+            );
+        }
+        let owner_id = &owner_id;
+
+        if let Some(token_metadata_by_id) = &mut self.tokens.token_metadata_by_id {
+            token_metadata_by_id.remove(&token_id);
+        }
+
+        if let Some(tokens_per_owner) = &mut self.tokens.tokens_per_owner {
+            let mut token_ids = tokens_per_owner.remove(owner_id).unwrap();
+            token_ids.remove(&token_id);
+            if !token_ids.is_empty() {
+                tokens_per_owner.insert(owner_id, &token_ids);
+            }
+        }
+        if let Some(approval_ids) = &mut self.tokens.approvals_by_id {
+            approval_ids.remove(&token_id);
+        }
+
+        if let Some(next_approval_id_by_id) = &mut self.tokens.next_approval_id_by_id {
+            next_approval_id_by_id.remove(&token_id);
+        }
+        NearEvent::log_nft_burn(owner_id.to_string(), None, vec![token_id], None);
+        // NftBurn {
+        //     owner_id,
+        //     token_ids: &[token_id.as_str()],
+        //     authorized_id: None,
+        //     memo: None,
+        // }
+        // .emit();
+    }
+
+    #[payable]
     pub fn nft_mint_one(&mut self) -> Token {
         self.nft_mint_many(1)[0].clone()
     }
@@ -394,12 +439,12 @@ impl Contract {
     }
 
     pub fn update_uri(&mut self, uri: String) {
-      self.assert_owner();
-      let mut metadata = self.metadata.get().unwrap();
-      log!("New URI: {}", &uri);
-      metadata.base_uri = Some(uri);
-      self.metadata.set(&metadata);
-  }
+        self.assert_owner();
+        let mut metadata = self.metadata.get().unwrap();
+        log!("New URI: {}", &uri);
+        metadata.base_uri = Some(uri);
+        self.metadata.set(&metadata);
+    }
 
     // Contract private methods
 
