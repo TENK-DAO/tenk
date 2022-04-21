@@ -1,11 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import snake from "to-snake-case";
-import {
-  allows,
-  MethodName,
-  changeMethods,
-  viewMethods
-} from "../../near/methods";
 import { Dropdown } from ".."
 import useNear from '../../hooks/useNear'
 
@@ -22,13 +16,13 @@ type Items = {
 
 export const Selector: React.FC<{
   value?: string
-  onSelected: (method: MethodName) => void
+  onSelected: (method: string) => void
 }> = ({ value, onSelected }) => {
-  const { wallet, contract } = useNear()
+  const { wallet, contract, viewMethods, changeMethods, canCall } = useNear()
   const [items, setItems] = useState<Items>()
   const user = wallet?.getAccountId() as string
 
-  const toItem = useMemo(() => (method: MethodName) => ({
+  const toItem = useMemo(() => (method: string) => ({
     children: snake(method),
     onSelect: () => {
       onSelected(method);
@@ -41,7 +35,7 @@ export const Selector: React.FC<{
 
       if (contract && user) {
         const allowed = await Promise.all(
-          changeMethods.map(method => allows(contract, method, user))
+          changeMethods.map(method => canCall(method, user))
         )
 
         const filteredChangeMethods = changeMethods.filter((_, i) => allowed[i])
@@ -53,7 +47,7 @@ export const Selector: React.FC<{
 
       setItems(itemsPartial)
     })()
-  }, [contract, user, toItem])
+  }, [contract, canCall, viewMethods, changeMethods, user, toItem])
 
   return (
     <Dropdown

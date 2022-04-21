@@ -11,7 +11,10 @@ export function Home() {
   return (
     <Layout>
       <h2>Inspect a contract</h2>
-      <p>This admin panel currently supports TenK contracts created since 2022-03-15. <a href="./docs" target="_blank">Contract docs</a>.</p>
+      <p>
+        This admin panel currently supports contracts with a Wasm Custom Section containing a <code>json</code> field pointed at a URL where the contract's JSON Schema file can be downloaded. This Schema is assumed to be generated from contract Rust code using <code>witme</code>.
+      </p>
+      <p><a href="./docs" target="_blank">TenK Contract docs</a>.</p>
       <form onSubmit={e => {
         e.preventDefault()
 

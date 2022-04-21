@@ -4,7 +4,6 @@ import snake from "to-snake-case";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import useNear from "../../hooks/useNear"
 import { Selector } from ".."
-import { getMethod, getDefinition } from "../../near/methods"
 
 import css from "./form.module.css"
 
@@ -73,7 +72,7 @@ function allFilled(formData?: FormData, required?: string[]) {
 }
 
 export function Form() {
-  const { TenK } = useNear()
+  const { wallet, getMethod, getDefinition } = useNear()
   const { contract, method } = useParams<{ contract: string, method: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
   const formData = decodeData(searchParams)
@@ -101,9 +100,16 @@ export function Form() {
   const onSubmit = useMemo(() => async ({ formData }: WrappedFormData) => {
     setLoading(true)
     setError(undefined)
+    if (!contract || !method) return
     try {
-      // @ts-expect-error can't see final method name
-      const res = await TenK[snake(method)](formData?.args, formData?.options)
+      const res = getDefinition(method)?.contractMethod === 'change'
+        ? await wallet?.account().functionCall({
+          contractId: contract,
+          methodName: snake(method),
+          args: formData?.args ?? {},
+          ...formData?.options ?? {}
+        })
+        : await wallet?.account().viewFunction(contract, snake(method), formData?.args)
       setResult(JSON.stringify(res, null, 2));
     } catch (e: unknown) {
       setError(
@@ -114,7 +120,7 @@ export function Form() {
     } finally {
       setLoading(false)
     }
-  }, [TenK, method])
+  }, [contract, getDefinition, method, wallet])
 
   // update page title based on current contract & method; reset on component unmount
   useEffect(() => {
@@ -124,13 +130,14 @@ export function Form() {
 
   // at first load, auto-submit if required arguments are fill in
   useEffect(() => {
+    if (!method) return
     const def = getDefinition(method)
     if (def?.contractMethod === 'view' && allFilled(formData, def?.properties?.args?.required)) {
       setTimeout(() => onSubmit({ formData }), 100)
     }
-    // purposely only re-check this when method changes;
+    // purposely only re-check this when method changes or when schema fetch completes (wallet becomes defined);
     // don't want to auto-submit while filling in form, but do when changing methods
-  }, [method]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [wallet, method]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <>

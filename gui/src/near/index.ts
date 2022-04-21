@@ -1,10 +1,11 @@
 import * as naj from "near-api-js"
-import { Contract } from "./contracts/tenk"
 
 // TODO: remove pending https://github.com/near/near-api-js/issues/757
 import { Buffer } from "buffer"
 if (typeof window !== "undefined") window.Buffer = Buffer
 if (typeof global !== "undefined") global.Buffer = Buffer
+
+export * from './schema'
 
 const mainnetConfig = {
   networkId: "mainnet",
@@ -39,7 +40,6 @@ export interface ContractInterface {
   wallet: naj.WalletConnection
   signIn: () => void
   signOut: () => void
-  TenK: Contract
 }
 
 const cache: Record<ContractName, ContractInterface> = {}
@@ -82,9 +82,7 @@ export function init(contract: string): ContractInterface {
     window.location.replace(window.location.origin + window.location.pathname)
   }
 
-  const TenK = new Contract(wallet.account(), contract)
-
-  cache[contract] = { contract, config, near, wallet, signIn, signOut, TenK }
+  cache[contract] = { contract, config, near, wallet, signIn, signOut }
 
   return cache[contract]
 }
