@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import snake from "to-snake-case";
 import {
+  allows,
   MethodName,
-  adminMethods,
   changeMethods,
   viewMethods
 } from "../../near/methods";
@@ -24,12 +24,9 @@ export const Selector: React.FC<{
   value?: string
   onSelected: (method: MethodName) => void
 }> = ({ value, onSelected }) => {
-  const { wallet, TenK } = useNear()
-  const [admins, setAdmins] = useState<string[]>()
-
-  useEffect(() => {
-    TenK?.admins().then(setAdmins)
-  }, [wallet, TenK])
+  const { wallet, contract } = useNear()
+  const [items, setItems] = useState<Items>()
+  const user = wallet?.getAccountId() as string
 
   const toItem = useMemo(() => (method: MethodName) => ({
     children: snake(method),
@@ -38,21 +35,30 @@ export const Selector: React.FC<{
     },
   }), [onSelected])
 
-  const items: Items = useMemo(() => {
-    const user = wallet?.getAccountId() as string
-    const isAdmin = admins?.includes(user)
+  useEffect(() => {
+    (async () => {
+      const itemsPartial: Items = { 'View Methods': viewMethods.map(toItem) }
 
-    const ret: Items = { 'View Methods': viewMethods.map(toItem) }
-    if (user) ret['Change Methods'] = changeMethods.map(toItem)
-    if (isAdmin) ret['Admin Methods'] = adminMethods.map(toItem)
+      if (contract && user) {
+        const allowed = await Promise.all(
+          changeMethods.map(method => allows(contract, method, user))
+        )
 
-    return ret
-  }, [wallet, toItem, admins])
+        const filteredChangeMethods = changeMethods.filter((_, i) => allowed[i])
+
+        if (filteredChangeMethods.length > 0) {
+          itemsPartial['Change Methods'] = filteredChangeMethods.map(toItem)
+        }
+      }
+
+      setItems(itemsPartial)
+    })()
+  }, [contract, user, toItem])
 
   return (
     <Dropdown
       trigger={value ?? "Select contract method"}
-      items={Object.keys(items).length === 1
+      items={!items ? [] : Object.keys(items).length === 1
         ? items['View Methods']
         : items
       }
