@@ -21,7 +21,7 @@ jobs:
     - uses: actions-rs/cargo@v1
       with:
         command: install
-        args: witme --git https://github.com/AhaLabs/witme --branch feat/update_witgen
+        args: witme --git https://github.com/AhaLabs/witme
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'
