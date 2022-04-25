@@ -7,19 +7,20 @@ import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
   uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
-  name: "TENK NFT",
-  symbol: "TENK",
+  name: "BeerPunks",
+  symbol: "BP",
   icon,
 };
 
-const size = 10_000;
+const size = 4_200;
  
 const sale: tenk.Sale = {
-  price: NEAR.parse("1 N").toJSON(),
-  // presale_price: NEAR.parse("6 N").toJSON(),
-  mint_rate_limit: 6,
-  // presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-  public_sale_start: Date.now(),
+  price: NEAR.parse("7.77 N").toJSON(),
+  presale_price: NEAR.parse("5.55 N").toJSON(),
+  mint_rate_limit: 5,
+  presale_start: Date.parse("29 April 2022 7:30 AM UTC"),
+  public_sale_start: Date.parse("30 April 2022 7:30 AM UTC"),
+  allowance: 5,
   // initial_royalties: {
   //   percent: 10_000,
   //   accounts: {
