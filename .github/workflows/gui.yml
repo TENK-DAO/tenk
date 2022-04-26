@@ -18,10 +18,6 @@ jobs:
     - uses: actions-rs/toolchain@v1
       with:
           toolchain: stable
-    - uses: actions-rs/cargo@v1
-      with:
-        command: install
-        args: witme --git https://github.com/AhaLabs/witme
     - uses: actions/setup-node@v1
       with:
         node-version: '16.x'
