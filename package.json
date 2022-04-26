@@ -44,7 +44,8 @@
     "nft.storage": "^6.2.0",
     "ts-node": "^10.4.0",
     "typedoc": "^0.22.15",
-    "typescript": "^4.5.5"
+    "typescript": "^4.5.5",
+    "witme": "^0.2.5"
   },
   "dependencies": {
     "ipfs-car": "^0.7.0",
