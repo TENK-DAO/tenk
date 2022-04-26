@@ -148,7 +148,7 @@ start-sale: function(price: option<yocto-near>) -> bool
 ///  change
 add-admin: function(account-id: account-id) -> bool
 
-///  Update public sale price. 
+///  Update public sale price.
 ///  Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
 ///  @allow ["::admins", "::owner"]
 ///  change
@@ -159,6 +159,18 @@ update-price: function(price: u128) -> bool
 ///  @allow ["::admins", "::owner"]
 ///  change
 update-presale-price: function(presale-price: option<u128>) -> bool
+
+///  Update the presale start
+///  Careful this is in ms since 1970
+///  @allow ["::admins", "::owner"]
+///  change
+update-presale-start: function(presale-start: timestamp-ms) -> bool
+
+///  Update the public sale start
+///  Careful this is in ms since 1970
+///  @allow ["::admins", "::owner"]
+///  change
+update-public-sale-start: function(public-sale-start: timestamp-ms) -> bool
 
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
