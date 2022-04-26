@@ -6,20 +6,20 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
-  name: "TENK NFT",
-  symbol: "TENK",
+  uri: "https://bafybeigat7ws4ukhl22wx5tv4pjep4afyqct5evnf5kuroymawampvzwja.ipfs.dweb.link",
+  name: "World of the Abyss (WOTA)",
+  symbol: "wotaverse",
   icon,
 };
 
-const size = 10_000;
+const size = 101;
  
 const sale: tenk.Sale = {
-  price: NEAR.parse("1 N").toJSON(),
+  price: NEAR.parse("5 N").toJSON(),
   // presale_price: NEAR.parse("6 N").toJSON(),
-  mint_rate_limit: 6,
+  allowance: 3,
   // presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-  public_sale_start: Date.now(),
+  public_sale_start: Date.parse("27 April 2022 12:00 PM UTC"),
   // initial_royalties: {
   //   percent: 10_000,
   //   accounts: {
