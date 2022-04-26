@@ -6,20 +6,20 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
-  name: "TENK NFT",
-  symbol: "TENK",
+  uri: "https://bafybeifxjmv4oqigdfrce5vu73mqdmi6dpw7z6y5lawnmlbpjcvsycax2a.ipfs.dweb.link",
+  name: "MonkeDemonz",
+  symbol: "MONKEDEMONZ",
   icon,
 };
 
-const size = 10_000;
+const size = 665;
  
 const sale: tenk.Sale = {
-  price: NEAR.parse("1 N").toJSON(),
+  price: NEAR.parse("3 N").toJSON(),
   // presale_price: NEAR.parse("6 N").toJSON(),
-  mint_rate_limit: 6,
-  // presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-  public_sale_start: Date.now(),
+  mint_rate_limit: 1,
+  presale_start: Date.parse("28 April 2022 11:00 AM UTC"),
+  // public_sale_start: Date.now(),
   // initial_royalties: {
   //   percent: 10_000,
   //   accounts: {
