@@ -49,7 +49,11 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) -> bool {
+    pub fn add_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance: Option<u32>,
+    ) -> bool {
         #[cfg(feature = "testnet")]
         self.assert_owner_or_admin();
         let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
@@ -60,7 +64,11 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn update_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance_increase: u32) -> bool {
+    pub fn update_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance_increase: u32,
+    ) -> bool {
         self.assert_owner_or_admin();
         accounts.iter().for_each(|account_id| {
             let allowance = self.whitelist.get(&account_id).unwrap_or(0) + allowance_increase;
@@ -120,7 +128,7 @@ impl Contract {
         true
     }
 
-    /// Update public sale price. 
+    /// Update public sale price.
     /// Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
     /// @allow ["::admins", "::owner"]
     pub fn update_price(&mut self, price: U128) -> bool {
@@ -135,6 +143,24 @@ impl Contract {
     pub fn update_presale_price(&mut self, presale_price: Option<U128>) -> bool {
         self.assert_owner_or_admin();
         self.sale.presale_price = presale_price;
+        true
+    }
+
+    /// Update the presale start
+    /// Careful this is in ms since 1970
+    /// @allow ["::admins", "::owner"]
+    pub fn update_presale_start(&mut self, presale_start: TimestampMs) -> bool {
+        self.assert_owner_or_admin();
+        self.sale.presale_start = Some(presale_start);
+        true
+    }
+
+    /// Update the public sale start
+    /// Careful this is in ms since 1970
+    /// @allow ["::admins", "::owner"]
+    pub fn update_public_sale_start(&mut self, public_sale_start: TimestampMs) -> bool {
+        self.assert_owner_or_admin();
+        self.sale.public_sale_start = Some(public_sale_start);
         true
     }
 }
