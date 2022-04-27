@@ -11,7 +11,7 @@ let [id,] = args;
 let json = {
     name: `Dark Prince Chest #${id}`,
     image: "ipfs://bafybeigh4mop4opt7weh6cpny6qwh2owyn42v3azp67z77xahzierz35am",
-    description: "Very precious Dark Prince NFT Chests with one random NFT-weapon inside (Axe, Hammer, Bow, Staff or Dual Sword) of E,D,C grades.up to Legendary level. Will be usable in World of the Abyss game on Global Release.",
+    description: "Very precious Dark Prince NFT Chest with one random unique NFT-weapon inside such as: Axe, Hammer, Bow, Staff or Dual Sword of different grades up to Legendary level.",
     edition: parseInt(id)
 }
 

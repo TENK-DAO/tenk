@@ -6,7 +6,7 @@ import { binPath } from "./utils";
 import { icon } from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-    uri: "https://bafybeihnm54oute7a6ovuieegx6p5ukbsgqbdjltudhverb7ifcxcrypbu.ipfs.dweb.link",
+    uri: "https://bafybeif4zfuh2qnx2zrdpgxp3plllnxmrbwcxin2ffe43odid6bxxnjt3q.ipfs.dweb.link",
     name: "World of the Abyss (WOTA)",
     symbol: "wotaverse",
     icon,
@@ -15,21 +15,21 @@ const metadata: tenk.InitialMetadata = {
 const size = 120;
 
 const sale: tenk.Sale = {
-    price: NEAR.parse("5 N").toJSON(),
     allowance: 3,
+    price: NEAR.parse("5 N").toJSON(),
     public_sale_start: Date.parse("27 April 2022 18:00 UTC"),
     initial_royalties: {
         percent: 10_000,
         accounts: {
             "tenk.sputnik-dao.near": 2_500,
-            "project.sputnik-dao.near": 7_500,
+            "wotaverse.sputnik-dao.near": 7_500,
         },
     },
     royalties: {
       percent: 1_000,
       accounts: {
         "tenk.sputnik-dao.near": 2_500,
-        "project.sputnik-dao.near": 7_500,
+        "wotaverse.sputnik-dao.near": 7_500,
       },
     },
 };
