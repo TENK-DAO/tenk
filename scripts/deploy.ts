@@ -6,7 +6,7 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
+  uri: "https://bafybeiftfhiz2ya62htk3gzshq7mbdl4veykmwf37mhvlup7yztixbcb7e.ipfs.dweb.link",
   name: "BeerPunks",
   symbol: "BP",
   icon,
