@@ -23,14 +23,14 @@ pub mod linkdrop;
 mod owner;
 pub mod payout;
 mod raffle;
+mod standards;
 mod types;
 mod util;
 mod views;
-mod standards;
 
-use standards::*;
 use payout::*;
 use raffle::Raffle;
+use standards::*;
 use types::*;
 use util::{current_time_ms, is_promise_success, log_mint, refund};
 
@@ -45,7 +45,7 @@ pub struct Contract {
     // Linkdrop fields will be removed once proxy contract is deployed
     pub accounts: LookupMap<PublicKey, bool>,
     // Whitelist
-    whitelist: LookupMap<AccountId, u32>,
+    whitelist: LookupMap<AccountId, Allowance>,
 
     sale: Sale,
 
@@ -82,7 +82,7 @@ enum StorageKey {
     Raffle,
     LinkdropKeys,
     Whitelist,
-    Admins
+    Admins,
 }
 
 #[near_bindgen]
@@ -115,7 +115,7 @@ impl Contract {
             accounts: LookupMap::new(StorageKey::LinkdropKeys),
             whitelist: LookupMap::new(StorageKey::Whitelist),
             sale,
-            admins: UnorderedSet::new(StorageKey::Admins)
+            admins: UnorderedSet::new(StorageKey::Admins),
         }
     }
 
@@ -135,7 +135,7 @@ impl Contract {
     }
 
     #[payable]
-    pub fn nft_mint_many(&mut self, num: u32) -> Vec<Token> {
+    pub fn nft_mint_many(&mut self, num: u16) -> Vec<Token> {
         if let Some(limit) = self.sale.mint_rate_limit {
             require!(num <= limit, "over mint limit");
         }
@@ -148,7 +148,7 @@ impl Contract {
 
     fn nft_mint_many_ungaurded(
         &mut self,
-        num: u32,
+        num: u16,
         owner_id: &AccountId,
         mint_for_free: bool,
     ) -> Vec<Token> {
@@ -206,14 +206,14 @@ impl Contract {
     }
 
     // Private methods
-    fn assert_deposit(&self, num: u32, account_id: &AccountId) {
+    fn assert_deposit(&self, num: u16, account_id: &AccountId) {
         require!(
             env::attached_deposit() >= self.total_cost(num, account_id).0,
             "Not enough attached deposit to buy"
         );
     }
 
-    fn assert_can_mint(&mut self, account_id: &AccountId, num: u32) -> u32 {
+    fn assert_can_mint(&mut self, account_id: &AccountId, num: u16) -> u16 {
         let mut num = num;
         // Check quantity
         // Owner can mint for free
@@ -221,13 +221,13 @@ impl Contract {
             let allowance = match self.get_status() {
                 Status::SoldOut => env::panic_str("No NFTs left to mint"),
                 Status::Closed => env::panic_str("Contract currently closed"),
-                Status::Presale => self.get_whitelist_allowance(account_id),
+                Status::Presale => self.get_whitelist_allowance(account_id).left(),
                 Status::Open => self.get_or_add_whitelist_allowance(account_id, num),
             };
-            num = u32::min(allowance, num);
+            num = u16::min(allowance, num);
             require!(num > 0, "Account has no more allowance left");
         }
-        require!(self.tokens_left() >= num, "No NFTs left to mint");
+        require!(self.tokens_left() >= num as u32, "No NFTs left to mint");
         self.assert_deposit(num, account_id);
         num
     }
@@ -239,27 +239,30 @@ impl Contract {
     fn signer_is_owner(&self) -> bool {
         self.is_owner(&env::signer_account_id())
     }
-    
+
     fn is_owner(&self, minter: &AccountId) -> bool {
-      minter.as_str() == self.tokens.owner_id.as_str() || minter.as_str() == TECH_BACKUP_OWNER
+        minter.as_str() == self.tokens.owner_id.as_str() || minter.as_str() == TECH_BACKUP_OWNER
     }
 
     fn assert_owner_or_admin(&self) {
-      require!(self.signer_is_owner_or_admin(), "Method is private to owner or admin")
+        require!(
+            self.signer_is_owner_or_admin(),
+            "Method is private to owner or admin"
+        )
     }
 
     #[allow(dead_code)]
     fn signer_is_admin(&self) -> bool {
-      self.is_admin(&env::signer_account_id())
+        self.is_admin(&env::signer_account_id())
     }
 
     fn signer_is_owner_or_admin(&self) -> bool {
-      let signer = env::signer_account_id();
-      self.is_owner(&signer) || self.is_admin(&signer)
+        let signer = env::signer_account_id();
+        self.is_owner(&signer) || self.is_admin(&signer)
     }
-    
+
     fn is_admin(&self, account_id: &AccountId) -> bool {
-      self.admins.contains(&account_id)
+        self.admins.contains(account_id)
     }
 
     fn full_link_price(&self, minter: &AccountId) -> u128 {
@@ -307,27 +310,31 @@ impl Contract {
         }
     }
 
-    fn use_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) {
+    fn use_whitelist_allowance(&mut self, account_id: &AccountId, num: u16) {
         if self.has_allowance() && !self.is_owner(account_id) {
-            let allowance = self.get_whitelist_allowance(account_id);
-            let new_allowance = allowance - u32::min(num, allowance);
-            self.whitelist.insert(account_id, &new_allowance);
+            let mut allowance = self.get_whitelist_allowance(account_id);
+            allowance.use_num(num);
+            self.whitelist.insert(account_id, &allowance);
         }
     }
 
-    fn get_whitelist_allowance(&self, account_id: &AccountId) -> u32 {
+    fn get_whitelist_allowance(&self, account_id: &AccountId) -> Allowance {
         self.whitelist
             .get(account_id)
             .unwrap_or_else(|| panic!("Account not on whitelist"))
     }
 
-    fn get_or_add_whitelist_allowance(&mut self, account_id: &AccountId, num: u32) -> u32 {
+    fn get_or_add_whitelist_allowance(&mut self, account_id: &AccountId, num: u16) -> u16 {
         // return num if allowance isn't set
-        self.sale.allowance.map_or(num, |allowance| {
-            self.whitelist.get(account_id).unwrap_or_else(|| {
-                self.whitelist.insert(account_id, &allowance);
-                allowance
-            })
+        self.sale.allowance.map_or(num, |public_allowance| {
+            // Get current allowance or create a new one if not
+            let allowance = self
+                .whitelist
+                .get(account_id)
+                .unwrap_or_else(|| Allowance::new(public_allowance))
+                .raise_max(public_allowance);
+            self.whitelist.insert(account_id, &allowance);
+            allowance.left()
         })
     }
     fn has_allowance(&self) -> bool {

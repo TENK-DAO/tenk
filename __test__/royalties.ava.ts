@@ -25,16 +25,22 @@ if (Workspace.networkIsSandbox()) {
   const runner = Workspace.init(
     { initialBalance: NEAR.parse("20 N").toString() },
     async ({ root }) => {
-      const [bob, alice, eve] = await subaccounts(root);
-      const royalties = createRoyalties({ root, bob, alice, eve });
-      const tenk = await deploy(root, "tenk", {
-        sale: {
-          ...DEFAULT_SALE,
-          royalties,
-          initial_royalties: royalties,
-        }
-      });
-      return { tenk, bob, alice, eve };
+      try {
+        const [bob, alice, eve] = await subaccounts(root);
+        const royalties = createRoyalties({ root, bob, alice, eve });
+        const tenk = await deploy(root, "tenk", {
+          sale: {
+            ...DEFAULT_SALE,
+            royalties,
+            initial_royalties: royalties,
+          }
+        });
+        return { tenk, bob, alice, eve };
+    }
+    catch (err) {
+      console.log(err);
+      process.exit(1);
+    }
     }
   );
 
