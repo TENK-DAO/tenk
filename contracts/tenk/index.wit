@@ -25,6 +25,7 @@ record royalties {
 }
 
 
+
 ///  String of yocto NEAR; 1N = 1000000000000000000000000 yN
 type yocto-near = u128
 
@@ -82,7 +83,6 @@ record sale-info {
     ///  Current price for one token
     price: u128
 }
-
 
 
 
@@ -172,51 +172,15 @@ update-presale-start: function(presale-start: timestamp-ms) -> bool
 ///  change
 update-public-sale-start: function(public-sale-start: timestamp-ms) -> bool
 
+///  Mint single nft titled "1"
+///  @allow ["::admins", "::owner"]
+///  change
+mint-special: function() -> token
+
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
 ///  change
 nft-transfer-payout: function(receiver-id: account-id, token-id: string, approval-id: option<u64>, memo: option<string>, balance: u128, max-len-payout: option<u32>) -> payout
-
-///  Current contract owner
-owner: function() -> account-id
-
-///  Current set of admins
-admins: function() -> list<account-id>
-
-///  Check whether an account is allowed to mint during the presale
-whitelisted: function(account-id: account-id) -> bool
-
-///  Cost of NFT + fees for linkdrop
-cost-of-linkdrop: function(minter: account-id) -> u128
-
-total-cost: function(num: u32, minter: account-id) -> u128
-
-///  Flat cost of one token
-cost-per-token: function(minter: account-id) -> u128
-
-///  Current cost in NEAR to store one NFT
-token-storage-cost: function() -> u128
-
-///  Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
-tokens-left: function() -> u32
-
-///  Part of the NFT metadata standard. Returns the contract's metadata
-nft-metadata: function() -> nft-contract-metadata
-
-///  How many tokens an account is still allowed to mint. None, means unlimited
-remaining-allowance: function(account-id: account-id) -> option<u32>
-
-///  Max number of mints in one transaction. None, means unlimited
-mint-rate-limit: function() -> option<u32>
-
-///  Information about the current sale. When in starts, status, price, and how many could be minted.
-get-sale-info: function() -> sale-info
-
-///  Information about a current user. Whether they are VIP and how many tokens left in their allowance.
-get-user-sale-info: function(account-id: account-id) -> user-sale-info
-
-///  Initial size of collection. Number left to raffle + current total supply
-initial: function() -> u64
 
 ///  Simple transfer. Transfer a given `token_id` from current owner to
 ///  `receiver_id`.
@@ -380,6 +344,47 @@ nft-supply-for-owner: function(account-id: account-id) -> u128
 /// 
 ///  Returns a paginated list of all tokens owned by this account
 nft-tokens-for-owner: function(account-id: account-id, from-index: option<u128>, limit: option<u64>) -> list<token>
+
+///  Current contract owner
+owner: function() -> account-id
+
+///  Current set of admins
+admins: function() -> list<account-id>
+
+///  Check whether an account is allowed to mint during the presale
+whitelisted: function(account-id: account-id) -> bool
+
+///  Cost of NFT + fees for linkdrop
+cost-of-linkdrop: function(minter: account-id) -> u128
+
+total-cost: function(num: u32, minter: account-id) -> u128
+
+///  Flat cost of one token
+cost-per-token: function(minter: account-id) -> u128
+
+///  Current cost in NEAR to store one NFT
+token-storage-cost: function() -> u128
+
+///  Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+tokens-left: function() -> u32
+
+///  Part of the NFT metadata standard. Returns the contract's metadata
+nft-metadata: function() -> nft-contract-metadata
+
+///  How many tokens an account is still allowed to mint. None, means unlimited
+remaining-allowance: function(account-id: account-id) -> option<u32>
+
+///  Max number of mints in one transaction. None, means unlimited
+mint-rate-limit: function() -> option<u32>
+
+///  Information about the current sale. When in starts, status, price, and how many could be minted.
+get-sale-info: function() -> sale-info
+
+///  Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+get-user-sale-info: function(account-id: account-id) -> user-sale-info
+
+///  Initial size of collection. Number left to raffle + current total supply
+initial: function() -> u64
 
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)

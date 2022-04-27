@@ -602,6 +602,41 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("update_public_sale_start", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * Mint single nft titled "1"
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.mint_special = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.mint_specialRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Mint single nft titled "1"
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.mint_specialRaw = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "mint_special", args: args }, options));
+    };
+    /**
+    * Mint single nft titled "1"
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.mint_specialTx = function (args, options) {
+        var _a, _b;
+        if (args === void 0) { args = {}; }
+        return helper_1.transactions.functionCall("mint_special", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
     Contract.prototype.nft_payout = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_payout", args, options);
     };
@@ -624,95 +659,6 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_transfer_payoutTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("nft_transfer_payout", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    /**
-    * Current contract owner
-    */
-    Contract.prototype.owner = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "owner", args, options);
-    };
-    /**
-    * Current set of admins
-    */
-    Contract.prototype.admins = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "admins", args, options);
-    };
-    /**
-    * Check whether an account is allowed to mint during the presale
-    */
-    Contract.prototype.whitelisted = function (args, options) {
-        return this.account.viewFunction(this.contractId, "whitelisted", args, options);
-    };
-    /**
-    * Cost of NFT + fees for linkdrop
-    */
-    Contract.prototype.cost_of_linkdrop = function (args, options) {
-        return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
-    };
-    Contract.prototype.total_cost = function (args, options) {
-        return this.account.viewFunction(this.contractId, "total_cost", args, options);
-    };
-    /**
-    * Flat cost of one token
-    */
-    Contract.prototype.cost_per_token = function (args, options) {
-        return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
-    };
-    /**
-    * Current cost in NEAR to store one NFT
-    */
-    Contract.prototype.token_storage_cost = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
-    };
-    /**
-    * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
-    */
-    Contract.prototype.tokens_left = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "tokens_left", args, options);
-    };
-    /**
-    * Part of the NFT metadata standard. Returns the contract's metadata
-    */
-    Contract.prototype.nft_metadata = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
-    };
-    /**
-    * How many tokens an account is still allowed to mint. None, means unlimited
-    */
-    Contract.prototype.remaining_allowance = function (args, options) {
-        return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
-    };
-    /**
-    * Max number of mints in one transaction. None, means unlimited
-    */
-    Contract.prototype.mint_rate_limit = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
-    };
-    /**
-    * Information about the current sale. When in starts, status, price, and how many could be minted.
-    */
-    Contract.prototype.get_sale_info = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
-    };
-    /**
-    * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
-    */
-    Contract.prototype.get_user_sale_info = function (args, options) {
-        return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
-    };
-    /**
-    * Initial size of collection. Number left to raffle + current total supply
-    */
-    Contract.prototype.initial = function (args, options) {
-        if (args === void 0) { args = {}; }
-        return this.account.viewFunction(this.contractId, "initial", args, options);
     };
     /**
     * Simple transfer. Transfer a given `token_id` from current owner to
@@ -1215,6 +1161,95 @@ var Contract = /** @class */ (function () {
     */
     Contract.prototype.nft_tokens_for_owner = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_tokens_for_owner", args, options);
+    };
+    /**
+    * Current contract owner
+    */
+    Contract.prototype.owner = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "owner", args, options);
+    };
+    /**
+    * Current set of admins
+    */
+    Contract.prototype.admins = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "admins", args, options);
+    };
+    /**
+    * Check whether an account is allowed to mint during the presale
+    */
+    Contract.prototype.whitelisted = function (args, options) {
+        return this.account.viewFunction(this.contractId, "whitelisted", args, options);
+    };
+    /**
+    * Cost of NFT + fees for linkdrop
+    */
+    Contract.prototype.cost_of_linkdrop = function (args, options) {
+        return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
+    };
+    Contract.prototype.total_cost = function (args, options) {
+        return this.account.viewFunction(this.contractId, "total_cost", args, options);
+    };
+    /**
+    * Flat cost of one token
+    */
+    Contract.prototype.cost_per_token = function (args, options) {
+        return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
+    };
+    /**
+    * Current cost in NEAR to store one NFT
+    */
+    Contract.prototype.token_storage_cost = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
+    };
+    /**
+    * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+    */
+    Contract.prototype.tokens_left = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "tokens_left", args, options);
+    };
+    /**
+    * Part of the NFT metadata standard. Returns the contract's metadata
+    */
+    Contract.prototype.nft_metadata = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
+    };
+    /**
+    * How many tokens an account is still allowed to mint. None, means unlimited
+    */
+    Contract.prototype.remaining_allowance = function (args, options) {
+        return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
+    };
+    /**
+    * Max number of mints in one transaction. None, means unlimited
+    */
+    Contract.prototype.mint_rate_limit = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
+    };
+    /**
+    * Information about the current sale. When in starts, status, price, and how many could be minted.
+    */
+    Contract.prototype.get_sale_info = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
+    };
+    /**
+    * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+    */
+    Contract.prototype.get_user_sale_info = function (args, options) {
+        return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
+    };
+    /**
+    * Initial size of collection. Number left to raffle + current total supply
+    */
+    Contract.prototype.initial = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "initial", args, options);
     };
     Contract.prototype.new_default_meta = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {

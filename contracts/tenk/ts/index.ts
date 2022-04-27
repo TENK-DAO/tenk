@@ -669,6 +669,27 @@ export class Contract {
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_public_sale_start", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
+  /**
+  * Mint single nft titled "1"
+  * @allow ["::admins", "::owner"]
+  */
+  async mint_special(args = {}, options?: ChangeMethodOptions): Promise<Token> {
+    return providers.getTransactionLastResult(await this.mint_specialRaw(args, options));
+  }
+  /**
+  * Mint single nft titled "1"
+  * @allow ["::admins", "::owner"]
+  */
+  mint_specialRaw(args = {}, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "mint_special", args, ...options});
+  }
+  /**
+  * Mint single nft titled "1"
+  * @allow ["::admins", "::owner"]
+  */
+  mint_specialTx(args = {}, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("mint_special", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
   nft_payout(args: {
     token_id: string;
     balance: U128;
@@ -705,100 +726,6 @@ export class Contract {
     max_len_payout?: u32;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_transfer_payout", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  /**
-  * Current contract owner
-  */
-  owner(args = {}, options?: ViewFunctionOptions): Promise<AccountId> {
-    return this.account.viewFunction(this.contractId, "owner", args, options);
-  }
-  /**
-  * Current set of admins
-  */
-  admins(args = {}, options?: ViewFunctionOptions): Promise<AccountId[]> {
-    return this.account.viewFunction(this.contractId, "admins", args, options);
-  }
-  /**
-  * Check whether an account is allowed to mint during the presale
-  */
-  whitelisted(args: {
-    account_id: AccountId;
-  }, options?: ViewFunctionOptions): Promise<boolean> {
-    return this.account.viewFunction(this.contractId, "whitelisted", args, options);
-  }
-  /**
-  * Cost of NFT + fees for linkdrop
-  */
-  cost_of_linkdrop(args: {
-    minter: AccountId;
-  }, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
-  }
-  total_cost(args: {
-    num: u32;
-    minter: AccountId;
-  }, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "total_cost", args, options);
-  }
-  /**
-  * Flat cost of one token
-  */
-  cost_per_token(args: {
-    minter: AccountId;
-  }, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
-  }
-  /**
-  * Current cost in NEAR to store one NFT
-  */
-  token_storage_cost(args = {}, options?: ViewFunctionOptions): Promise<U128> {
-    return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
-  }
-  /**
-  * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
-  */
-  tokens_left(args = {}, options?: ViewFunctionOptions): Promise<u32> {
-    return this.account.viewFunction(this.contractId, "tokens_left", args, options);
-  }
-  /**
-  * Part of the NFT metadata standard. Returns the contract's metadata
-  */
-  nft_metadata(args = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
-    return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
-  }
-  /**
-  * How many tokens an account is still allowed to mint. None, means unlimited
-  */
-  remaining_allowance(args: {
-    account_id: AccountId;
-  }, options?: ViewFunctionOptions): Promise<u32 | null> {
-    return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
-  }
-  /**
-  * Max number of mints in one transaction. None, means unlimited
-  */
-  mint_rate_limit(args = {}, options?: ViewFunctionOptions): Promise<u32 | null> {
-    return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
-  }
-  /**
-  * Information about the current sale. When in starts, status, price, and how many could be minted.
-  */
-  get_sale_info(args = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
-    return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
-  }
-  /**
-  * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
-  */
-  get_user_sale_info(args: {
-    account_id: AccountId;
-  }, options?: ViewFunctionOptions): Promise<UserSaleInfo> {
-    return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
-  }
-  /**
-  * Initial size of collection. Number left to raffle + current total supply
-  */
-  initial(args = {}, options?: ViewFunctionOptions): Promise<u64> {
-    return this.account.viewFunction(this.contractId, "initial", args, options);
   }
   /**
   * Simple transfer. Transfer a given `token_id` from current owner to
@@ -1321,6 +1248,100 @@ export class Contract {
   }, options?: ViewFunctionOptions): Promise<Token[]> {
     return this.account.viewFunction(this.contractId, "nft_tokens_for_owner", args, options);
   }
+  /**
+  * Current contract owner
+  */
+  owner(args = {}, options?: ViewFunctionOptions): Promise<AccountId> {
+    return this.account.viewFunction(this.contractId, "owner", args, options);
+  }
+  /**
+  * Current set of admins
+  */
+  admins(args = {}, options?: ViewFunctionOptions): Promise<AccountId[]> {
+    return this.account.viewFunction(this.contractId, "admins", args, options);
+  }
+  /**
+  * Check whether an account is allowed to mint during the presale
+  */
+  whitelisted(args: {
+    account_id: AccountId;
+  }, options?: ViewFunctionOptions): Promise<boolean> {
+    return this.account.viewFunction(this.contractId, "whitelisted", args, options);
+  }
+  /**
+  * Cost of NFT + fees for linkdrop
+  */
+  cost_of_linkdrop(args: {
+    minter: AccountId;
+  }, options?: ViewFunctionOptions): Promise<U128> {
+    return this.account.viewFunction(this.contractId, "cost_of_linkdrop", args, options);
+  }
+  total_cost(args: {
+    num: u32;
+    minter: AccountId;
+  }, options?: ViewFunctionOptions): Promise<U128> {
+    return this.account.viewFunction(this.contractId, "total_cost", args, options);
+  }
+  /**
+  * Flat cost of one token
+  */
+  cost_per_token(args: {
+    minter: AccountId;
+  }, options?: ViewFunctionOptions): Promise<U128> {
+    return this.account.viewFunction(this.contractId, "cost_per_token", args, options);
+  }
+  /**
+  * Current cost in NEAR to store one NFT
+  */
+  token_storage_cost(args = {}, options?: ViewFunctionOptions): Promise<U128> {
+    return this.account.viewFunction(this.contractId, "token_storage_cost", args, options);
+  }
+  /**
+  * Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+  */
+  tokens_left(args = {}, options?: ViewFunctionOptions): Promise<u32> {
+    return this.account.viewFunction(this.contractId, "tokens_left", args, options);
+  }
+  /**
+  * Part of the NFT metadata standard. Returns the contract's metadata
+  */
+  nft_metadata(args = {}, options?: ViewFunctionOptions): Promise<NftContractMetadata> {
+    return this.account.viewFunction(this.contractId, "nft_metadata", args, options);
+  }
+  /**
+  * How many tokens an account is still allowed to mint. None, means unlimited
+  */
+  remaining_allowance(args: {
+    account_id: AccountId;
+  }, options?: ViewFunctionOptions): Promise<u32 | null> {
+    return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
+  }
+  /**
+  * Max number of mints in one transaction. None, means unlimited
+  */
+  mint_rate_limit(args = {}, options?: ViewFunctionOptions): Promise<u32 | null> {
+    return this.account.viewFunction(this.contractId, "mint_rate_limit", args, options);
+  }
+  /**
+  * Information about the current sale. When in starts, status, price, and how many could be minted.
+  */
+  get_sale_info(args = {}, options?: ViewFunctionOptions): Promise<SaleInfo> {
+    return this.account.viewFunction(this.contractId, "get_sale_info", args, options);
+  }
+  /**
+  * Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+  */
+  get_user_sale_info(args: {
+    account_id: AccountId;
+  }, options?: ViewFunctionOptions): Promise<UserSaleInfo> {
+    return this.account.viewFunction(this.contractId, "get_user_sale_info", args, options);
+  }
+  /**
+  * Initial size of collection. Number left to raffle + current total supply
+  */
+  initial(args = {}, options?: ViewFunctionOptions): Promise<u64> {
+    return this.account.viewFunction(this.contractId, "initial", args, options);
+  }
   async new_default_meta(args: {
     owner_id: AccountId;
     metadata: InitialMetadata;
@@ -1830,6 +1851,28 @@ export interface UpdatePublicSaleStart {
 }
 export type UpdatePublicSaleStart__Result = boolean;
 /**
+* Mint single nft titled "1"
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface MintSpecial {
+  args: {};
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type MintSpecial__Result = Token;
+/**
 * 
 * @contractMethod view
 */
@@ -1869,158 +1912,6 @@ export interface NftTransferPayout {
   
 }
 export type NftTransferPayout__Result = Payout;
-/**
-* Current contract owner
-* 
-* @contractMethod view
-*/
-export interface Owner {
-  args: {};
-  
-}
-export type Owner__Result = AccountId;
-/**
-* Current set of admins
-* 
-* @contractMethod view
-*/
-export interface Admins {
-  args: {};
-  
-}
-export type Admins__Result = AccountId[];
-/**
-* Check whether an account is allowed to mint during the presale
-* 
-* @contractMethod view
-*/
-export interface Whitelisted {
-  args: {
-    account_id: AccountId;
-  };
-  
-}
-export type Whitelisted__Result = boolean;
-/**
-* Cost of NFT + fees for linkdrop
-* 
-* @contractMethod view
-*/
-export interface CostOfLinkdrop {
-  args: {
-    minter: AccountId;
-  };
-  
-}
-export type CostOfLinkdrop__Result = U128;
-/**
-* 
-* @contractMethod view
-*/
-export interface TotalCost {
-  args: {
-    num: u32;
-    minter: AccountId;
-  };
-  
-}
-export type TotalCost__Result = U128;
-/**
-* Flat cost of one token
-* 
-* @contractMethod view
-*/
-export interface CostPerToken {
-  args: {
-    minter: AccountId;
-  };
-  
-}
-export type CostPerToken__Result = U128;
-/**
-* Current cost in NEAR to store one NFT
-* 
-* @contractMethod view
-*/
-export interface TokenStorageCost {
-  args: {};
-  
-}
-export type TokenStorageCost__Result = U128;
-/**
-* Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
-* 
-* @contractMethod view
-*/
-export interface TokensLeft {
-  args: {};
-  
-}
-export type TokensLeft__Result = u32;
-/**
-* Part of the NFT metadata standard. Returns the contract's metadata
-* 
-* @contractMethod view
-*/
-export interface NftMetadata {
-  args: {};
-  
-}
-export type NftMetadata__Result = NftContractMetadata;
-/**
-* How many tokens an account is still allowed to mint. None, means unlimited
-* 
-* @contractMethod view
-*/
-export interface RemainingAllowance {
-  args: {
-    account_id: AccountId;
-  };
-  
-}
-export type RemainingAllowance__Result = u32 | null;
-/**
-* Max number of mints in one transaction. None, means unlimited
-* 
-* @contractMethod view
-*/
-export interface MintRateLimit {
-  args: {};
-  
-}
-export type MintRateLimit__Result = u32 | null;
-/**
-* Information about the current sale. When in starts, status, price, and how many could be minted.
-* 
-* @contractMethod view
-*/
-export interface GetSaleInfo {
-  args: {};
-  
-}
-export type GetSaleInfo__Result = SaleInfo;
-/**
-* Information about a current user. Whether they are VIP and how many tokens left in their allowance.
-* 
-* @contractMethod view
-*/
-export interface GetUserSaleInfo {
-  args: {
-    account_id: AccountId;
-  };
-  
-}
-export type GetUserSaleInfo__Result = UserSaleInfo;
-/**
-* Initial size of collection. Number left to raffle + current total supply
-* 
-* @contractMethod view
-*/
-export interface Initial {
-  args: {};
-  
-}
-export type Initial__Result = u64;
 /**
 * Simple transfer. Transfer a given `token_id` from current owner to
 * `receiver_id`.
@@ -2351,6 +2242,158 @@ export interface NftTokensForOwner {
   
 }
 export type NftTokensForOwner__Result = Token[];
+/**
+* Current contract owner
+* 
+* @contractMethod view
+*/
+export interface Owner {
+  args: {};
+  
+}
+export type Owner__Result = AccountId;
+/**
+* Current set of admins
+* 
+* @contractMethod view
+*/
+export interface Admins {
+  args: {};
+  
+}
+export type Admins__Result = AccountId[];
+/**
+* Check whether an account is allowed to mint during the presale
+* 
+* @contractMethod view
+*/
+export interface Whitelisted {
+  args: {
+    account_id: AccountId;
+  };
+  
+}
+export type Whitelisted__Result = boolean;
+/**
+* Cost of NFT + fees for linkdrop
+* 
+* @contractMethod view
+*/
+export interface CostOfLinkdrop {
+  args: {
+    minter: AccountId;
+  };
+  
+}
+export type CostOfLinkdrop__Result = U128;
+/**
+* 
+* @contractMethod view
+*/
+export interface TotalCost {
+  args: {
+    num: u32;
+    minter: AccountId;
+  };
+  
+}
+export type TotalCost__Result = U128;
+/**
+* Flat cost of one token
+* 
+* @contractMethod view
+*/
+export interface CostPerToken {
+  args: {
+    minter: AccountId;
+  };
+  
+}
+export type CostPerToken__Result = U128;
+/**
+* Current cost in NEAR to store one NFT
+* 
+* @contractMethod view
+*/
+export interface TokenStorageCost {
+  args: {};
+  
+}
+export type TokenStorageCost__Result = U128;
+/**
+* Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
+* 
+* @contractMethod view
+*/
+export interface TokensLeft {
+  args: {};
+  
+}
+export type TokensLeft__Result = u32;
+/**
+* Part of the NFT metadata standard. Returns the contract's metadata
+* 
+* @contractMethod view
+*/
+export interface NftMetadata {
+  args: {};
+  
+}
+export type NftMetadata__Result = NftContractMetadata;
+/**
+* How many tokens an account is still allowed to mint. None, means unlimited
+* 
+* @contractMethod view
+*/
+export interface RemainingAllowance {
+  args: {
+    account_id: AccountId;
+  };
+  
+}
+export type RemainingAllowance__Result = u32 | null;
+/**
+* Max number of mints in one transaction. None, means unlimited
+* 
+* @contractMethod view
+*/
+export interface MintRateLimit {
+  args: {};
+  
+}
+export type MintRateLimit__Result = u32 | null;
+/**
+* Information about the current sale. When in starts, status, price, and how many could be minted.
+* 
+* @contractMethod view
+*/
+export interface GetSaleInfo {
+  args: {};
+  
+}
+export type GetSaleInfo__Result = SaleInfo;
+/**
+* Information about a current user. Whether they are VIP and how many tokens left in their allowance.
+* 
+* @contractMethod view
+*/
+export interface GetUserSaleInfo {
+  args: {
+    account_id: AccountId;
+  };
+  
+}
+export type GetUserSaleInfo__Result = UserSaleInfo;
+/**
+* Initial size of collection. Number left to raffle + current total supply
+* 
+* @contractMethod view
+*/
+export interface Initial {
+  args: {};
+  
+}
+export type Initial__Result = u64;
 /**
 * 
 * @contractMethod change

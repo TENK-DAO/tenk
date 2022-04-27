@@ -496,6 +496,46 @@
         }
       ]
     },
+    "MintSpecial": {
+      "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
+      "contractMethod": "change",
+      "description": "Mint single nft titled \"1\"",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "MintSpecial__Result": {
+      "$ref": "#/definitions/Token"
+    },
     "New": {
       "additionalProperties": false,
       "contractMethod": "change",
