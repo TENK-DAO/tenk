@@ -32,7 +32,7 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn update_allowance(&mut self, allowance: u32) -> bool {
+    pub fn update_allowance(&mut self, allowance: u16) -> bool {
         self.assert_owner_or_admin();
         self.sale.allowance = Some(allowance);
         true
@@ -48,31 +48,42 @@ impl Contract {
         true
     }
 
+    /// Add whitelist accounts at a given max allowance
     /// @allow ["::admins", "::owner"]
     pub fn add_whitelist_accounts(
         &mut self,
         accounts: Vec<AccountId>,
-        allowance: Option<u32>,
+        max_allowance: Option<u16>,
     ) -> bool {
         #[cfg(feature = "testnet")]
         self.assert_owner_or_admin();
-        let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
+        let max_allowance = max_allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
         accounts.iter().for_each(|account_id| {
+            let allowance = self
+                .whitelist
+                .get(account_id)
+                .unwrap_or_else(|| Allowance::new(max_allowance))
+                .raise_max(max_allowance);
             self.whitelist.insert(account_id, &allowance);
         });
         true
     }
 
+    /// Increases allowance for whitelist accounts
     /// @allow ["::admins", "::owner"]
     pub fn update_whitelist_accounts(
         &mut self,
         accounts: Vec<AccountId>,
-        allowance_increase: u32,
+        allowance_increase: u16,
     ) -> bool {
         self.assert_owner_or_admin();
         accounts.iter().for_each(|account_id| {
-            let allowance = self.whitelist.get(&account_id).unwrap_or(0) + allowance_increase;
-            self.whitelist.insert(account_id, &allowance);
+            if let Some(mut allowance) = self.whitelist.get(account_id) {
+                allowance.increase_max(allowance_increase);
+                self.whitelist.insert(account_id, &allowance);
+            } else {
+                log!("Account {} is not in whitelist", account_id);
+            }
         });
         true
     }
