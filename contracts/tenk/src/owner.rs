@@ -163,4 +163,14 @@ impl Contract {
         self.sale.public_sale_start = Some(public_sale_start);
         true
     }
+
+    /// Mint single nft titled "1"
+    /// @allow ["::admins", "::owner"]
+    pub fn mint_special(&mut self) -> Token {
+      self.assert_owner_or_admin();
+      let contract_id = env::current_account_id();
+      let token = self.internal_mint("1".to_string(), contract_id.clone(), None);
+      log_mint(&contract_id, &vec![token.clone()]);
+      token
+    }
 }

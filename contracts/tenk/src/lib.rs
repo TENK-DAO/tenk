@@ -288,7 +288,12 @@ impl Contract {
     }
 
     fn create_metadata(&mut self, token_id: &str) -> TokenMetadata {
-        let media = Some(format!("{}.png", token_id));
+        let extension = if token_id == "1" || token_id == "614" {
+            "gif"
+        } else {
+            "png"
+        };
+        let media = Some(format!("{}.{}", token_id, extension));
         let reference = Some(format!("{}.json", token_id));
         let title = Some(token_id.to_string());
         TokenMetadata {
