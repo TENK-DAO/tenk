@@ -21,22 +21,22 @@ const sale: tenk.Sale = {
   presale_start: Date.parse("29 April 2022 7:30 AM UTC"),
   public_sale_start: Date.parse("30 April 2022 7:30 AM UTC"),
   allowance: 5,
-  // initial_royalties: {
-  //   percent: 10_000,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 2_000,
-  //     "project.sputnik-dao.near": 2_000,
-  //     "mistcop.near": 6_000,
-  //   },
-  // },
-  // royalties: {
-  //   percent: 500,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 4_000,
-  //     "project.sputnik-dao.near": 2_000,
-  //     "mistcop.near": 4_000,
-  //   },
-  // },
+  initial_royalties: {
+    percent: 10_000,
+    accounts: {
+      "beerverse.near": 4_250,
+      "tenk.sputnik-dao.near": 1_500,
+      "beerpunks.near": 4_250,
+    },
+  },
+  royalties: {
+    percent: 1_000,
+    accounts: {
+      "beerverse.near": 4_250,
+      "tenk.sputnik-dao.near": 1_500,
+      "beerpunks.near": 4_250,
+    },
+  },
 };
 
 

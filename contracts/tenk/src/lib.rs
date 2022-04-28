@@ -275,7 +275,7 @@ impl Contract {
     }
 
     fn draw_and_mint(&mut self, token_owner_id: AccountId, refund: Option<AccountId>) -> Token {
-        let id = self.raffle.draw();
+        let id = self.raffle.draw() + 1;
         self.internal_mint(id.to_string(), token_owner_id, refund)
     }
 
