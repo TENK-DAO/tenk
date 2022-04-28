@@ -529,6 +529,60 @@ export class Contract {
     return transactions.functionCall("start_sale", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
+  * Update the current presale start time
+  * @allow ["::admins", "::owner"]
+  */
+  async update_presale_start(args: {
+    presale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_presale_startRaw(args, options));
+  }
+  /**
+  * Update the current presale start time
+  * @allow ["::admins", "::owner"]
+  */
+  update_presale_startRaw(args: {
+    presale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_presale_start", args, ...options});
+  }
+  /**
+  * Update the current presale start time
+  * @allow ["::admins", "::owner"]
+  */
+  update_presale_startTx(args: {
+    presale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_presale_start", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Update the current public sale start time
+  * @allow ["::admins", "::owner"]
+  */
+  async update_public_sale_start(args: {
+    public_sale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_public_sale_startRaw(args, options));
+  }
+  /**
+  * Update the current public sale start time
+  * @allow ["::admins", "::owner"]
+  */
+  update_public_sale_startRaw(args: {
+    public_sale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_public_sale_start", args, ...options});
+  }
+  /**
+  * Update the current public sale start time
+  * @allow ["::admins", "::owner"]
+  */
+  update_public_sale_startTx(args: {
+    public_sale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_public_sale_start", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
   * Add a new admin. Careful who you add!
   * @allow ["::admins", "::owner"]
   */
@@ -1654,6 +1708,54 @@ export interface StartSale {
   
 }
 export type StartSale__Result = boolean;
+/**
+* Update the current presale start time
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface UpdatePresaleStart {
+  args: {
+    presale_start: TimestampMs;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdatePresaleStart__Result = boolean;
+/**
+* Update the current public sale start time
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface UpdatePublicSaleStart {
+  args: {
+    public_sale_start: TimestampMs;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdatePublicSaleStart__Result = boolean;
 /**
 * Add a new admin. Careful who you add!
 * @allow ["::admins", "::owner"]

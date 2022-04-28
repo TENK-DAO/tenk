@@ -1945,6 +1945,54 @@
     "UpdatePresalePrice__Result": {
       "type": "boolean"
     },
+    "UpdatePresaleStart": {
+      "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
+      "contractMethod": "change",
+      "description": "Update the current presale start time",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "presale_start": {
+              "$ref": "#/definitions/TimestampMs"
+            }
+          },
+          "required": [
+            "presale_start"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdatePresaleStart__Result": {
+      "type": "boolean"
+    },
     "UpdatePrice": {
       "additionalProperties": false,
       "allow": [
@@ -1991,6 +2039,54 @@
       "type": "object"
     },
     "UpdatePrice__Result": {
+      "type": "boolean"
+    },
+    "UpdatePublicSaleStart": {
+      "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
+      "contractMethod": "change",
+      "description": "Update the current public sale start time",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "public_sale_start": {
+              "$ref": "#/definitions/TimestampMs"
+            }
+          },
+          "required": [
+            "public_sale_start"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdatePublicSaleStart__Result": {
       "type": "boolean"
     },
     "UpdateRoyalties": {

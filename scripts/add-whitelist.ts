@@ -29,7 +29,7 @@ export async function main({ account, argv }: Context) {
   const [file, contractId, allowance_str, number] = argv;
   let whitelist = filter_accounts(JSON.parse(await readFile(file, "utf8")));
 
-  const allowance = parseInt(allowance_str);
+  const max_allowance = parseInt(allowance_str);
   let atATime = number ? parseInt(number) : DEFAULT_PER_TX;
   const contract = new Contract(account, contractId);
 
@@ -52,7 +52,7 @@ export async function main({ account, argv }: Context) {
     const gas = Gas.parse("250 Tgas");
     if (accounts.length > 0) {
       try {
-        await contract.add_whitelist_accounts({ accounts, allowance }, { gas });
+        await contract.add_whitelist_accounts({ accounts, max_allowance }, { gas });
       } catch (e) {
         console.log(`Failed ${accounts}`);
         continue;

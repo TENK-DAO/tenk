@@ -145,6 +145,16 @@ start-presale: function(public-sale-start: option<timestamp-ms>, presale-price: 
 ///  change
 start-sale: function(price: option<yocto-near>) -> bool
 
+///  Update the current presale start time
+///  @allow ["::admins", "::owner"]
+///  change
+update-presale-start: function(presale-start: timestamp-ms) -> bool
+
+///  Update the current public sale start time
+///  @allow ["::admins", "::owner"]
+///  change
+update-public-sale-start: function(public-sale-start: timestamp-ms) -> bool
+
 ///  Add a new admin. Careful who you add!
 ///  @allow ["::admins", "::owner"]
 ///  change

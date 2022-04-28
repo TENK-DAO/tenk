@@ -437,6 +437,48 @@ export declare class Contract {
         price?: YoctoNear;
     }, options?: ChangeMethodOptions): transactions.Action;
     /**
+    * Update the current presale start time
+    * @allow ["::admins", "::owner"]
+    */
+    update_presale_start(args: {
+        presale_start: TimestampMs;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Update the current presale start time
+    * @allow ["::admins", "::owner"]
+    */
+    update_presale_startRaw(args: {
+        presale_start: TimestampMs;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Update the current presale start time
+    * @allow ["::admins", "::owner"]
+    */
+    update_presale_startTx(args: {
+        presale_start: TimestampMs;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
+    * Update the current public sale start time
+    * @allow ["::admins", "::owner"]
+    */
+    update_public_sale_start(args: {
+        public_sale_start: TimestampMs;
+    }, options?: ChangeMethodOptions): Promise<boolean>;
+    /**
+    * Update the current public sale start time
+    * @allow ["::admins", "::owner"]
+    */
+    update_public_sale_startRaw(args: {
+        public_sale_start: TimestampMs;
+    }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
+    /**
+    * Update the current public sale start time
+    * @allow ["::admins", "::owner"]
+    */
+    update_public_sale_startTx(args: {
+        public_sale_start: TimestampMs;
+    }, options?: ChangeMethodOptions): transactions.Action;
+    /**
     * Add a new admin. Careful who you add!
     * @allow ["::admins", "::owner"]
     */
@@ -1422,6 +1464,52 @@ export interface StartSale {
     };
 }
 export declare type StartSale__Result = boolean;
+/**
+* Update the current presale start time
+* @allow ["::admins", "::owner"]
+*
+* @contractMethod change
+*/
+export interface UpdatePresaleStart {
+    args: {
+        presale_start: TimestampMs;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdatePresaleStart__Result = boolean;
+/**
+* Update the current public sale start time
+* @allow ["::admins", "::owner"]
+*
+* @contractMethod change
+*/
+export interface UpdatePublicSaleStart {
+    args: {
+        public_sale_start: TimestampMs;
+    };
+    options: {
+        /** Units in gas
+        * @pattern [0-9]+
+        * @default "30000000000000"
+        */
+        gas?: string;
+        /** Units in yoctoNear
+        * @default "0"
+        */
+        attachedDeposit?: Balance;
+    };
+}
+export declare type UpdatePublicSaleStart__Result = boolean;
 /**
 * Add a new admin. Careful who you add!
 * @allow ["::admins", "::owner"]

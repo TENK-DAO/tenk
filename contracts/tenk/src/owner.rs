@@ -131,6 +131,27 @@ impl Contract {
         true
     }
 
+    /// Update the current presale start time
+    /// @allow ["::admins", "::owner"]
+    pub fn update_presale_start(
+        &mut self,
+        presale_start: TimestampMs,
+    ) -> bool {
+        self.assert_owner_or_admin();
+        self.sale.presale_start = Some(presale_start);
+        true
+    }
+    /// Update the current public sale start time
+    /// @allow ["::admins", "::owner"]
+    pub fn update_public_sale_start(
+        &mut self,
+        public_sale_start: TimestampMs,
+    ) -> bool {
+      self.assert_owner_or_admin();
+      self.sale.public_sale_start = Some(public_sale_start);
+      true
+    }
+
     /// Add a new admin. Careful who you add!
     /// @allow ["::admins", "::owner"]
     pub fn add_admin(&mut self, account_id: AccountId) -> bool {
