@@ -279,6 +279,7 @@ export async function create_account_and_claim(
     if (res.failed) {
       t.log(get_gas_profile(res));
     }
+    t.log(JSON.stringify(res.Failure, null, 3));
     t.assert(
       await new_account.exists(),
       `account ${new_account_id} does not exist`

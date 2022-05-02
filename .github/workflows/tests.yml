@@ -1,5 +1,9 @@
 name: Tests
 on: push
+
+env:
+  SANDBOX_ARTIFACT_URL: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore/Darwin-x86_64/master/57362268301554563c4f800af963a1270b3d5283/near-sandbox.tar.gz
+
 jobs:
   tests:
     strategy:

@@ -8,7 +8,7 @@ use near_units::parse_near;
 /// 0.064311394105062020653824 N
 pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = parse_near!("0 N");
 
-pub(crate) const LINKDROP_DEPOSIT: u128 = parse_near!("0.02 N");
+pub(crate) const LINKDROP_DEPOSIT: u128 = parse_near!("0.1 N");
 /// can take 0.5 of access key since gas required is 6.6 times what was actually used
 const ON_CREATE_ACCOUNT_GAS: Gas = Gas(30_000_000_000_000);
 const NO_DEPOSIT: Balance = 0;
