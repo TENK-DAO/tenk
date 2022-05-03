@@ -2,6 +2,7 @@ import {
     Workspace,
     NearAccount,
     randomAccountId,
+    createKeyPair,
 } from "near-workspaces-ava";
 import {
     ava
@@ -102,6 +103,31 @@ runner.test(
 
         // await new_account.delete(root.accountId);
     }
+);
+
+runner.test(
+  "Use `claim` to send to existing account with normal account should fail",
+  async (t, { root, tenk }) => {
+      const alice = await root.createAccount("alice");
+      t.log(NEAR.from(await tenk.view("token_storage_cost")).toHuman());
+      const attachedDeposit = await linkdropCost(tenk, alice.accountId);
+      t.log(attachedDeposit.toHuman());
+      const senderKey = createKeyPair();
+      const public_key = senderKey.getPublicKey().toString();
+      let res = await alice.call_raw(
+        tenk,
+        "create_linkdrop",
+        {
+          public_key,
+        },
+        {
+          attachedDeposit,
+          gas: Gas.parse("40 Tgas"),
+        }
+      );
+      t.assert(res.failed, "transaction should fail")
+
+  }
 );
 
 // TODO: there is a race condition on the key store.  Either need multiple keys per account,
