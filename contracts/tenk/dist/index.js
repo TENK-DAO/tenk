@@ -77,35 +77,6 @@ var Contract = /** @class */ (function () {
         this.contractId = contractId;
     }
     /**
-    * Create a pending token that can be claimed with corresponding private key
-    */
-    Contract.prototype.create_linkdrop = function (args, options) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _a, _b;
-            return __generator(this, function (_c) {
-                switch (_c.label) {
-                    case 0:
-                        _b = (_a = helper_1.providers).getTransactionLastResult;
-                        return [4 /*yield*/, this.create_linkdropRaw(args, options)];
-                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
-                }
-            });
-        });
-    };
-    /**
-    * Create a pending token that can be claimed with corresponding private key
-    */
-    Contract.prototype.create_linkdropRaw = function (args, options) {
-        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "create_linkdrop", args: args }, options));
-    };
-    /**
-    * Create a pending token that can be claimed with corresponding private key
-    */
-    Contract.prototype.create_linkdropTx = function (args, options) {
-        var _a, _b;
-        return helper_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
-    };
-    /**
     * Returns the balance associated with given key.
     */
     Contract.prototype.get_key_balance = function (args, options) {
@@ -531,6 +502,108 @@ var Contract = /** @class */ (function () {
     Contract.prototype.update_presale_priceTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("update_presale_price", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Update the presale start
+    * Careful this is in ms since 1970
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_presale_start = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_presale_startRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Update the presale start
+    * Careful this is in ms since 1970
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_presale_startRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_presale_start", args: args }, options));
+    };
+    /**
+    * Update the presale start
+    * Careful this is in ms since 1970
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_presale_startTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_presale_start", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Update the public sale start
+    * Careful this is in ms since 1970
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_public_sale_start = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_public_sale_startRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Update the public sale start
+    * Careful this is in ms since 1970
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_public_sale_startRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_public_sale_start", args: args }, options));
+    };
+    /**
+    * Update the public sale start
+    * Careful this is in ms since 1970
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_public_sale_startTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_public_sale_start", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Create a pending token that can be claimed with corresponding private key
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.create_linkdrop = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.create_linkdropRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Create a pending token that can be claimed with corresponding private key
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.create_linkdropRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "create_linkdrop", args: args }, options));
+    };
+    /**
+    * Create a pending token that can be claimed with corresponding private key
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.create_linkdropTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_payout = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_payout", args, options);

@@ -224,30 +224,6 @@ export class Contract {
   constructor(public account: Account, public readonly contractId: string){}
   
   /**
-  * Create a pending token that can be claimed with corresponding private key
-  */
-  async create_linkdrop(args: {
-    public_key: PublicKey;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.create_linkdropRaw(args, options));
-  }
-  /**
-  * Create a pending token that can be claimed with corresponding private key
-  */
-  create_linkdropRaw(args: {
-    public_key: PublicKey;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "create_linkdrop", args, ...options});
-  }
-  /**
-  * Create a pending token that can be claimed with corresponding private key
-  */
-  create_linkdropTx(args: {
-    public_key: PublicKey;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  /**
   * Returns the balance associated with given key.
   */
   get_key_balance(args = {}, options?: ViewFunctionOptions): Promise<U128> {
@@ -608,6 +584,93 @@ export class Contract {
     presale_price?: U128;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_presale_price", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Update the presale start
+  * Careful this is in ms since 1970
+  * @allow ["::admins", "::owner"]
+  */
+  async update_presale_start(args: {
+    presale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_presale_startRaw(args, options));
+  }
+  /**
+  * Update the presale start
+  * Careful this is in ms since 1970
+  * @allow ["::admins", "::owner"]
+  */
+  update_presale_startRaw(args: {
+    presale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_presale_start", args, ...options});
+  }
+  /**
+  * Update the presale start
+  * Careful this is in ms since 1970
+  * @allow ["::admins", "::owner"]
+  */
+  update_presale_startTx(args: {
+    presale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_presale_start", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Update the public sale start
+  * Careful this is in ms since 1970
+  * @allow ["::admins", "::owner"]
+  */
+  async update_public_sale_start(args: {
+    public_sale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_public_sale_startRaw(args, options));
+  }
+  /**
+  * Update the public sale start
+  * Careful this is in ms since 1970
+  * @allow ["::admins", "::owner"]
+  */
+  update_public_sale_startRaw(args: {
+    public_sale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_public_sale_start", args, ...options});
+  }
+  /**
+  * Update the public sale start
+  * Careful this is in ms since 1970
+  * @allow ["::admins", "::owner"]
+  */
+  update_public_sale_startTx(args: {
+    public_sale_start: TimestampMs;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_public_sale_start", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Create a pending token that can be claimed with corresponding private key
+  * @allow ["::admins", "::owner"]
+  */
+  async create_linkdrop(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.create_linkdropRaw(args, options));
+  }
+  /**
+  * Create a pending token that can be claimed with corresponding private key
+  * @allow ["::admins", "::owner"]
+  */
+  create_linkdropRaw(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "create_linkdrop", args, ...options});
+  }
+  /**
+  * Create a pending token that can be claimed with corresponding private key
+  * @allow ["::admins", "::owner"]
+  */
+  create_linkdropTx(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   nft_payout(args: {
     token_id: string;
@@ -1356,29 +1419,6 @@ export class Contract {
   }
 }
 /**
-* Create a pending token that can be claimed with corresponding private key
-* 
-* @contractMethod change
-*/
-export interface CreateLinkdrop {
-  args: {
-    public_key: PublicKey;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type CreateLinkdrop__Result = void;
-/**
 * Returns the balance associated with given key.
 * 
 * @contractMethod view
@@ -1719,6 +1759,80 @@ export interface UpdatePresalePrice {
   
 }
 export type UpdatePresalePrice__Result = boolean;
+/**
+* Update the presale start
+* Careful this is in ms since 1970
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface UpdatePresaleStart {
+  args: {
+    presale_start: TimestampMs;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdatePresaleStart__Result = boolean;
+/**
+* Update the public sale start
+* Careful this is in ms since 1970
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface UpdatePublicSaleStart {
+  args: {
+    public_sale_start: TimestampMs;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdatePublicSaleStart__Result = boolean;
+/**
+* Create a pending token that can be claimed with corresponding private key
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface CreateLinkdrop {
+  args: {
+    public_key: PublicKey;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type CreateLinkdrop__Result = void;
 /**
 * 
 * @contractMethod view

@@ -146,8 +146,27 @@ impl Contract {
         true
     }
 
+    /// Update the presale start
+    /// Careful this is in ms since 1970
+    /// @allow ["::admins", "::owner"]
+    pub fn update_presale_start(&mut self, presale_start: TimestampMs) -> bool {
+        self.assert_owner_or_admin();
+        self.sale.presale_start = Some(presale_start);
+        true
+    }
+
+    /// Update the public sale start
+    /// Careful this is in ms since 1970
+    /// @allow ["::admins", "::owner"]
+    pub fn update_public_sale_start(&mut self, public_sale_start: TimestampMs) -> bool {
+        self.assert_owner_or_admin();
+        self.sale.public_sale_start = Some(public_sale_start);
+        true
+    }
+
     #[payable]
     /// Create a pending token that can be claimed with corresponding private key
+    /// @allow ["::admins", "::owner"]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_owner_or_admin();
         let deposit = env::attached_deposit();
