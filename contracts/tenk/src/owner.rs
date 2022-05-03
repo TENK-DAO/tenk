@@ -49,7 +49,11 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) -> bool {
+    pub fn add_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance: Option<u32>,
+    ) -> bool {
         #[cfg(feature = "testnet")]
         self.assert_owner_or_admin();
         let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
@@ -60,7 +64,11 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn update_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance_increase: u32) -> bool {
+    pub fn update_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance_increase: u32,
+    ) -> bool {
         self.assert_owner_or_admin();
         accounts.iter().for_each(|account_id| {
             let allowance = self.whitelist.get(&account_id).unwrap_or(0) + allowance_increase;
@@ -120,7 +128,7 @@ impl Contract {
         true
     }
 
-    /// Update public sale price. 
+    /// Update public sale price.
     /// Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
     /// @allow ["::admins", "::owner"]
     pub fn update_price(&mut self, price: U128) -> bool {
@@ -136,5 +144,26 @@ impl Contract {
         self.assert_owner_or_admin();
         self.sale.presale_price = presale_price;
         true
+    }
+
+    #[payable]
+    /// Create a pending token that can be claimed with corresponding private key
+    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
+        self.assert_owner_or_admin();
+        let deposit = env::attached_deposit();
+        let account = &env::predecessor_account_id();
+        self.assert_can_mint(account, 1);
+        let total_cost = self.cost_of_linkdrop(account).0;
+        self.pending_tokens += 1;
+        let mint_for_free = self.is_owner(account);
+        self.use_whitelist_allowance(account, 1);
+        log!("Total cost of creation is {}", total_cost);
+        refund(account, deposit - total_cost);
+        self.send(public_key, mint_for_free)
+            .then(ext_self::on_send_with_callback(
+                env::current_account_id(),
+                total_cost,
+                GAS_REQUIRED_TO_CREATE_LINKDROP,
+            ))
     }
 }

@@ -24,25 +24,6 @@ trait ExtLinkdrop {
 
 #[near_bindgen]
 impl Contract {
-    #[payable]
-    /// Create a pending token that can be claimed with corresponding private key
-    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
-        let deposit = env::attached_deposit();
-        let account = &env::predecessor_account_id();
-        self.assert_can_mint(account, 1);
-        let total_cost = self.cost_of_linkdrop(account).0;
-        self.pending_tokens += 1;
-        let mint_for_free = self.is_owner(account);
-        self.use_whitelist_allowance(account, 1);
-        log!("Total cost of creation is {}", total_cost);
-        refund(account, deposit - total_cost);
-        self.send(public_key, mint_for_free)
-            .then(ext_self::on_send_with_callback(
-                env::current_account_id(),
-                total_cost,
-                GAS_REQUIRED_TO_CREATE_LINKDROP,
-            ))
-    }
     /// Allows given public key to claim sent balance.
     /// Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
 

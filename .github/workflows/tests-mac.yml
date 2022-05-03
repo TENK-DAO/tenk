@@ -6,12 +6,12 @@ jobs:
   tests:
     strategy:
       matrix:
-        platform: [ubuntu-latest]
+        platform: [macos-latest]
         node-version: ['16']
         toolchain: [stable]
     runs-on: ${{ matrix.platform }}
     env: 
-      SANDBOX_ARTIFACT_URL: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore/Linux-x86_64/master/57362268301554563c4f800af963a1270b3d5283/near-sandbox.tar.gz
+      SANDBOX_ARTIFACT_URL: https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore/Darwin-x86_64/master/57362268301554563c4f800af963a1270b3d5283/near-sandbox.tar.gz
     steps:
       - uses: actions/checkout@v2
       - name: "${{ matrix.toolchain }} with rustfmt, and wasm32"
