@@ -49,7 +49,11 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn add_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance: Option<u32>) -> bool {
+    pub fn add_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance: Option<u32>,
+    ) -> bool {
         #[cfg(feature = "testnet")]
         self.assert_owner_or_admin();
         let allowance = allowance.unwrap_or_else(|| self.sale.allowance.unwrap_or(0));
@@ -60,7 +64,11 @@ impl Contract {
     }
 
     /// @allow ["::admins", "::owner"]
-    pub fn update_whitelist_accounts(&mut self, accounts: Vec<AccountId>, allowance_increase: u32) -> bool {
+    pub fn update_whitelist_accounts(
+        &mut self,
+        accounts: Vec<AccountId>,
+        allowance_increase: u32,
+    ) -> bool {
         self.assert_owner_or_admin();
         accounts.iter().for_each(|account_id| {
             let allowance = self.whitelist.get(&account_id).unwrap_or(0) + allowance_increase;
@@ -120,7 +128,7 @@ impl Contract {
         true
     }
 
-    /// Update public sale price. 
+    /// Update public sale price.
     /// Careful this is in yoctoNear: 1N = 1000000000000000000000000 yN
     /// @allow ["::admins", "::owner"]
     pub fn update_price(&mut self, price: U128) -> bool {
