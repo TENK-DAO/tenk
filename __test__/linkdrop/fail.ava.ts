@@ -23,7 +23,6 @@ import {
     create_account_and_claim,
     deploy,
     linkdropCost,
-    sleep,
 } from "../util";
 
 const base_cost = NEAR.parse("1 N");
@@ -53,7 +52,6 @@ runner.test(
     "Use `claim` to send to existing account without enough gas",
     async (t, { root, tenk }) => {
         const alice = await root.createAccount("alice");
-        await sleep(2000);
         // Create temporary keys for access key on linkdrop
         const [delta, _] = await getDelta(t, tenk, async () => {
             let [linkDelta, senderKey] = await getDelta(t, root, () =>
@@ -101,7 +99,6 @@ runner.test(
         t.assert(await checkKey(senderKey.getPublicKey(), tenk));
         const tokens = await getTokens(tenk, new_account);
         t.assert(tokens.length == 0, "should contain only one token");
-        await sleep(2000);
 
         // await new_account.delete(root.accountId);
     }

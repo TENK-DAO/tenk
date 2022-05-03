@@ -12,7 +12,6 @@ import {
     create_account_and_claim,
     deploy,
     linkdropCost,
-    sleep,
 } from "../util";
 
 const base_cost = NEAR.parse("1 N");
@@ -41,7 +40,6 @@ runner.test(
     "Use `claim` to send to existing account with link created with root",
     async (t, { root, tenk }) => {
         const alice = await root.createAccount("alice");
-        await sleep(2000);
         t.log(NEAR.from(await tenk.view("token_storage_cost")).toHuman());
 
         // Create temporary keys for access key on linkdrop
@@ -70,7 +68,6 @@ runner.test(
     "Use `claim` to send to existing account with normal account",
     async (t, { root, tenk }) => {
         const alice = await root.createAccount("alice");
-        await sleep(2000);
         t.log(NEAR.from(await tenk.view("token_storage_cost")).toHuman());
 
         // Create temporary keys for access key on linkdrop
