@@ -8,7 +8,7 @@ use near_units::parse_near;
 /// 0.064311394105062020653824 N
 pub(crate) const ACCESS_KEY_ALLOWANCE: u128 = parse_near!("0 N");
 
-pub(crate) const LINKDROP_DEPOSIT: u128 = parse_near!("0.1 N");
+pub(crate) const LINKDROP_DEPOSIT: u128 = parse_near!("0.02 N");
 /// can take 0.5 of access key since gas required is 6.6 times what was actually used
 const ON_CREATE_ACCOUNT_GAS: Gas = Gas(30_000_000_000_000);
 const NO_DEPOSIT: Balance = 0;
@@ -24,25 +24,6 @@ trait ExtLinkdrop {
 
 #[near_bindgen]
 impl Contract {
-    #[payable]
-    /// Create a pending token that can be claimed with corresponding private key
-    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
-        let deposit = env::attached_deposit();
-        let account = &env::predecessor_account_id();
-        self.assert_can_mint(account, 1);
-        let total_cost = self.cost_of_linkdrop(account).0;
-        self.pending_tokens += 1;
-        let mint_for_free = self.is_owner(account);
-        self.use_whitelist_allowance(account, 1);
-        log!("Total cost of creation is {}", total_cost);
-        refund(account, deposit - total_cost);
-        self.send(public_key, mint_for_free)
-            .then(ext_self::on_send_with_callback(
-                env::current_account_id(),
-                total_cost,
-                GAS_REQUIRED_TO_CREATE_LINKDROP,
-            ))
-    }
     /// Allows given public key to claim sent balance.
     /// Takes ACCESS_KEY_ALLOWANCE as fee from deposit to cover account creation via an access key.
 
