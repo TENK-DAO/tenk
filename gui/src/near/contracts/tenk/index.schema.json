@@ -259,6 +259,10 @@
     },
     "CreateLinkdrop": {
       "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
       "contractMethod": "change",
       "description": "Create a pending token that can be claimed with corresponding private key",
       "properties": {

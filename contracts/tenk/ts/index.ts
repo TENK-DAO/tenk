@@ -224,30 +224,6 @@ export class Contract {
   constructor(public account: Account, public readonly contractId: string){}
   
   /**
-  * Create a pending token that can be claimed with corresponding private key
-  */
-  async create_linkdrop(args: {
-    public_key: PublicKey;
-  }, options?: ChangeMethodOptions): Promise<void> {
-    return providers.getTransactionLastResult(await this.create_linkdropRaw(args, options));
-  }
-  /**
-  * Create a pending token that can be claimed with corresponding private key
-  */
-  create_linkdropRaw(args: {
-    public_key: PublicKey;
-  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
-    return this.account.functionCall({contractId: this.contractId, methodName: "create_linkdrop", args, ...options});
-  }
-  /**
-  * Create a pending token that can be claimed with corresponding private key
-  */
-  create_linkdropTx(args: {
-    public_key: PublicKey;
-  }, options?: ChangeMethodOptions): transactions.Action {
-    return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
-  }
-  /**
   * Returns the balance associated with given key.
   */
   get_key_balance(args = {}, options?: ViewFunctionOptions): Promise<U128> {
@@ -668,6 +644,33 @@ export class Contract {
     public_sale_start: TimestampMs;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_public_sale_start", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Create a pending token that can be claimed with corresponding private key
+  * @allow ["::admins", "::owner"]
+  */
+  async create_linkdrop(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.create_linkdropRaw(args, options));
+  }
+  /**
+  * Create a pending token that can be claimed with corresponding private key
+  * @allow ["::admins", "::owner"]
+  */
+  create_linkdropRaw(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "create_linkdrop", args, ...options});
+  }
+  /**
+  * Create a pending token that can be claimed with corresponding private key
+  * @allow ["::admins", "::owner"]
+  */
+  create_linkdropTx(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   nft_payout(args: {
     token_id: string;
@@ -1416,29 +1419,6 @@ export class Contract {
   }
 }
 /**
-* Create a pending token that can be claimed with corresponding private key
-* 
-* @contractMethod change
-*/
-export interface CreateLinkdrop {
-  args: {
-    public_key: PublicKey;
-  };
-  options: {
-    /** Units in gas
-    * @pattern [0-9]+
-    * @default "30000000000000"
-    */
-    gas?: string;
-    /** Units in yoctoNear
-    * @default "0"
-    */
-    attachedDeposit?: Balance;
-  }
-  
-}
-export type CreateLinkdrop__Result = void;
-/**
 * Returns the balance associated with given key.
 * 
 * @contractMethod view
@@ -1829,6 +1809,30 @@ export interface UpdatePublicSaleStart {
   
 }
 export type UpdatePublicSaleStart__Result = boolean;
+/**
+* Create a pending token that can be claimed with corresponding private key
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface CreateLinkdrop {
+  args: {
+    public_key: PublicKey;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type CreateLinkdrop__Result = void;
 /**
 * 
 * @contractMethod view

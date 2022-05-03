@@ -166,6 +166,7 @@ impl Contract {
 
     #[payable]
     /// Create a pending token that can be claimed with corresponding private key
+    /// @allow ["::admins", "::owner"]
     pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
         self.assert_owner_or_admin();
         let deposit = env::attached_deposit();
