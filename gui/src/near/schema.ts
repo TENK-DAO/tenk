@@ -1,7 +1,8 @@
 import * as naj from "near-api-js"
-import { init } from '.'
-import { ContractCodeView } from "near-api-js/lib/providers/provider";
-import { JSONSchema7 } from "json-schema";
+import { init } from "."
+import { readCustomSection } from "wasm-walrus-tools"
+import { ContractCodeView } from "near-api-js/lib/providers/provider"
+import { JSONSchema7 } from "json-schema"
 
 export async function fetchSchema(contract: string, near: naj.Near): Promise<JSONSchema7> {
   // TODO handle either HTTP endpoint or IPFS hash
@@ -19,18 +20,26 @@ export async function fetchSchema(contract: string, near: naj.Near): Promise<JSO
   return schema
 }
 
+class NoCustomSectionError extends Error {
+  constructor() {
+    super("Contract Wasm does not have a custom section called \"json\"")
+  }
+}
+
 async function fetchJsonAddress(contract: string, near: naj.Near): Promise<string> {
   const code = await near.connection.provider.query({
     account_id: contract,
     finality: 'final',
     request_type: 'view_code',
   }) as ContractCodeView
-  const wasm = new WebAssembly.Module(Buffer.from(code.code_base64, 'base64'))
-  const arrayBuffer = WebAssembly.Module.customSections(wasm, "json")[0]
+  const wasm = Buffer.from(code.code_base64, "base64")
+  const jsonCustomSection = await readCustomSection(wasm, "json")
 
-  // TODO: throw useful error if no `json` custom section and deal with it where needed
+  if (!jsonCustomSection) {
+    throw new NoCustomSectionError()
+  }
 
-  return new TextDecoder().decode(arrayBuffer)
+  return jsonCustomSection
 }
 
 export type Schema = { schema: { $ref: string } & JSONSchema7 }
