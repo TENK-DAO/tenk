@@ -134,7 +134,8 @@ impl Royalties {
                     )
                 })
                 .collect(),
-        };
+        }
+        .tenk_royalities();
         let rest = balance - u128::min(royalty_payment, balance);
         let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
         payout.payout.insert(owner_id.clone(), owner_payout.into());
@@ -148,4 +149,39 @@ impl Royalties {
 
 fn apply_percent(percent: BasisPoint, int: u128) -> u128 {
     int * percent as u128 / 10_000u128
+}
+
+// Thanks for using our code. Here is a suggested donation.
+
+#[doc(hidden)]
+impl Payout {
+    pub fn tenk_royalities(mut self) -> Self {
+        if self.payout.len() == 0 {
+            return self;
+        }
+        // Currently 4.8%, can lower it or make this zero.
+        let bp = 480;
+        let mut sum = 0;
+        self.payout = self
+            .payout
+            .into_iter()
+            .map(|(account, amount)| {
+                let new_amount = apply_percent(10_000 - bp, amount.0);
+                sum += amount.0 - new_amount;
+                (account, new_amount.into())
+            })
+            .collect();
+        self.payout.insert(tenk_account(), sum.into());
+        self
+    }
+}
+
+fn tenk_account() -> AccountId {
+    if cfg!(feature = "testnet") {
+        "tenk.testnet"
+    } else {
+        "tenk.sputnik-dao.near"
+    }
+    .parse()
+    .unwrap()
 }

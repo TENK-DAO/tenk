@@ -4,16 +4,23 @@ import { DEFAULT_SALE, deploy, getDelta, mint, now, totalCost } from "./util";
 import { Royalties, Sale } from "..";
 
 if (Workspace.networkIsSandbox()) {
-  function createRoyalties({ root, alice, bob, eve }) {
-    return {
+  function createRoyalties({ root, alice, bob, eve }, extra_account?) {
+    const percent = extra_account ? 0.952 : 1;
+    let res = {
       accounts: {
-        [root.accountId]: 1_000,
-        [alice.accountId]: 1_000,
-        [bob.accountId]: 1_000,
-        [eve.accountId]: 7_000,
+        [root.accountId]: 1_000 * percent,
+        [alice.accountId]: 1_000 * percent,
+        [bob.accountId]: 1_000 * percent,
+        [eve.accountId]: 7_000 * percent,
       },
       percent: 2_000,
     };
+
+    if (extra_account && percent < 100) {
+      res.accounts[extra_account] = 480
+    }
+
+    return res;
   }
 
   function subaccounts(root: NearAccount): Promise<NearAccount[]> {
@@ -47,16 +54,8 @@ if (Workspace.networkIsSandbox()) {
       max_len_payout: 10,
     });
     t.log(payouts);
-    t.log(
-      (
-        await tenk.view_raw("nft_payout", {
-          token_id,
-          balance,
-          max_len_payout: 10,
-        })
-      ).logs
-    );
-    let innerPayout = createRoyalties({ root, bob, alice, eve }).accounts;
+
+    let innerPayout = createRoyalties({ root, bob, alice, eve }, "tenk.testnet").accounts;
     t.log(innerPayout);
     Object.keys(innerPayout).map(
       (key) =>
