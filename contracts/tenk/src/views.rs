@@ -23,7 +23,7 @@ impl Contract {
             .into()
     }
 
-    pub fn total_cost(&self, num: u32, minter: &AccountId) -> U128 {
+    pub fn total_cost(&self, num: u16, minter: &AccountId) -> U128 {
         (num as Balance * self.cost_per_token(minter).0).into()
     }
 
@@ -53,12 +53,14 @@ impl Contract {
     }
 
     /// How many tokens an account is still allowed to mint. None, means unlimited
-    pub fn remaining_allowance(&self, account_id: &AccountId) -> Option<u32> {
-        self.whitelist.get(account_id)
+    pub fn remaining_allowance(&self, account_id: &AccountId, new_max: u16) -> Option<u16> {
+        self.whitelist
+            .get(account_id)
+            .map(|a| a.raise_max(new_max).left())
     }
 
     /// Max number of mints in one transaction. None, means unlimited
-    pub fn mint_rate_limit(&self) -> Option<u32> {
+    pub fn mint_rate_limit(&self) -> Option<u16> {
         self.sale.mint_rate_limit
     }
 
@@ -76,8 +78,10 @@ impl Contract {
     /// Information about a current user. Whether they are VIP and how many tokens left in their allowance.
     pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
         let sale_info = self.get_sale_info();
-        let remaining_allowance = if self.is_presale() || self.sale.allowance.is_some() {
-            self.remaining_allowance(account_id)
+        let remaining_allowance = if self.is_presale() {
+            self.remaining_allowance(account_id, 0)
+        } else if let Some(allowance) = self.sale.allowance {
+            self.remaining_allowance(account_id, allowance)
         } else {
             None
         };
@@ -90,6 +94,6 @@ impl Contract {
 
     /// Initial size of collection. Number left to raffle + current total supply
     pub fn initial(&self) -> u64 {
-      self.raffle.len() + self.nft_total_supply().0 as u64
-  }
+        self.raffle.len() + self.nft_total_supply().0 as u64
+    }
 }

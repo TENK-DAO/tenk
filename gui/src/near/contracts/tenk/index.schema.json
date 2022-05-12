@@ -62,6 +62,7 @@
         "::owner"
       ],
       "contractMethod": "change",
+      "description": "Add whitelist accounts at a given max allowance",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -72,8 +73,8 @@
               },
               "type": "array"
             },
-            "allowance": {
-              "$ref": "#/definitions/u32"
+            "max_allowance": {
+              "$ref": "#/definitions/u16"
             }
           },
           "required": [
@@ -493,7 +494,7 @@
     "MintRateLimit__Result": {
       "anyOf": [
         {
-          "$ref": "#/definitions/u32"
+          "$ref": "#/definitions/u16"
         },
         {
           "type": "null"
@@ -800,7 +801,7 @@
           "additionalProperties": false,
           "properties": {
             "num": {
-              "$ref": "#/definitions/u32"
+              "$ref": "#/definitions/u16"
             }
           },
           "required": [
@@ -1361,10 +1362,14 @@
           "properties": {
             "account_id": {
               "$ref": "#/definitions/AccountId"
+            },
+            "new_max": {
+              "$ref": "#/definitions/u16"
             }
           },
           "required": [
-            "account_id"
+            "account_id",
+            "new_max"
           ],
           "type": "object"
         }
@@ -1377,7 +1382,7 @@
     "RemainingAllowance__Result": {
       "anyOf": [
         {
-          "$ref": "#/definitions/u32"
+          "$ref": "#/definitions/u16"
         },
         {
           "type": "null"
@@ -1407,13 +1412,13 @@
       "additionalProperties": false,
       "properties": {
         "allowance": {
-          "$ref": "#/definitions/u32"
+          "$ref": "#/definitions/u16"
         },
         "initial_royalties": {
           "$ref": "#/definitions/Royalties"
         },
         "mint_rate_limit": {
-          "$ref": "#/definitions/u32"
+          "$ref": "#/definitions/u16"
         },
         "presale_price": {
           "$ref": "#/definitions/U128"
@@ -1735,7 +1740,7 @@
               "$ref": "#/definitions/AccountId"
             },
             "num": {
-              "$ref": "#/definitions/u32"
+              "$ref": "#/definitions/u16"
             }
           },
           "required": [
@@ -1817,7 +1822,7 @@
           "additionalProperties": false,
           "properties": {
             "allowance": {
-              "$ref": "#/definitions/u32"
+              "$ref": "#/definitions/u16"
             }
           },
           "required": [
@@ -2189,6 +2194,7 @@
         "::owner"
       ],
       "contractMethod": "change",
+      "description": "Increases allowance for whitelist accounts",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -2200,7 +2206,7 @@
               "type": "array"
             },
             "allowance_increase": {
-              "$ref": "#/definitions/u32"
+              "$ref": "#/definitions/u16"
             }
           },
           "required": [
@@ -2244,7 +2250,7 @@
           "type": "boolean"
         },
         "remaining_allowance": {
-          "$ref": "#/definitions/u32"
+          "$ref": "#/definitions/u16"
         },
         "sale_info": {
           "$ref": "#/definitions/SaleInfo"

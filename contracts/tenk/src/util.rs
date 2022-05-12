@@ -1,4 +1,4 @@
-use near_contract_standards::non_fungible_token::{Token, events::NftMint};
+use near_contract_standards::non_fungible_token::{events::NftMint, Token};
 use near_sdk::{env, AccountId, Promise, PromiseResult};
 
 use crate::TimestampMs;

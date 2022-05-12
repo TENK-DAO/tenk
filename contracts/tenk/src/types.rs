@@ -18,7 +18,7 @@ pub struct InitialMetadata {
 }
 
 impl From<InitialMetadata> for NFTContractMetadata {
-    fn from(inital_metadata: InitialMetadata) -> Self {
+    fn from(initial_metadata: InitialMetadata) -> Self {
         let InitialMetadata {
             spec,
             name,
@@ -27,7 +27,7 @@ impl From<InitialMetadata> for NFTContractMetadata {
             uri,
             reference,
             reference_hash,
-        } = inital_metadata;
+        } = initial_metadata;
         NFTContractMetadata {
             spec: spec.unwrap_or_else(|| NFT_METADATA_SPEC.to_string()),
             name,
@@ -40,6 +40,34 @@ impl From<InitialMetadata> for NFTContractMetadata {
     }
 }
 
+#[derive(BorshSerialize, BorshDeserialize)]
+pub struct Allowance {
+    max: u16,
+    used: u16,
+}
+
+impl Allowance {
+    pub fn new(max: u16) -> Self {
+        Self { max, used: 0 }
+    }
+    pub fn left(&self) -> u16 {
+        self.max - self.used
+    }
+
+    pub fn use_num(&mut self, num: u16) {
+        self.used += num
+    }
+
+    pub fn increase_max(&mut self, num: u16) {
+        self.max += num;
+    }
+
+    pub fn raise_max(mut self, new_max: u16) -> Self {
+        self.max = u16::max(self.max, new_max);
+        self
+    }
+}
+
 #[derive(Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[serde(crate = "near_sdk::serde")]
 #[witgen]
@@ -48,10 +76,10 @@ pub struct Sale {
     pub initial_royalties: Option<Royalties>,
     pub presale_start: Option<TimestampMs>,
     pub public_sale_start: Option<TimestampMs>,
-    pub allowance: Option<u32>,
+    pub allowance: Option<u16>,
     pub presale_price: Option<U128>,
     pub price: U128,
-    pub mint_rate_limit: Option<u32>,
+    pub mint_rate_limit: Option<u16>,
 }
 
 impl Default for Sale {
@@ -103,7 +131,7 @@ pub enum Status {
 pub struct UserSaleInfo {
     pub sale_info: SaleInfo,
     pub is_vip: bool,
-    pub remaining_allowance: Option<u32>,
+    pub remaining_allowance: Option<u16>,
 }
 
 /// Information about the current sale
@@ -123,7 +151,6 @@ pub struct SaleInfo {
     /// Current price for one token
     pub price: U128,
 }
-
 
 #[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
@@ -160,9 +187,6 @@ mod tests {
     #[test]
     fn check_price() {
         let contract = new_contract();
-        assert_eq!(
-            contract.cost_per_token(&account()).0,
-            TEN
-        );
+        assert_eq!(contract.cost_per_token(&account()).0, TEN);
     }
 }
