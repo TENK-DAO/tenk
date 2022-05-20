@@ -1136,36 +1136,42 @@ export declare class Contract {
         metadata: InitialMetadata;
         size: u32;
         sale?: Sale;
+        media_extension?: string;
     }, options?: ChangeMethodOptions): Promise<void>;
     new_default_metaRaw(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
         size: u32;
         sale?: Sale;
+        media_extension?: string;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     new_default_metaTx(args: {
         owner_id: AccountId;
         metadata: InitialMetadata;
         size: u32;
         sale?: Sale;
+        media_extension?: string;
     }, options?: ChangeMethodOptions): transactions.Action;
     new(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
         size: u32;
         sale: Sale;
+        media_extension?: string;
     }, options?: ChangeMethodOptions): Promise<void>;
     newRaw(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
         size: u32;
         sale: Sale;
+        media_extension?: string;
     }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome>;
     newTx(args: {
         owner_id: AccountId;
         metadata: NftContractMetadata;
         size: u32;
         sale: Sale;
+        media_extension?: string;
     }, options?: ChangeMethodOptions): transactions.Action;
     nft_mint(args: {
         token_id: TokenId;
@@ -2099,6 +2105,7 @@ export interface NewDefaultMeta {
         metadata: InitialMetadata;
         size: u32;
         sale?: Sale;
+        media_extension?: string;
     };
     options: {
         /** Units in gas
@@ -2123,6 +2130,7 @@ export interface New {
         metadata: NftContractMetadata;
         size: u32;
         sale: Sale;
+        media_extension?: string;
     };
     options: {
         /** Units in gas
