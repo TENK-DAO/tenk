@@ -30,10 +30,7 @@ impl Contract {
     /// Claim tokens for specific account that are attached to the public key this tx is signed with.
     #[private]
     pub fn claim(&mut self, account_id: AccountId) -> Promise {
-        require!(
-            self.nft_supply_for_owner(account_id.clone()).0 == 0,
-            "Account can only claim one NFT"
-        );
+        self.assert_key(&account_id);
         Promise::new(account_id.clone())
             .transfer(LINKDROP_DEPOSIT)
             .then(ext_self::link_callback(
@@ -58,11 +55,7 @@ impl Contract {
         new_account_id: AccountId,
         new_public_key: PublicKey,
     ) -> Promise {
-        require!(
-            self.nft_supply_for_owner(new_account_id.clone()).0 == 0,
-            "Account can only claim one NFT"
-        );
-
+        self.assert_key(&new_account_id);
         self.create_account(new_account_id.clone(), new_public_key)
             .then(ext_self::link_callback(
                 new_account_id.clone(),
@@ -135,6 +128,19 @@ impl Contract {
             env::current_account_id(),
             "claim,create_account_and_claim".to_string(),
         )
+    }
+
+    fn assert_key(&mut self, account_id: &AccountId) {
+        require!(
+            self.tokens.nft_supply_for_owner(account_id.clone()).0 == 0,
+            "Account can only claim one NFT"
+        );
+        if self.tokens_left() == 0 {
+            let key = env::signer_account_pk();
+            self.accounts.remove(&key);
+            Promise::new(env::current_account_id()).delete_key(key);
+            require!(false, "No tokens left");
+        }
     }
 
     #[allow(dead_code)]

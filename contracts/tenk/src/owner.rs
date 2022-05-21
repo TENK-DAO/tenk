@@ -184,7 +184,6 @@ impl Contract {
         let account = &env::predecessor_account_id();
         self.assert_can_mint(account, 1);
         let total_cost = self.cost_of_linkdrop(account).0;
-        self.pending_tokens += 1;
         let mint_for_free = self.is_owner(account);
         self.use_whitelist_allowance(account, 1);
         log!("Total cost of creation is {}", total_cost);

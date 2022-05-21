@@ -29,14 +29,14 @@ const sale: tenk.Sale = {
   //     "mistcop.near": 6_000,
   //   },
   // },
-  // royalties: {
-  //   percent: 500,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 4_000,
-  //     "project.sputnik-dao.near": 2_000,
-  //     "mistcop.near": 4_000,
-  //   },
-  // },
+  royalties: {
+    percent: 7500,
+    accounts: {
+      "tenk.sputnik-dao.near": 4_000,
+      "project.sputnik-dao.near": 2_000,
+      "mistcop.near": 4_000,
+    },
+  },
 };
 
 

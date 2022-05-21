@@ -209,7 +209,7 @@ impl Contract {
     #[payable]
     pub fn on_send_with_callback(&mut self) {
         if !is_promise_success(None) {
-            self.pending_tokens -= 1;
+            // self.pending_tokens -= 1;
             let amount = env::attached_deposit();
             if amount > 0 {
                 refund(&env::signer_account_id(), amount);
