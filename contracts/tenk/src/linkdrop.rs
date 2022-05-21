@@ -30,19 +30,21 @@ impl Contract {
     /// Claim tokens for specific account that are attached to the public key this tx is signed with.
     #[private]
     pub fn claim(&mut self, account_id: AccountId) -> Promise {
-        // require!(false, "Cannot claim at this time try again later");
-        let (mint_for_free, deletion_promise) = self.delete_current_access_key();
-        deletion_promise
-            .then(Promise::new(account_id.clone()).transfer(LINKDROP_DEPOSIT))
+        require!(
+            self.nft_supply_for_owner(account_id.clone()).0 == 0,
+            "Account can only claim one NFT"
+        );
+        Promise::new(account_id.clone())
+            .transfer(LINKDROP_DEPOSIT)
             .then(ext_self::link_callback(
                 account_id.clone(),
-                mint_for_free,
+                true,
                 env::current_account_id(),
                 self.total_cost(1, &account_id).0,
                 GAS_REQUIRED_FOR_LINKDROP,
             ))
             .then(ext_linkdrop::on_create_and_claim(
-                mint_for_free,
+                true,
                 env::current_account_id(),
                 NO_DEPOSIT,
                 ON_CREATE_ACCOUNT_CALLBACK_GAS,
@@ -56,19 +58,21 @@ impl Contract {
         new_account_id: AccountId,
         new_public_key: PublicKey,
     ) -> Promise {
-        // require!(false, "Cannot claim at this time try again later");
-        let (mint_for_free, deletion_promise) = self.delete_current_access_key();
-        deletion_promise
-            .and(self.create_account(new_account_id.clone(), new_public_key))
+        require!(
+            self.nft_supply_for_owner(new_account_id.clone()).0 == 0,
+            "Account can only claim one NFT"
+        );
+
+        self.create_account(new_account_id.clone(), new_public_key)
             .then(ext_self::link_callback(
                 new_account_id.clone(),
-                mint_for_free,
+                true,
                 env::current_account_id(),
                 self.total_cost(1, &new_account_id).0,
                 GAS_REQUIRED_FOR_LINKDROP,
             ))
             .then(ext_linkdrop::on_create_and_claim(
-                mint_for_free,
+                true,
                 env::current_account_id(),
                 NO_DEPOSIT,
                 ON_CREATE_ACCOUNT_CALLBACK_GAS,
@@ -120,11 +124,11 @@ impl Contract {
         )
     }
 
-    fn add_key(&mut self, key: PublicKey, mint_for_free: bool) -> Promise {
+    fn add_key(&mut self, key: PublicKey, _mint_for_free: bool) -> Promise {
         // insert returns false if key was present
-        if self.accounts.insert(&key, &mint_for_free).is_some() {
-            env::panic_str("key already added");
-        }
+        // if self.accounts.insert(&key, &mint_for_free).is_some() {
+        //     env::panic_str("key already added");
+        // }
         Promise::new(env::current_account_id()).add_access_key(
             key,
             ACCESS_KEY_ALLOWANCE,
@@ -133,6 +137,7 @@ impl Contract {
         )
     }
 
+    #[allow(dead_code)]
     fn delete_current_access_key(&mut self) -> (bool, Promise) {
         let key = env::signer_account_pk();
         let mint_for_free = self.accounts.remove(&key);

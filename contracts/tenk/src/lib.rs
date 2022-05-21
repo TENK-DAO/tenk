@@ -221,7 +221,6 @@ impl Contract {
     #[private]
     pub fn link_callback(&mut self, account_id: AccountId, mint_for_free: bool) -> Token {
         if is_promise_success(None) {
-            self.pending_tokens -= 1;
             self.nft_mint_many_ungaurded(1, &account_id, mint_for_free)[0].clone()
         } else {
             env::panic_str("Promise before Linkdrop callback failed");
@@ -320,13 +319,17 @@ impl Contract {
             self.media_extension.as_ref().unwrap_or(&"png".to_string())
         ));
         let reference = Some(format!("{}.json", token_id));
-        let title = Some(token_id.to_string());
+        let title = Some(format!(
+            "{} #{}",
+            self.metadata.get().unwrap().name,
+            token_id.to_string()
+        ));
         TokenMetadata {
             title, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             media, // URL to associated media, preferably to decentralized, content-addressed storage
             issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
-            reference,            // URL to an off-chain JSON file with more info.
-            description: None,    // free-form description
+            reference, // URL to an off-chain JSON file with more info.
+            description: Some("https://tenk.dev".into()), // free-form description
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
             copies: None, // number of copies of this set of metadata in existence when token was minted.
             expires_at: None, // ISO 8601 datetime when token expires
