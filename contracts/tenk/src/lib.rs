@@ -39,17 +39,20 @@ use util::{current_time_ms, is_promise_success, log_mint, refund};
 pub struct Contract {
     pub(crate) tokens: NonFungibleToken,
     metadata: LazyOption<NFTContractMetadata>,
-    // Vector of available NFTs
+    /// Vector of available NFTs
     raffle: Raffle,
     pending_tokens: u32,
-    // Linkdrop fields will be removed once proxy contract is deployed
+    /// Linkdrop fields will be removed once proxy contract is deployed
     pub accounts: LookupMap<PublicKey, bool>,
-    // Whitelist
+    /// Whitelist
     whitelist: LookupMap<AccountId, Allowance>,
 
     sale: Sale,
 
     admins: UnorderedSet<AccountId>,
+
+    /// extension for generating media links
+    media_extension: Option<String>,
 }
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
@@ -93,14 +96,33 @@ impl Contract {
         metadata: InitialMetadata,
         size: u32,
         sale: Option<Sale>,
+        media_extension: Option<String>,
     ) -> Self {
-        Self::new(owner_id, metadata.into(), size, sale.unwrap_or_default())
+        Self::new(
+            owner_id,
+            metadata.into(),
+            size,
+            sale.unwrap_or_default(),
+            media_extension,
+        )
     }
 
     #[init]
-    pub fn new(owner_id: AccountId, metadata: NFTContractMetadata, size: u32, sale: Sale) -> Self {
+    pub fn new(
+        owner_id: AccountId,
+        metadata: NFTContractMetadata,
+        size: u32,
+        sale: Sale,
+        media_extension: Option<String>,
+    ) -> Self {
         metadata.assert_valid();
         sale.validate();
+        if let Some(ext) = media_extension.as_ref() {
+            require!(
+                !ext.starts_with('.'),
+                "media extension must not start with '.'"
+            );
+        }
         Self {
             tokens: NonFungibleToken::new(
                 StorageKey::NonFungibleToken,
@@ -116,6 +138,7 @@ impl Contract {
             whitelist: LookupMap::new(StorageKey::Whitelist),
             sale,
             admins: UnorderedSet::new(StorageKey::Admins),
+            media_extension,
         }
     }
 
@@ -291,7 +314,11 @@ impl Contract {
     }
 
     fn create_metadata(&mut self, token_id: &str) -> TokenMetadata {
-        let media = Some(format!("{}.png", token_id));
+        let media = Some(format!(
+            "{}.{}",
+            token_id,
+            self.media_extension.as_ref().unwrap_or(&"png".to_string())
+        ));
         let reference = Some(format!("{}.json", token_id));
         let title = Some(token_id.to_string());
         TokenMetadata {

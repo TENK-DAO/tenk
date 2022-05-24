@@ -181,6 +181,7 @@ mod tests {
                 price: TEN.into(),
                 ..Default::default()
             }),
+            None,
         )
     }
 

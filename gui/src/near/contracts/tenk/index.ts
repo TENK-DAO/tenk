@@ -1336,6 +1336,7 @@ export class Contract {
     metadata: InitialMetadata;
     size: u32;
     sale?: Sale;
+    media_extension?: string;
   }, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.new_default_metaRaw(args, options));
   }
@@ -1344,6 +1345,7 @@ export class Contract {
     metadata: InitialMetadata;
     size: u32;
     sale?: Sale;
+    media_extension?: string;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "new_default_meta", args, ...options});
   }
@@ -1352,6 +1354,7 @@ export class Contract {
     metadata: InitialMetadata;
     size: u32;
     sale?: Sale;
+    media_extension?: string;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("new_default_meta", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
@@ -1360,6 +1363,7 @@ export class Contract {
     metadata: NftContractMetadata;
     size: u32;
     sale: Sale;
+    media_extension?: string;
   }, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.newRaw(args, options));
   }
@@ -1368,6 +1372,7 @@ export class Contract {
     metadata: NftContractMetadata;
     size: u32;
     sale: Sale;
+    media_extension?: string;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "new", args, ...options});
   }
@@ -1376,6 +1381,7 @@ export class Contract {
     metadata: NftContractMetadata;
     size: u32;
     sale: Sale;
+    media_extension?: string;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("new", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
@@ -2375,6 +2381,7 @@ export interface NewDefaultMeta {
     metadata: InitialMetadata;
     size: u32;
     sale?: Sale;
+    media_extension?: string;
   };
   options: {
     /** Units in gas
@@ -2400,6 +2407,7 @@ export interface New {
     metadata: NftContractMetadata;
     size: u32;
     sale: Sale;
+    media_extension?: string;
   };
   options: {
     /** Units in gas

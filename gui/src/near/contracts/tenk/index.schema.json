@@ -508,6 +508,9 @@
         "args": {
           "additionalProperties": false,
           "properties": {
+            "media_extension": {
+              "type": "string"
+            },
             "metadata": {
               "$ref": "#/definitions/NftContractMetadata"
             },
@@ -560,6 +563,9 @@
         "args": {
           "additionalProperties": false,
           "properties": {
+            "media_extension": {
+              "type": "string"
+            },
             "metadata": {
               "$ref": "#/definitions/InitialMetadata"
             },

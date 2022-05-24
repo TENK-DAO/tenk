@@ -87,7 +87,6 @@ record sale-info {
 
 
 
-
 ///  Returns the balance associated with given key.
 get-key-balance: function() -> u128
 
@@ -386,9 +385,9 @@ get-user-sale-info: function(account-id: account-id) -> user-sale-info
 initial: function() -> u64
 
 ///  change
-new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>)
+new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>, media-extension: option<string>)
 ///  change
-new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale)
+new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale, media-extension: option<string>)
 ///  change
 nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadata: token-metadata) -> token
 
