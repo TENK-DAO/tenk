@@ -32,9 +32,8 @@ const sale: tenk.Sale = {
   royalties: {
     percent: 7500,
     accounts: {
-      "tenk.sputnik-dao.near": 4_000,
-      "project.sputnik-dao.near": 2_000,
-      "mistcop.near": 4_000,
+      "tenk.sputnik-dao.near": 10_000,
+      
     },
   },
 };
