@@ -6,34 +6,34 @@ import { binPath } from "./utils";
 import { icon } from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-    uri: "https://bafybeifg5m4kvnrnf5cv2qtdcno5d33p3nkgfdec4dv76cghzfivhtbx4a.ipfs.dweb.link",
+    uri: "https://bafybeib3jhq2ytsjcdxfbiyiflxkjxkgk2s2yabw2nd2mzj62biur63kou.ipfs.dweb.link",
     name: "Friendly Turtles",
     symbol: "friendlyturtles.nearocean",
     icon,
 };
 
-const size = 1_000;
+const size = 993;
 
 const sale: tenk.Sale = {
     price: NEAR.parse("10 N").toJSON(),
     // presale_price: NEAR.parse("6 N").toJSON(),
     mint_rate_limit: 2,
     // allowance: 1,
-    // presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-    public_sale_start: Date.now(),
-    // initial_royalties: {
-    //     percent: 10_000,
-    //     accounts: {
-    //         "tenk.sputnik-dao.near": 2_000,
-    //         "fscmint.near": 2_500,
-    //         "fscdonation.near": 2_500,
-    //         "sixxx.near": 1_000,
-    //         "within4d45.near": 500,
-    //         "kcpesce.near": 500,
-    //         "fscmint.near": 500,
-    //         "beetogether.near": 500,
-    //     },
-    // },
+    presale_start: Date.parse("27 April 2022 1:00 AM UTC"),
+    public_sale_start: Date.parse("27 April 2022 7:00 PM UTC"),
+    initial_royalties: {
+        percent: 10_000,
+        accounts: {
+            "tenk.sputnik-dao.near": 2_000,
+            "fscmint.near": 2_500,
+            "fscdonation.near": 2_500,
+            "sixxx.near": 1_000,
+            "within4d45.near": 500,
+            "kcpesce.near": 500,
+            "fscteam.near": 500,
+            "beetogether.near": 500,
+        },
+    },
     royalties: {
         percent: 600,
         accounts: {
@@ -69,7 +69,7 @@ export async function main({ account, nearAPI, argv, near }: Context) {
         metadata,
         size,
         sale,
-        media_extension: "gif",
+        // media_extension: "png",
     };
 
     const contract = new tenk.Contract(account, contractId);

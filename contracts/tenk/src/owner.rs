@@ -196,4 +196,15 @@ impl Contract {
                 GAS_REQUIRED_TO_CREATE_LINKDROP,
             ))
     }
+
+    /// Mint special tokens
+    /// @allow ["::admins", "::owner"]
+    pub fn mint_special(&mut self) {
+        self.assert_owner_or_admin();
+        let contract_id = env::current_account_id();
+        let tokens = (993u16..1000)
+            .map(|id| self.internal_mint(id.to_string(), contract_id.clone(), None))
+            .collect::<Vec<Token>>();
+        log_mint(&contract_id, &tokens)
+    }
 }
