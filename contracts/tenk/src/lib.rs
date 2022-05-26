@@ -320,7 +320,7 @@ impl Contract {
             self.media_extension.as_ref().unwrap_or(&"png".to_string())
         ));
         let reference = Some(format!("{}.json", token_id));
-        let title = Some(token_id.to_string());
+        let title = Some(format!("{} #{token_id}", self.metadata.get().unwrap().name));
         TokenMetadata {
             title, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             media, // URL to associated media, preferably to decentralized, content-addressed storage
