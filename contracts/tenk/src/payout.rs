@@ -156,7 +156,8 @@ fn apply_percent(percent: BasisPoint, int: u128) -> u128 {
 #[doc(hidden)]
 impl Payout {
     pub fn tenk_royalities(mut self) -> Self {
-        if self.payout.len() == 0 {
+        let tenk = tenk_account();
+        if self.payout.len() == 0 || self.payout.contains_key(&tenk) {
             return self;
         }
         // Currently 4.8%, can lower it or make this zero.
