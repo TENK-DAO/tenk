@@ -96,4 +96,9 @@ impl Contract {
     pub fn initial(&self) -> u64 {
         self.raffle.len() + self.nft_total_supply().0 as u64
     }
+
+    /// How many linkdrops have yet to be claimed
+    pub fn pending_tokens(&self) -> u32 {
+      self.pending_tokens
+    }
 }

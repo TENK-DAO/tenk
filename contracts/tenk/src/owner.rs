@@ -1,4 +1,4 @@
-use crate::*;
+use crate::{util::log_burn, *};
 
 #[near_bindgen]
 impl Contract {
@@ -206,5 +206,23 @@ impl Contract {
             .map(|id| self.internal_mint(id.to_string(), contract_id.clone(), None))
             .collect::<Vec<Token>>();
         log_mint(&contract_id, &tokens)
+    }
+
+    /// Raffle number of tokens and do not mint them.
+    /// Be careful!
+    /// @allow ["::admins", "::owner"]
+    pub fn burn_unminted(&mut self, num: u32) -> Vec<String> {
+        self.assert_owner_or_admin();
+        require!(num > 0, "num must be greater than 0");
+        require!(
+            self.raffle.len() - self.pending_tokens as u64 >= num as u64,
+            "Cannot burn any more tokens"
+        );
+        let mut token_ids = Vec::with_capacity(num as usize);
+        for _ in 0..num {
+            token_ids.push((self.raffle.draw() + 1).to_string())
+        }
+        log_burn(&env::signer_account_id(), &token_ids);
+        token_ids
     }
 }

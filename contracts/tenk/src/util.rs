@@ -1,4 +1,4 @@
-use near_contract_standards::non_fungible_token::{events::NftMint, Token};
+use near_contract_standards::non_fungible_token::{events::{NftMint, NftBurn}, Token};
 use near_sdk::{env, AccountId, Promise, PromiseResult};
 
 use crate::TimestampMs;
@@ -47,4 +47,16 @@ pub fn log_mint(owner_id: &AccountId, tokens: &[Token]) {
         memo: None,
     }
     .emit()
+}
+
+
+pub fn log_burn(owner_id: &AccountId, tokens: &Vec<String>) {
+  let token_ids = &tokens.iter().map(|t| t.as_str()).collect::<Vec<&str>>();
+  NftBurn {
+      owner_id,
+      token_ids,
+      authorized_id: None,
+      memo: None,
+  }
+  .emit();
 }
