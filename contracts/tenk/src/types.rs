@@ -107,6 +107,19 @@ impl Sale {
             r.validate()
         }
     }
+
+    pub fn payout(
+        &self,
+        amount: u128,
+        ty: RoyaltyType,
+        owner_id: Option<&AccountId>,
+    ) -> Option<Payout> {
+        match ty {
+            RoyaltyType::Primary => self.initial_royalties.as_ref(),
+            RoyaltyType::Secondary => self.royalties.as_ref(),
+        }
+        .map(|r| r.create_payout(amount, owner_id))
+    }
 }
 /// Current state of contract
 #[witgen]
@@ -150,6 +163,16 @@ pub struct SaleInfo {
     pub token_final_supply: u64,
     /// Current price for one token
     pub price: U128,
+}
+
+
+/// Primary is during initial mint. Secondary is for market places.
+#[witgen]
+#[derive(Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub enum RoyaltyType {
+    Primary,
+    Secondary,
 }
 
 #[cfg(not(target_arch = "wasm32"))]

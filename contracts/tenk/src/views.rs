@@ -99,6 +99,11 @@ impl Contract {
 
     /// How many linkdrops have yet to be claimed
     pub fn pending_tokens(&self) -> u32 {
-      self.pending_tokens
+        self.pending_tokens
+    }
+
+    /// Royality payout
+    pub fn royalty_payout(&self, amount: U128, ty: RoyaltyType) -> Payout {
+        self.sale.payout(amount.0, ty, None).unwrap()
     }
 }

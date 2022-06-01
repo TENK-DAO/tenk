@@ -225,4 +225,13 @@ impl Contract {
         log_burn(&env::signer_account_id(), &token_ids);
         token_ids
     }
+
+    /// Split funds from  contract among royality accounts
+    /// @allow ["::admins", "::owner"]
+    pub fn split_contract_funds(&self, amount: U128, ty: RoyaltyType) {
+        self.assert_owner_or_admin();
+        let available_balance = env::account_balance() - env::account_locked_balance();
+        require!(amount.0 < available_balance, "Insufficent balance");
+        self.royalty_payout(amount, ty).send_funds()
+    }
 }
