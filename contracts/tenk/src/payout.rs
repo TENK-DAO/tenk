@@ -134,8 +134,7 @@ impl Royalties {
                     )
                 })
                 .collect(),
-        }
-        .tenk_royalities();
+        };
         if let Some(owner_id) = owner_id {
             let rest = balance - u128::min(royalty_payment, balance);
             let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
