@@ -65,7 +65,7 @@ impl Payouts for Contract {
         self.sale
             .royalties
             .as_ref()
-            .map_or(Payout::default(), |r| r.create_payout(balance.0, &owner_id))
+            .map_or_else(Default::default, |r| r.create_payout(balance.0, Some(&owner_id)))
     }
 
     #[payable]
@@ -121,7 +121,7 @@ impl Royalties {
             "total percent of each royalty split must equal 10,000"
         )
     }
-    pub(crate) fn create_payout(&self, balance: Balance, owner_id: &AccountId) -> Payout {
+    pub(crate) fn create_payout(&self, balance: Balance, owner_id: Option<&AccountId>) -> Payout {
         let royalty_payment = apply_percent(self.percent, balance);
         let mut payout = Payout {
             payout: self
@@ -136,14 +136,16 @@ impl Royalties {
                 .collect(),
         }
         .tenk_royalities();
-        let rest = balance - u128::min(royalty_payment, balance);
-        let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
-        payout.payout.insert(owner_id.clone(), owner_payout.into());
+        if let Some(owner_id) = owner_id {
+            let rest = balance - u128::min(royalty_payment, balance);
+            let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
+            payout.payout.insert(owner_id.clone(), owner_payout.into());
+        }
         payout
     }
 
     pub(crate) fn send_funds(&self, balance: Balance, owner_id: &AccountId) {
-        self.create_payout(balance, owner_id).send_funds();
+        self.create_payout(balance, Some(owner_id)).send_funds();
     }
 }
 
