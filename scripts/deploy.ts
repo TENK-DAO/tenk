@@ -6,7 +6,7 @@ import { binPath } from "./utils";
 import { icon } from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-    uri: "https://bafybeib3jhq2ytsjcdxfbiyiflxkjxkgk2s2yabw2nd2mzj62biur63kou.ipfs.dweb.link",
+    uri: "https://bafybeiffohfsrx577momb7u7d4ei4vi7de2bnglheqy6kmvmnke457k6lq.ipfs.dweb.link",
     name: "Friendly Turtles",
     symbol: "friendlyturtles.nearocean",
     icon,
