@@ -40,7 +40,6 @@ function updateAttrs(attrs: Trait[], json: any): Trait[] {
     
   // Delete Nose
   attrs = attrs.filter(not(isNose))
-
   
   if (attrs.some(({ trait_type }) => trait_type === "Nose")) {
       throw new Error("Should not be a nose")
@@ -52,6 +51,7 @@ function updateAttrs(attrs: Trait[], json: any): Trait[] {
       attrs = attrs.filter(not(isSpecialEquipment));
       specialEquipment.value = specialEquipment.value.replace("Ninja Head", "Ninja").replace("Helmet", "Astronaut Helmet");
       specialEquipment.trait_type = "Hat";
+      specialEquipment.rarity = '1';
       attrs.push(specialEquipment);
       // console.log(json)
   }
@@ -71,12 +71,23 @@ function updateAttrs(attrs: Trait[], json: any): Trait[] {
   }
 
   attrs.map(trait => {
+    if (trait.trait_type === "Gadgets") {
+      if (trait.value === "Nothing") {
+        trait.rarity = '37';
+      }
+    }
     if (trait.trait_type === "Mouth") {
       trait.value = trait.value.replace(" fat", "");
     }
     if (trait.trait_type === "Eyes") {
       trait.value = trait.value.replace("Golden ", "");
       trait.value = trait.value[0].toUpperCase() + trait.value.slice(1);
+      if (json.edition == 701) {
+        trait.rarity = '5';
+      }
+      if (json.edition == 669) {
+        trait.rarity = '11';
+      }
     }
 
     if (trait.trait_type === "Shell") {
