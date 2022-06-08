@@ -6,36 +6,34 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
-  name: "TENK NFT",
-  symbol: "TENK",
+  uri: "https://bafybeidtf2sremkggt7ivcl4mh4nvrz65il5ozllfe2lyvhnizgrqhvmtu.ipfs.dweb.link",
+  name: "Cattyverse Paddock Club Gen 1 ",
+  symbol: "CVPC_1",
   icon,
 };
 
-const size = 10_000;
+const size = 1_111;
  
 const sale: tenk.Sale = {
-  price: NEAR.parse("1 N").toJSON(),
-  // presale_price: NEAR.parse("6 N").toJSON(),
-  mint_rate_limit: 6,
-  // presale_start: Date.parse("05 April 2022 4:00 PM UTC"),
-  public_sale_start: Date.now(),
-  // initial_royalties: {
-  //   percent: 10_000,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 2_000,
-  //     "project.sputnik-dao.near": 2_000,
-  //     "mistcop.near": 6_000,
-  //   },
-  // },
-  // royalties: {
-  //   percent: 500,
-  //   accounts: {
-  //     "tenk.sputnik-dao.near": 4_000,
-  //     "project.sputnik-dao.near": 2_000,
-  //     "mistcop.near": 4_000,
-  //   },
-  // },
+  price: NEAR.parse("6 N").toJSON(),
+  presale_price: NEAR.parse("4 N").toJSON(),
+  mint_rate_limit: 8,
+  presale_start: Date.parse("09 June 2022 4:00 PM UTC"),
+  public_sale_start: Date.parse("10 June 2022 2:00 PM UTC"),
+  initial_royalties: {
+    percent: 10_000,
+    accounts: {
+      "tenk.sputnik-dao.near": 2_500,
+      "cattyverse.sputnik-dao.near": 7_500,
+    },
+  },
+  royalties: {
+    percent: 700,
+    accounts: {
+      "tenk.sputnik-dao.near": 2_500,
+      "cattyverse.sputnik-dao.near": 7_500,
+    },
+  },
 };
 
 
