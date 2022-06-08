@@ -8,7 +8,7 @@
     "pretest": "npm run build:testnet && npm run lint",
     "upload:nft": "ts-node ./scripts/nft-uploader.ts",
     "build:testnet": "npm run build -- --features testnet",
-    "build": "cargo build --target wasm32-unknown-unknown --release",
+    "build": "raen build --release --standards",
     "test": "ava",
     "test:testnet": "NEAR_WORKSPACES_NETWORK=testnet npm run test",
     "test:linkdrop": "npm run test:testnet '*/linkdrop/*'",
@@ -42,6 +42,7 @@
     "near-cli": "git+https://github.com/ahalabs/near-cli#betav1",
     "near-workspaces-ava": "^1.1.0",
     "nft.storage": "^6.2.0",
+    "raen-cli": "^0.0.5",
     "ts-node": "^10.4.0",
     "typedoc": "^0.22.15",
     "typescript": "^4.5.5",
@@ -49,6 +50,6 @@
   },
   "dependencies": {
     "ipfs-car": "^0.7.0",
-    "near-api-js": "git+https://github.com/ahalabs/near-api-js#betav1"
+    "near-api-js": "github:ahalabs/near-api-js#betav1"
   }
 }
