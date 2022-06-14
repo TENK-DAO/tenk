@@ -2,7 +2,7 @@ import { KeyPairEd25519 } from "near-api-js/lib/utils";
 import { join } from "path";
 
 export function binPath(name) {
-  const RUST_BIN_FOLDER = ["target", "wasm32-unknown-unknown", "release"];
+  const RUST_BIN_FOLDER = ["target", "res"];
   return join(__dirname, "..", ...RUST_BIN_FOLDER, `${name}.wasm`);
 }
 
