@@ -53,10 +53,10 @@ impl Contract {
     }
 
     /// How many tokens an account is still allowed to mint. None, means unlimited
-    pub fn remaining_allowance(&self, account_id: &AccountId, new_max: u16) -> Option<u16> {
+    pub fn remaining_allowance(&self, account_id: &AccountId, new_max: Option<u16>) -> Option<u16> {
         self.whitelist
             .get(account_id)
-            .map(|a| a.raise_max(new_max).left())
+            .map(|a| a.raise_max(new_max.unwrap_or(0)).left())
     }
 
     /// Max number of mints in one transaction. None, means unlimited
@@ -79,9 +79,9 @@ impl Contract {
     pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
         let sale_info = self.get_sale_info();
         let remaining_allowance = if self.is_presale() {
-            self.remaining_allowance(account_id, 0)
+            self.remaining_allowance(account_id, None)
         } else if let Some(allowance) = self.sale.allowance {
-            self.remaining_allowance(account_id, allowance)
+            self.remaining_allowance(account_id, Some(allowance))
         } else {
             None
         };
