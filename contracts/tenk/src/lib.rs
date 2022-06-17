@@ -320,11 +320,15 @@ impl Contract {
             self.media_extension.as_ref().unwrap_or(&"png".to_string())
         ));
         let reference = Some(format!("{}.json", token_id));
-        let title = Some(token_id.to_string());
+        let title = Some(format!(
+            "{} #{}",
+            self.metadata.get().unwrap().name,
+            token_id.to_string()
+        ));
         TokenMetadata {
             title, // ex. "Arch Nemesis: Mail Carrier" or "Parcel #5055"
             media, // URL to associated media, preferably to decentralized, content-addressed storage
-            issued_at: Some(env::block_timestamp().to_string()), // ISO 8601 datetime when token was issued or minted
+            issued_at: Some(current_time_ms().to_string()), // ISO 8601 datetime when token was issued or minted
             reference,            // URL to an off-chain JSON file with more info.
             description: None,    // free-form description
             media_hash: None, // Base64-encoded sha256 hash of content referenced by the `media` field. Required if `media` is included.
