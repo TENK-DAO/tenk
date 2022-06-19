@@ -196,4 +196,17 @@ impl Contract {
                 GAS_REQUIRED_TO_CREATE_LINKDROP,
             ))
     }
+
+    /// Burn unminted tokens
+    /// @allow ["::admins", "::owner"]
+    pub fn burn_tokens(&mut self, num: u32) -> Vec<u64> {
+        self.assert_owner_or_admin();
+        require!(num > 0, "num must be greater than 0");
+        require!(num <= self.tokens_left(), "Cannot burn any more tokens");
+        let mut token_ids = Vec::with_capacity(num as usize);
+        for _ in 0..num {
+            token_ids.push(self.raffle.draw())
+        }
+        token_ids
+    }
 }
