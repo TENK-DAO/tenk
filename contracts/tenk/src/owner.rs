@@ -48,6 +48,16 @@ impl Contract {
         true
     }
 
+    /// @allow ["::admins", "::owner"]
+    pub fn update_icon(&mut self, icon: String) -> bool {
+        self.assert_owner_or_admin();
+        let mut metadata = self.metadata.get().unwrap();
+        log!("New icon: {}", &icon);
+        metadata.icon = Some(icon);
+        self.metadata.set(&metadata);
+        true
+    }
+
     /// Add whitelist accounts at a given max allowance
     /// @allow ["::admins", "::owner"]
     pub fn add_whitelist_accounts(
