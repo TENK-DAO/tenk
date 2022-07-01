@@ -196,4 +196,14 @@ impl Contract {
                 GAS_REQUIRED_TO_CREATE_LINKDROP,
             ))
     }
+
+    #[payable]
+    /// Delete an linkdrop and decrease the number of pending tokens.
+    /// @allow ["::admins", "::owner"]
+    pub fn delete_linkdrop(&mut self, public_key: PublicKey) -> Promise {
+        self.assert_owner_or_admin();
+        let promise = self.delete_access_key(public_key).1;
+        self.pending_tokens -= 1;
+        promise
+    }
 }
