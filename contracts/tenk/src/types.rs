@@ -1,3 +1,5 @@
+use near_sdk::CryptoHash;
+
 use crate::*;
 
 /// String of yocto NEAR; 1N = 1000000000000000000000000 yN
@@ -191,3 +193,7 @@ mod tests {
         assert_eq!(contract.cost_per_token(&account()).0, TEN);
     }
 }
+
+/// Id for roketo stream
+#[witgen]
+pub type StreamId = String;
