@@ -133,13 +133,16 @@ impl Contract {
         )
     }
 
-    fn delete_current_access_key(&mut self) -> (bool, Promise) {
-        let key = env::signer_account_pk();
-        let mint_for_free = self.accounts.remove(&key);
+    pub(crate) fn delete_access_key(&mut self, public_key: PublicKey) -> (bool, Promise) {
+        let mint_for_free = self.accounts.remove(&public_key);
         require!(mint_for_free.is_some(), "Can't use a full access key.");
         (
             mint_for_free.unwrap(),
-            Promise::new(env::current_account_id()).delete_key(key),
+            Promise::new(env::current_account_id()).delete_key(public_key),
         )
+    }
+
+    fn delete_current_access_key(&mut self) -> (bool, Promise) {
+        self.delete_access_key(env::signer_account_pk())
     }
 }
