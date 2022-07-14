@@ -72,6 +72,14 @@ impl Contract {
         true
     }
 
+    /// Remove whitelisted account. If account is removed, the number of tokens left in returned.
+    /// @allow ["::admins", "::owner"]
+    pub fn remove_whitelist_account(&mut self, account_id: AccountId) -> Option<u16> {
+        self.assert_owner_or_admin();
+        self.whitelist.remove(&account_id).as_ref().map(Allowance::left)
+    }
+
+
     /// Increases allowance for whitelist accounts
     /// @allow ["::admins", "::owner"]
     pub fn update_whitelist_accounts(
