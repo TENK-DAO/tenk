@@ -31,10 +31,13 @@ impl Contract {
         true
     }
 
+    /// This is the allowance during the public sale.
+    /// When an allowance isn't provided, it is unlimited.
+    /// e.g. submit with no `allowance` argument
     /// @allow ["::admins", "::owner"]
-    pub fn update_allowance(&mut self, allowance: u16) -> bool {
+    pub fn update_allowance(&mut self, allowance: Option<u16>) -> bool {
         self.assert_owner_or_admin();
-        self.sale.allowance = Some(allowance);
+        self.sale.allowance = allowance;
         true
     }
 
