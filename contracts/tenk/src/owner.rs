@@ -31,10 +31,13 @@ impl Contract {
         true
     }
 
+    /// This is the allowance during the public sale.
+    /// When an allowance isn't provided, it is unlimited.
+    /// e.g. submit with no `allowance` argument
     /// @allow ["::admins", "::owner"]
-    pub fn update_allowance(&mut self, allowance: u16) -> bool {
+    pub fn update_allowance(&mut self, allowance: Option<u16>) -> bool {
         self.assert_owner_or_admin();
-        self.sale.allowance = Some(allowance);
+        self.sale.allowance = allowance;
         true
     }
 
@@ -68,6 +71,14 @@ impl Contract {
         });
         true
     }
+
+    /// Remove whitelisted account. If account is removed, the number of tokens left in returned.
+    /// @allow ["::admins", "::owner"]
+    pub fn remove_whitelist_account(&mut self, account_id: AccountId) -> Option<u16> {
+        self.assert_owner_or_admin();
+        self.whitelist.remove(&account_id).as_ref().map(Allowance::left)
+    }
+
 
     /// Increases allowance for whitelist accounts
     /// @allow ["::admins", "::owner"]
