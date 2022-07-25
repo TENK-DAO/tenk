@@ -410,7 +410,7 @@ impl Contract {
     }
 
     // Owner private methods
-
+    /// @allow ["::owner"]
     pub fn transfer_ownership(&mut self, new_owner: AccountId) {
         self.assert_owner();
         env::log_str(&format!(
@@ -420,17 +420,20 @@ impl Contract {
         self.tokens.owner_id = new_owner;
     }
 
+    /// @allow ["::owner"]
     pub fn update_royalties(&mut self, royalties: Royalties) {
         self.assert_owner();
         royalties.validate();
         self.sale.royalties = Some(royalties);
     }
 
+    /// @allow ["::owner"]
     pub fn update_allowance(&mut self, allowance: u32) {
         self.assert_owner();
         self.sale.allowance = Some(allowance);
     }
 
+    /// @allow ["::owner"]
     pub fn update_uri(&mut self, uri: String) {
         self.assert_owner();
         let mut metadata = self.metadata.get().unwrap();
