@@ -89,3 +89,23 @@ runner.test("presale allowance should only allow 2 then 2 in public", async (t, 
     tokens = await getTokens(tenk, alice);
     t.assert(tokens.length == 4);
 });
+
+
+runner.test("presale allowance should only allow 1", async (t, { root, tenk, alice }) => {
+  await root.call(tenk, "add_whitelist_accounts", { accounts: [alice], max_allowance: 1 });
+  const cost = await totalCost(tenk, 1, alice.accountId);
+  await mint(tenk, alice, cost);
+  let last_try = await mint_raw(tenk, alice, cost);
+  t.assert(last_try.failed, "tx didn't fail");
+  const tokens = await getTokens(tenk, alice);
+  t.assert(tokens.length == 1);
+
+  await root.call(tenk, "start_sale", {})
+  t.log(await tenk.view("get_sale_info"));
+
+  t.is(await tenk.view("remaining_allowance",{account_id: alice}), 1);
+
+  t.assert(await root.call(tenk, "update_allowance", {}));
+
+  t.is(await tenk.view("remaining_allowance",{account_id: alice}), null);
+});

@@ -53,10 +53,17 @@ impl Contract {
     }
 
     /// How many tokens an account is still allowed to mint. None, means unlimited
-    pub fn remaining_allowance(&self, account_id: &AccountId, new_max: Option<u16>) -> Option<u16> {
+    pub fn remaining_allowance(&self, account_id: &AccountId) -> Option<u16> {
+        let allowance = if self.is_presale() {
+            0
+        } else if let Some(allowance) = self.sale.allowance {
+            allowance
+        } else {
+            return None;
+        };
         self.whitelist
             .get(account_id)
-            .map(|a| a.raise_max(new_max.unwrap_or(0)).left())
+            .map(|a| a.raise_max(allowance).left())
     }
 
     /// Max number of mints in one transaction. None, means unlimited
@@ -78,13 +85,7 @@ impl Contract {
     /// Information about a current user. Whether they are VIP and how many tokens left in their allowance.
     pub fn get_user_sale_info(&self, account_id: &AccountId) -> UserSaleInfo {
         let sale_info = self.get_sale_info();
-        let remaining_allowance = if self.is_presale() {
-            self.remaining_allowance(account_id, None)
-        } else if let Some(allowance) = self.sale.allowance {
-            self.remaining_allowance(account_id, Some(allowance))
-        } else {
-            None
-        };
+        let remaining_allowance = self.remaining_allowance(account_id);
         UserSaleInfo {
             sale_info,
             remaining_allowance,
