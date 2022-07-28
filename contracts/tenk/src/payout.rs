@@ -62,10 +62,39 @@ impl Payouts for Contract {
             .owner_by_id
             .get(&token_id)
             .expect("No such token_id");
-        self.sale
+
+        // If there is a stream attached to the token then we need to reserve some balance to cover the fee
+        let (balance, balance_needed) = if let Some(RoketoStream {
+            storage_balance_needed,
+            ..
+        }) = self.roketo_ids.get(&token_id)
+        {
+            require!(
+                storage_balance_needed < balance.0,
+                &format!(
+                    "Not enough funds to cover storage_balance. Require {storage_balance_needed}"
+                )
+            );
+            (
+                balance.0 - storage_balance_needed,
+                Some(storage_balance_needed),
+            )
+        } else {
+            (balance.0, None)
+        };
+        let mut payout = self
+            .sale
             .royalties
             .as_ref()
-            .map_or(Payout::default(), |r| r.create_payout(balance.0, &owner_id))
+            .map_or(Payout::default(), |r| r.create_payout(balance, &owner_id));
+
+        // Add the reserved balance to the payout map
+        if let Some(balance_needed) = balance_needed {
+            payout
+                .payout
+                .insert(env::current_account_id(), balance_needed.into());
+        }
+        payout
     }
 
     #[payable]
@@ -134,8 +163,7 @@ impl Royalties {
                     )
                 })
                 .collect(),
-        }
-        .tenk_royalities();
+        };
         let rest = balance - u128::min(royalty_payment, balance);
         let owner_payout: u128 = payout.payout.get(owner_id).map_or(0, |x| x.0) + rest;
         payout.payout.insert(owner_id.clone(), owner_payout.into());

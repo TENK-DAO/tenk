@@ -7,11 +7,11 @@ use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
     collections::{LazyOption, LookupMap, UnorderedSet},
     env, ext_contract,
-    json_types::{Base58CryptoHash, Base64VecU8, U128},
+    json_types::{Base64VecU8, U128},
     log, near_bindgen, require,
     serde::{Deserialize, Serialize},
-    witgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise, PromiseOrValue,
-    PublicKey,
+    serde_json, witgen, AccountId, Balance, BorshStorageKey, Gas, PanicOnDefault, Promise,
+    PromiseOrValue, PublicKey,
 };
 use near_units::{parse_gas, parse_near};
 
@@ -32,7 +32,9 @@ use payout::*;
 use raffle::Raffle;
 use standards::*;
 use types::*;
-use util::{current_time_ms, is_promise_success, log_mint, refund};
+use util::{
+    current_time_ms, is_promise_success, log_mint, promise_result, refund, refund_left_over_balance,
+};
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]
@@ -55,7 +57,7 @@ pub struct Contract {
     media_extension: Option<String>,
 
     /// Roketo ids
-    roketo_ids: LookupMap<TokenId, StreamId>, //
+    roketo_ids: LookupMap<TokenId, RoketoStream>, //
 }
 
 const GAS_REQUIRED_FOR_LINKDROP: Gas = Gas(parse_gas!("40 Tgas") as u64);
@@ -79,11 +81,19 @@ trait Linkdrop {
     fn on_send_with_callback(&mut self) -> Promise;
 
     fn link_callback(&mut self, account_id: AccountId, mint_for_free: bool) -> Token;
+
+    fn on_attach_stream_to_nft(
+        &mut self,
+        owner_id: AccountId,
+        token_id: TokenId,
+        stream_id: StreamId,
+    ) -> Promise;
 }
 
 #[ext_contract(ext_roketo_contract)]
 trait Roketo {
-    fn change_receiver(stream_id: String, receiver_id: AccountId);
+    fn nft_change_receiver(stream_id: String, receiver_id: AccountId);
+    fn get_token(token_id: String) -> FtToken;
 }
 
 #[derive(BorshSerialize, BorshStorageKey)]
@@ -182,6 +192,8 @@ impl Contract {
         tokens
     }
 
+    /// If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+    /// so that it will transfer with the token
     pub fn attach_stream_to_nft(&mut self, token_id: TokenId, stream_id: StreamId) {
         let owner_id = self
             .tokens
@@ -192,8 +204,53 @@ impl Contract {
             owner_id == env::predecessor_account_id(),
             "Must be Token Owner"
         );
-        self.roketo_ids.insert(&token_id, &stream_id);
-        env::log_str(&format!("Added {stream_id} to {token_id}"));
+        ext_roketo_contract::get_token(
+            token_id.to_string(),
+            Contract::roketo_account_id(),
+            0,
+            Gas(parse_gas!("5 Tgas") as u64),
+        )
+        .then(ext_self::on_attach_stream_to_nft(
+            owner_id,
+            token_id,
+            stream_id,
+            env::current_account_id(),
+            env::attached_deposit(),
+            Gas(parse_gas!("10 Tgas") as u64),
+        ));
+    }
+
+
+    /// Get's the funds required to change the receiver later.
+    /// Ensures that the user provided enough funds to cover storage
+    #[private]
+    pub fn on_attach_stream_to_nft(
+        &mut self,
+        owner_id: AccountId,
+        token_id: TokenId,
+        stream_id: StreamId,
+    ) {
+        if let Some(FtToken {
+            storage_balance_needed,
+            ..
+        }) = promise_result(0)
+            .as_ref()
+            .and_then(|bytes| serde_json::from_slice(bytes).ok())
+        {
+            let storage_balance_needed = storage_balance_needed.0;
+            refund_left_over_balance(&owner_id, || {
+                self.roketo_ids.insert(
+                    &token_id,
+                    &RoketoStream {
+                        stream_id: stream_id.to_string(),
+                        storage_balance_needed,
+                    },
+                );
+            });
+            env::log_str(&format!("Added {} to {token_id}", stream_id));
+        } else {
+            env::panic_str("failed to get token from roketo contract");
+        }
     }
 
     fn nft_mint_many_ungaurded(
@@ -433,25 +490,29 @@ impl Contract {
         .unwrap()
     }
 
-    fn roketo_change_receiver(
+    fn roketo_nft_change_receiver(
         &self,
         receiver_id: &AccountId,
         token_id: &TokenId,
     ) -> Option<Promise> {
-        require!(env::attached_deposit() >= DEFAULT_STORAGE_BALANCE);
         require!(
             self.tokens.owner_by_id.contains_key(token_id),
             "Token does not exist"
         );
-        self.roketo_ids.get(token_id).map(|stream_id| {
-            ext_roketo_contract::change_receiver(
-                stream_id,
-                receiver_id.clone(),
-                Contract::roketo_account_id(),
-                env::attached_deposit(),
-                DEFAULT_GAS_FOR_ROKETO_TRANSFER,
-            )
-        })
+        self.roketo_ids.get(token_id).map(
+            |RoketoStream {
+                 stream_id,
+                 storage_balance_needed,
+             }| {
+                ext_roketo_contract::nft_change_receiver(
+                    stream_id,
+                    receiver_id.clone(),
+                    Contract::roketo_account_id(),
+                    storage_balance_needed,
+                    DEFAULT_GAS_FOR_ROKETO_TRANSFER,
+                )
+            },
+        )
         // Returned promise is not processed to keep `nft_transfer` / `nft_transfer_call`
         // similar to non-streaming versions.
         //

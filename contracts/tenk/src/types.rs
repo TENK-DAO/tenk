@@ -197,3 +197,36 @@ mod tests {
 /// Id for roketo stream
 #[witgen]
 pub type StreamId = String;
+
+///Ft Token Type used by Rokte
+///
+#[witgen]
+#[derive(Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct FtToken {
+    account_id: AccountId,
+    is_payment: bool,
+    collected_commission: String,
+
+    commission_on_create: String, // taken in current fts in case of listed token
+    commission_coef: SafeFloat,   // percentage of tokens taken for commission
+
+    pub storage_balance_needed: U128,
+    gas_for_ft_transfer: String,
+    gas_for_storage_deposit: String,
+}
+
+#[witgen]
+#[derive(Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+struct SafeFloat {
+    val: f64,
+    pow: f64,
+}
+
+#[derive(Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct RoketoStream {
+    pub stream_id: StreamId,
+    pub storage_balance_needed: Balance,
+}

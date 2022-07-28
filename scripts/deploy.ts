@@ -6,13 +6,13 @@ import { binPath } from "./utils";
 import {icon} from "./icon";
 
 const metadata: tenk.InitialMetadata = {
-  uri: "https://bafybeihmtke7glg2aec5oav5btzlv6ec4fxkbbh4xjre4x5ipaqdxroahe.ipfs.dweb.link",
-  name: "TENK NFT",
-  symbol: "TENK",
+  uri: "https://bafybeifj7sronkwlpvtkcguq3rztzmr3lun5zoom63vpl2czqukejqbfky.ipfs.dweb.link",
+  name: "Amber",
+  symbol: "AMBER",
   icon,
 };
 
-const size = 10_000;
+const size = 11;
  
 const sale: tenk.Sale = {
   price: NEAR.parse("1 N").toJSON(),
