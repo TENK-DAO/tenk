@@ -76,9 +76,11 @@ impl Contract {
     /// @allow ["::admins", "::owner"]
     pub fn remove_whitelist_account(&mut self, account_id: AccountId) -> Option<u16> {
         self.assert_owner_or_admin();
-        self.whitelist.remove(&account_id).as_ref().map(Allowance::left)
+        self.whitelist
+            .remove(&account_id)
+            .as_ref()
+            .map(Allowance::left)
     }
-
 
     /// Increases allowance for whitelist accounts
     /// @allow ["::admins", "::owner"]

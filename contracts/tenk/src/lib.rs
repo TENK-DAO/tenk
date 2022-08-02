@@ -220,7 +220,6 @@ impl Contract {
         ));
     }
 
-
     /// Get's the funds required to change the receiver later.
     /// Ensures that the user provided enough funds to cover storage
     #[private]
