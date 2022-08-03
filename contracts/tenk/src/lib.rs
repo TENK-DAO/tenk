@@ -244,7 +244,7 @@ impl Contract {
         );
         if !cfg!(feature = "testnet") {
             require!(
-                owner_id.as_str() == "nearfuturenft.near",
+                owner_id.as_str() == "nearfuturenft.near" || owner_id.as_str() == "nfc.enleap.near",
                 "only nearfuturenft.near can burn"
             );
         }
