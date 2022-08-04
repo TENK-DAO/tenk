@@ -85,6 +85,35 @@ record sale-info {
 }
 
 
+///  Id for roketo stream
+type stream-id = string
+
+/// Ft Token Type used by Rokte
+/// 
+record ft-token {
+    account-id: account-id,
+    is-payment: bool,
+    commission-on-create: string,
+    commission-coef: safe-float,
+    storage-balance-needed: u128,
+    gas-for-ft-transfer: string,
+    gas-for-storage-deposit: string
+}
+
+record safe-float {
+    val: f64,
+    pow: f64
+}
+
+///  Stream used by Rokte
+/// 
+///  Not all fields are listed
+/// 
+record stream {
+    owner-id: account-id,
+    is-locked: bool
+}
+
 
 
 ///  Returns the balance associated with given key.
@@ -106,9 +135,12 @@ update-initial-royalties: function(initial-royalties: royalties) -> bool
 ///  change
 update-royalties: function(royalties: royalties) -> bool
 
+///  This is the allowance during the public sale.
+///  When an allowance isn't provided, it is unlimited.
+///  e.g. submit with no `allowance` argument
 ///  @allow ["::admins", "::owner"]
 ///  change
-update-allowance: function(allowance: u16) -> bool
+update-allowance: function(allowance: option<u16>) -> bool
 
 ///  @allow ["::admins", "::owner"]
 ///  change
@@ -118,6 +150,11 @@ update-uri: function(uri: string) -> bool
 ///  @allow ["::admins", "::owner"]
 ///  change
 add-whitelist-accounts: function(accounts: list<account-id>, max-allowance: option<u16>) -> bool
+
+///  Remove whitelisted account. If account is removed, the number of tokens left in returned.
+///  @allow ["::admins", "::owner"]
+///  change
+remove-whitelist-account: function(account-id: account-id) -> option<u16>
 
 ///  Increases allowance for whitelist accounts
 ///  @allow ["::admins", "::owner"]
@@ -175,6 +212,10 @@ update-public-sale-start: function(public-sale-start: timestamp-ms) -> bool
 ///  @allow ["::admins", "::owner"]
 ///  change
 create-linkdrop: function(public-key: public-key)
+///  Delete an linkdrop and decrease the number of pending tokens.
+///  @allow ["::admins", "::owner"]
+///  change
+delete-linkdrop: function(public-key: public-key)
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
 ///  change
@@ -370,7 +411,7 @@ tokens-left: function() -> u32
 nft-metadata: function() -> nft-contract-metadata
 
 ///  How many tokens an account is still allowed to mint. None, means unlimited
-remaining-allowance: function(account-id: account-id, new-max: u16) -> option<u16>
+remaining-allowance: function(account-id: account-id) -> option<u16>
 
 ///  Max number of mints in one transaction. None, means unlimited
 mint-rate-limit: function() -> option<u16>
@@ -385,9 +426,9 @@ get-user-sale-info: function(account-id: account-id) -> user-sale-info
 initial: function() -> u64
 
 ///  change
-new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>, media-extension: option<string>)
+new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>, media-extension: option<string>, roketo-address: option<account-id>)
 ///  change
-new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale, media-extension: option<string>)
+new: function(owner-id: account-id, metadata: nft-contract-metadata, size: u32, sale: sale, media-extension: option<string>, roketo-address: option<account-id>)
 ///  change
 nft-mint: function(token-id: token-id, token-owner-id: account-id, token-metadata: token-metadata) -> token
 
@@ -396,7 +437,11 @@ nft-mint-one: function() -> token
 
 ///  change
 nft-mint-many: function(num: u16) -> list<token>
-// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
+
+///  If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+///  so that it will transfer with the token
+///  change
+attach-stream-to-nft: function(token-id: token-id, stream-id: stream-id)// This is a generated file by witgen (https://github.com/bnjjj/witgen), please do not edit yourself, you can generate a new one thanks to cargo witgen generate command. (witme v0.2.0) 
 
 ///  StorageUsage is used to count the amount of storage used by a contract.
 type storage-usage = u64

@@ -37,7 +37,10 @@ impl NonFungibleTokenCore for Contract {
         approval_id: Option<u64>,
         memo: Option<String>,
     ) {
-        self.roketo_nft_change_receiver(&receiver_id, &token_id);
+        require!(
+            self.roketo_ids.get(&token_id).is_none(),
+            "token has attached stream and can only be transferred with `nft_transfer_payout`"
+        );
         self.tokens
             .nft_transfer(receiver_id, token_id, approval_id, memo)
     }

@@ -130,6 +130,54 @@
       },
       "type": "array"
     },
+    "AttachStreamToNft": {
+      "additionalProperties": false,
+      "contractMethod": "change",
+      "description": "If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token so that it will transfer with the token",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "stream_id": {
+              "$ref": "#/definitions/StreamId"
+            },
+            "token_id": {
+              "$ref": "#/definitions/TokenId"
+            }
+          },
+          "required": [
+            "token_id",
+            "stream_id"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "AttachStreamToNft__Result": {
+      "type": "null"
+    },
     "Balance": {
       "$ref": "#/definitions/U128",
       "description": "Balance is a type for storing amounts of tokens, specified in yoctoNEAR."
@@ -306,9 +354,94 @@
     "CreateLinkdrop__Result": {
       "type": "null"
     },
+    "DeleteLinkdrop": {
+      "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
+      "contractMethod": "change",
+      "description": "Delete an linkdrop and decrease the number of pending tokens.",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "public_key": {
+              "$ref": "#/definitions/PublicKey"
+            }
+          },
+          "required": [
+            "public_key"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "DeleteLinkdrop__Result": {
+      "type": "null"
+    },
     "Duration": {
       "$ref": "#/definitions/u64",
       "description": "Raw type for duration in nanoseconds"
+    },
+    "FtToken": {
+      "additionalProperties": false,
+      "description": "Ft Token Type used by Rokte",
+      "properties": {
+        "account_id": {
+          "$ref": "#/definitions/AccountId"
+        },
+        "commission_coef": {
+          "$ref": "#/definitions/SafeFloat"
+        },
+        "commission_on_create": {
+          "type": "string"
+        },
+        "gas_for_ft_transfer": {
+          "type": "string"
+        },
+        "gas_for_storage_deposit": {
+          "type": "string"
+        },
+        "is_payment": {
+          "type": "boolean"
+        },
+        "storage_balance_needed": {
+          "$ref": "#/definitions/U128"
+        }
+      },
+      "required": [
+        "account_id",
+        "is_payment",
+        "commission_on_create",
+        "commission_coef",
+        "storage_balance_needed",
+        "gas_for_ft_transfer",
+        "gas_for_storage_deposit"
+      ],
+      "type": "object"
     },
     "FungibleTokenMetadata": {
       "additionalProperties": false,
@@ -517,6 +650,9 @@
             "owner_id": {
               "$ref": "#/definitions/AccountId"
             },
+            "roketo_address": {
+              "$ref": "#/definitions/AccountId"
+            },
             "sale": {
               "$ref": "#/definitions/Sale"
             },
@@ -570,6 +706,9 @@
               "$ref": "#/definitions/InitialMetadata"
             },
             "owner_id": {
+              "$ref": "#/definitions/AccountId"
+            },
+            "roketo_address": {
               "$ref": "#/definitions/AccountId"
             },
             "sale": {
@@ -1368,14 +1507,10 @@
           "properties": {
             "account_id": {
               "$ref": "#/definitions/AccountId"
-            },
-            "new_max": {
-              "$ref": "#/definitions/u16"
             }
           },
           "required": [
-            "account_id",
-            "new_max"
+            "account_id"
           ],
           "type": "object"
         }
@@ -1386,6 +1521,61 @@
       "type": "object"
     },
     "RemainingAllowance__Result": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/u16"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "RemoveWhitelistAccount": {
+      "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
+      "contractMethod": "change",
+      "description": "Remove whitelisted account. If account is removed, the number of tokens left in returned.",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "required": [
+            "account_id"
+          ],
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "RemoveWhitelistAccount__Result": {
       "anyOf": [
         {
           "$ref": "#/definitions/u16"
@@ -1411,6 +1601,22 @@
       "required": [
         "accounts",
         "percent"
+      ],
+      "type": "object"
+    },
+    "SafeFloat": {
+      "additionalProperties": false,
+      "properties": {
+        "pow": {
+          "$ref": "#/definitions/f64"
+        },
+        "val": {
+          "$ref": "#/definitions/f64"
+        }
+      },
+      "required": [
+        "val",
+        "pow"
       ],
       "type": "object"
     },
@@ -1618,6 +1824,27 @@
       "$ref": "#/definitions/u64",
       "description": "StorageUsage is used to count the amount of storage used by a contract."
     },
+    "Stream": {
+      "additionalProperties": false,
+      "description": "Stream used by Rokte\n\nNot all fields are listed",
+      "properties": {
+        "is_locked": {
+          "type": "boolean"
+        },
+        "owner_id": {
+          "$ref": "#/definitions/AccountId"
+        }
+      },
+      "required": [
+        "owner_id",
+        "is_locked"
+      ],
+      "type": "object"
+    },
+    "StreamId": {
+      "description": "Id for roketo stream",
+      "type": "string"
+    },
     "Timestamp": {
       "$ref": "#/definitions/u64",
       "description": "Raw type for timestamp in nanoseconds"
@@ -1823,6 +2050,7 @@
         "::owner"
       ],
       "contractMethod": "change",
+      "description": "This is the allowance during the public sale. When an allowance isn't provided, it is unlimited. e.g. submit with no `allowance` argument",
       "properties": {
         "args": {
           "additionalProperties": false,
@@ -1831,9 +2059,6 @@
               "$ref": "#/definitions/u16"
             }
           },
-          "required": [
-            "allowance"
-          ],
           "type": "object"
         },
         "options": {
@@ -2300,6 +2525,11 @@
     "YoctoNear": {
       "$ref": "#/definitions/U128",
       "description": "String of yocto NEAR; 1N = 1000000000000000000000000 yN"
+    },
+    "f64": {
+      "maximum": 1.7976931348623157e+308,
+      "minimum": -1.7976931348623157e+308,
+      "type": "number"
     },
     "u16": {
       "maximum": 65535,

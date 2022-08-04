@@ -178,6 +178,9 @@ var Contract = /** @class */ (function () {
         return helper_1.transactions.functionCall("update_royalties", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
+    * This is the allowance during the public sale.
+    * When an allowance isn't provided, it is unlimited.
+    * e.g. submit with no `allowance` argument
     * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_allowance = function (args, options) {
@@ -194,12 +197,18 @@ var Contract = /** @class */ (function () {
         });
     };
     /**
+    * This is the allowance during the public sale.
+    * When an allowance isn't provided, it is unlimited.
+    * e.g. submit with no `allowance` argument
     * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_allowanceRaw = function (args, options) {
         return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_allowance", args: args }, options));
     };
     /**
+    * This is the allowance during the public sale.
+    * When an allowance isn't provided, it is unlimited.
+    * e.g. submit with no `allowance` argument
     * @allow ["::admins", "::owner"]
     */
     Contract.prototype.update_allowanceTx = function (args, options) {
@@ -266,6 +275,38 @@ var Contract = /** @class */ (function () {
     Contract.prototype.add_whitelist_accountsTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("add_whitelist_accounts", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Remove whitelisted account. If account is removed, the number of tokens left in returned.
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.remove_whitelist_account = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.remove_whitelist_accountRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Remove whitelisted account. If account is removed, the number of tokens left in returned.
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.remove_whitelist_accountRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "remove_whitelist_account", args: args }, options));
+    };
+    /**
+    * Remove whitelisted account. If account is removed, the number of tokens left in returned.
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.remove_whitelist_accountTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("remove_whitelist_account", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     /**
     * Increases allowance for whitelist accounts
@@ -610,6 +651,38 @@ var Contract = /** @class */ (function () {
     Contract.prototype.create_linkdropTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("create_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * Delete an linkdrop and decrease the number of pending tokens.
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.delete_linkdrop = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.delete_linkdropRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * Delete an linkdrop and decrease the number of pending tokens.
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.delete_linkdropRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "delete_linkdrop", args: args }, options));
+    };
+    /**
+    * Delete an linkdrop and decrease the number of pending tokens.
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.delete_linkdropTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("delete_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     Contract.prototype.nft_payout = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_payout", args, options);
@@ -1327,6 +1400,38 @@ var Contract = /** @class */ (function () {
     Contract.prototype.nft_mint_manyTx = function (args, options) {
         var _a, _b;
         return helper_1.transactions.functionCall("nft_mint_many", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
+    /**
+    * If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+    * so that it will transfer with the token
+    */
+    Contract.prototype.attach_stream_to_nft = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.attach_stream_to_nftRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+    * so that it will transfer with the token
+    */
+    Contract.prototype.attach_stream_to_nftRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "attach_stream_to_nft", args: args }, options));
+    };
+    /**
+    * If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+    * so that it will transfer with the token
+    */
+    Contract.prototype.attach_stream_to_nftTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("attach_stream_to_nft", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
     return Contract;
 }());

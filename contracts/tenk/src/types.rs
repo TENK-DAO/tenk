@@ -184,6 +184,7 @@ mod tests {
                 ..Default::default()
             }),
             None,
+            None,
         )
     }
 
@@ -206,8 +207,7 @@ pub type StreamId = String;
 pub struct FtToken {
     account_id: AccountId,
     is_payment: bool,
-    collected_commission: String,
-
+    // collected_commission: String,
     commission_on_create: String, // taken in current fts in case of listed token
     commission_coef: SafeFloat,   // percentage of tokens taken for commission
 
@@ -230,3 +230,19 @@ pub struct RoketoStream {
     pub stream_id: StreamId,
     pub storage_balance_needed: Balance,
 }
+
+/// Stream used by Rokte
+///
+/// Not all fields are listed
+///
+#[witgen]
+#[derive(Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct Stream {
+    pub owner_id: AccountId,
+    pub is_locked: bool,
+}
+
+#[derive(Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct TokenStats {}

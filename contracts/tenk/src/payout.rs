@@ -109,7 +109,9 @@ impl Payouts for Contract {
     ) -> Payout {
         assert_one_yocto();
         let payout = self.nft_payout(token_id.clone(), balance, max_len_payout);
-        self.nft_transfer(receiver_id, token_id, approval_id, memo);
+        self.roketo_nft_change_receiver(&receiver_id, &token_id);
+        self.tokens
+            .nft_transfer(receiver_id, token_id, approval_id, memo);
         payout
     }
 }

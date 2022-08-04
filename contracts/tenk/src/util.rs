@@ -1,7 +1,12 @@
+use std::fmt::Display;
+
 use near_contract_standards::non_fungible_token::{events::NftMint, Token};
 use near_sdk::{env, require, serde::Deserialize, serde_json, AccountId, Promise, PromiseResult};
 
-use crate::TimestampMs;
+use crate::{
+    types::{FtToken, Stream, TokenStats},
+    TimestampMs,
+};
 pub fn is_promise_success(num_of_promises: Option<u64>) -> bool {
     let count = env::promise_results_count();
     if num_of_promises.map_or(false, |num| num != count) {
@@ -76,4 +81,12 @@ pub fn left_over_balance<F: FnOnce()>(f: F) -> u128 {
 
 pub fn refund_left_over_balance<F: FnOnce()>(account_id: &AccountId, f: F) -> Option<Promise> {
     refund(account_id, left_over_balance(f))
+}
+
+pub fn log_error<E: Display>(e: E, bytes: &[u8]) -> E {
+    env::log_str(&format!(
+        "{e}, Failed to deserialize\n{}",
+        String::from_utf8(bytes.to_vec()).unwrap()
+    ));
+    e
 }

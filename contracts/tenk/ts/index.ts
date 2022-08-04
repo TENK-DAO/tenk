@@ -117,6 +117,37 @@ export interface SaleInfo {
   price: U128;
 }
 /**
+* Id for roketo stream
+*/
+export type StreamId = string;
+/**
+* Ft Token Type used by Rokte
+* 
+*/
+export interface FtToken {
+  account_id: AccountId;
+  is_payment: boolean;
+  commission_on_create: string;
+  commission_coef: SafeFloat;
+  storage_balance_needed: U128;
+  gas_for_ft_transfer: string;
+  gas_for_storage_deposit: string;
+}
+export interface SafeFloat {
+  val: f64;
+  pow: f64;
+}
+/**
+* Stream used by Rokte
+* 
+* Not all fields are listed
+* 
+*/
+export interface Stream {
+  owner_id: AccountId;
+  is_locked: boolean;
+}
+/**
 * StorageUsage is used to count the amount of storage used by a contract.
 */
 export type StorageUsage = u64;
@@ -310,26 +341,35 @@ export class Contract {
     return transactions.functionCall("update_royalties", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
+  * This is the allowance during the public sale.
+  * When an allowance isn't provided, it is unlimited.
+  * e.g. submit with no `allowance` argument
   * @allow ["::admins", "::owner"]
   */
   async update_allowance(args: {
-    allowance: u16;
+    allowance?: u16;
   }, options?: ChangeMethodOptions): Promise<boolean> {
     return providers.getTransactionLastResult(await this.update_allowanceRaw(args, options));
   }
   /**
+  * This is the allowance during the public sale.
+  * When an allowance isn't provided, it is unlimited.
+  * e.g. submit with no `allowance` argument
   * @allow ["::admins", "::owner"]
   */
   update_allowanceRaw(args: {
-    allowance: u16;
+    allowance?: u16;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "update_allowance", args, ...options});
   }
   /**
+  * This is the allowance during the public sale.
+  * When an allowance isn't provided, it is unlimited.
+  * e.g. submit with no `allowance` argument
   * @allow ["::admins", "::owner"]
   */
   update_allowanceTx(args: {
-    allowance: u16;
+    allowance?: u16;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("update_allowance", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
@@ -386,6 +426,33 @@ export class Contract {
     max_allowance?: u16;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("add_whitelist_accounts", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Remove whitelisted account. If account is removed, the number of tokens left in returned.
+  * @allow ["::admins", "::owner"]
+  */
+  async remove_whitelist_account(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): Promise<u16 | null> {
+    return providers.getTransactionLastResult(await this.remove_whitelist_accountRaw(args, options));
+  }
+  /**
+  * Remove whitelisted account. If account is removed, the number of tokens left in returned.
+  * @allow ["::admins", "::owner"]
+  */
+  remove_whitelist_accountRaw(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "remove_whitelist_account", args, ...options});
+  }
+  /**
+  * Remove whitelisted account. If account is removed, the number of tokens left in returned.
+  * @allow ["::admins", "::owner"]
+  */
+  remove_whitelist_accountTx(args: {
+    account_id: AccountId;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("remove_whitelist_account", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   /**
   * Increases allowance for whitelist accounts
@@ -677,6 +744,33 @@ export class Contract {
     public_key: PublicKey;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("create_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * Delete an linkdrop and decrease the number of pending tokens.
+  * @allow ["::admins", "::owner"]
+  */
+  async delete_linkdrop(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.delete_linkdropRaw(args, options));
+  }
+  /**
+  * Delete an linkdrop and decrease the number of pending tokens.
+  * @allow ["::admins", "::owner"]
+  */
+  delete_linkdropRaw(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "delete_linkdrop", args, ...options});
+  }
+  /**
+  * Delete an linkdrop and decrease the number of pending tokens.
+  * @allow ["::admins", "::owner"]
+  */
+  delete_linkdropTx(args: {
+    public_key: PublicKey;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("delete_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   nft_payout(args: {
     token_id: string;
@@ -1301,7 +1395,6 @@ export class Contract {
   */
   remaining_allowance(args: {
     account_id: AccountId;
-    new_max: u16;
   }, options?: ViewFunctionOptions): Promise<u16 | null> {
     return this.account.viewFunction(this.contractId, "remaining_allowance", args, options);
   }
@@ -1337,6 +1430,7 @@ export class Contract {
     size: u32;
     sale?: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   }, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.new_default_metaRaw(args, options));
   }
@@ -1346,6 +1440,7 @@ export class Contract {
     size: u32;
     sale?: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "new_default_meta", args, ...options});
   }
@@ -1355,6 +1450,7 @@ export class Contract {
     size: u32;
     sale?: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("new_default_meta", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
@@ -1364,6 +1460,7 @@ export class Contract {
     size: u32;
     sale: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   }, options?: ChangeMethodOptions): Promise<void> {
     return providers.getTransactionLastResult(await this.newRaw(args, options));
   }
@@ -1373,6 +1470,7 @@ export class Contract {
     size: u32;
     sale: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
     return this.account.functionCall({contractId: this.contractId, methodName: "new", args, ...options});
   }
@@ -1382,6 +1480,7 @@ export class Contract {
     size: u32;
     sale: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("new", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
@@ -1429,6 +1528,36 @@ export class Contract {
     num: u16;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("nft_mint_many", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+  * so that it will transfer with the token
+  */
+  async attach_stream_to_nft(args: {
+    token_id: TokenId;
+    stream_id: StreamId;
+  }, options?: ChangeMethodOptions): Promise<void> {
+    return providers.getTransactionLastResult(await this.attach_stream_to_nftRaw(args, options));
+  }
+  /**
+  * If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+  * so that it will transfer with the token
+  */
+  attach_stream_to_nftRaw(args: {
+    token_id: TokenId;
+    stream_id: StreamId;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "attach_stream_to_nft", args, ...options});
+  }
+  /**
+  * If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+  * so that it will transfer with the token
+  */
+  attach_stream_to_nftTx(args: {
+    token_id: TokenId;
+    stream_id: StreamId;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("attach_stream_to_nft", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
 }
 /**
@@ -1531,13 +1660,16 @@ export interface UpdateRoyalties {
 }
 export type UpdateRoyalties__Result = boolean;
 /**
+* This is the allowance during the public sale.
+* When an allowance isn't provided, it is unlimited.
+* e.g. submit with no `allowance` argument
 * @allow ["::admins", "::owner"]
 * 
 * @contractMethod change
 */
 export interface UpdateAllowance {
   args: {
-    allowance: u16;
+    allowance?: u16;
   };
   options: {
     /** Units in gas
@@ -1601,6 +1733,30 @@ export interface AddWhitelistAccounts {
   
 }
 export type AddWhitelistAccounts__Result = boolean;
+/**
+* Remove whitelisted account. If account is removed, the number of tokens left in returned.
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface RemoveWhitelistAccount {
+  args: {
+    account_id: AccountId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type RemoveWhitelistAccount__Result = u16 | null;
 /**
 * Increases allowance for whitelist accounts
 * @allow ["::admins", "::owner"]
@@ -1848,6 +2004,30 @@ export interface CreateLinkdrop {
   
 }
 export type CreateLinkdrop__Result = void;
+/**
+* Delete an linkdrop and decrease the number of pending tokens.
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface DeleteLinkdrop {
+  args: {
+    public_key: PublicKey;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type DeleteLinkdrop__Result = void;
 /**
 * 
 * @contractMethod view
@@ -2324,7 +2504,6 @@ export type NftMetadata__Result = NftContractMetadata;
 export interface RemainingAllowance {
   args: {
     account_id: AccountId;
-    new_max: u16;
   };
   
 }
@@ -2382,6 +2561,7 @@ export interface NewDefaultMeta {
     size: u32;
     sale?: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   };
   options: {
     /** Units in gas
@@ -2408,6 +2588,7 @@ export interface New {
     size: u32;
     sale: Sale;
     media_extension?: string;
+    roketo_address?: AccountId;
   };
   options: {
     /** Units in gas
@@ -2489,3 +2670,28 @@ export interface NftMintMany {
   
 }
 export type NftMintMany__Result = Token[];
+/**
+* If the owner of the NFT is the receiver of a roketo stream, they can attach the stream to the token
+* so that it will transfer with the token
+* 
+* @contractMethod change
+*/
+export interface AttachStreamToNft {
+  args: {
+    token_id: TokenId;
+    stream_id: StreamId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type AttachStreamToNft__Result = void;
