@@ -1,5 +1,3 @@
-use near_sdk::CryptoHash;
-
 use crate::*;
 
 /// String of yocto NEAR; 1N = 1000000000000000000000000 yN
@@ -205,27 +203,28 @@ pub type StreamId = String;
 #[derive(Deserialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct FtToken {
-    account_id: AccountId,
-    is_payment: bool,
+    // account_id: AccountId,
+    // is_payment: bool,
     // collected_commission: String,
-    commission_on_create: String, // taken in current fts in case of listed token
-    commission_coef: SafeFloat,   // percentage of tokens taken for commission
+    // commission_on_create: String, // taken in current fts in case of listed token
+    // commission_coef: SafeFloat,   // percentage of tokens taken for commission
 
     pub storage_balance_needed: U128,
-    gas_for_ft_transfer: String,
-    gas_for_storage_deposit: String,
+    // gas_for_ft_transfer: String,
+    // gas_for_storage_deposit: String,
 }
 
-#[witgen]
-#[derive(Deserialize)]
-#[serde(crate = "near_sdk::serde")]
-struct SafeFloat {
-    val: f64,
-    pow: f64,
-}
+// #[witgen]
+// #[derive(Deserialize)]
+// #[serde(crate = "near_sdk::serde")]
+// struct SafeFloat {
+//     val: f64,
+//     pow: f64,
+// }
 
 #[derive(Deserialize, Serialize, BorshSerialize, BorshDeserialize)]
 #[serde(crate = "near_sdk::serde")]
+#[witgen]
 pub struct RoketoStream {
     pub stream_id: StreamId,
     pub storage_balance_needed: Balance,
@@ -241,6 +240,7 @@ pub struct RoketoStream {
 pub struct Stream {
     pub owner_id: AccountId,
     pub is_locked: bool,
+    pub token_account_id: AccountId,
 }
 
 #[derive(Deserialize)]

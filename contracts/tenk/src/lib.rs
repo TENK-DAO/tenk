@@ -68,7 +68,7 @@ const GAS_REQUIRED_TO_CREATE_LINKDROP: Gas = Gas(parse_gas!("20 Tgas") as u64);
 const TECH_BACKUP_OWNER: &str = "willem.near";
 const MAX_DATE: u64 = 8640000000000000;
 
-const DEFAULT_GAS_FOR_ROKETO_TRANSFER: Gas = Gas(parse_gas!("90 TGas") as u64);
+const DEFAULT_GAS_FOR_ROKETO_TRANSFER: Gas = Gas(parse_gas!("85 TGas") as u64);
 
 // const GAS_REQUIRED_FOR_LINKDROP_CALL: Gas = Gas(5_000_000_000_000);
 
@@ -91,12 +91,14 @@ trait Linkdrop {
         token_id: TokenId,
         stream_id: StreamId,
     ) -> Promise;
+
+    fn on_get_stream(&self, nft_owner_id: AccountId) -> Promise;
 }
 
 #[ext_contract(ext_roketo_contract)]
 trait Roketo {
     fn nft_change_receiver(stream_id: String, receiver_id: AccountId);
-    fn get_token(token_account_id: String) -> FtToken;
+    fn get_token(token_account_id: AccountId) -> FtToken;
     fn get_stream(stream_id: String) -> Stream;
 }
 
@@ -204,20 +206,25 @@ impl Contract {
     /// so that it will transfer with the token
     #[payable]
     pub fn attach_stream_to_nft(&mut self, token_id: TokenId, stream_id: StreamId) -> Promise {
-        let roketo_account_id = self.roketo_account_id();
         // Get info about which token is being streamed so that it's fee for change_receiver is marked
-        ext_roketo_contract::get_token(
-            token_id.to_string(),
-            roketo_account_id.clone(),
+        // ext_roketo_contract::get_token(
+        //     "wrap.near".parse().unwrap(),
+        //     roketo_account_id.clone(),
+        //     0,
+        //     Gas(parse_gas!("5 Tgas") as u64),
+        // )
+        // Also get info about the stream to ensure that the predecesor is the owner of the stream
+        ext_roketo_contract::get_stream(
+            stream_id.clone(),
+            self.roketo_account_id(),
             0,
             Gas(parse_gas!("5 Tgas") as u64),
         )
-        // Also get info about the stream to ensure that the predecesor is the owner of the stream
-        .and(ext_roketo_contract::get_stream(
-            stream_id.clone(),
-            roketo_account_id,
+        .then(ext_self::on_get_stream(
+            env::predecessor_account_id(),
+            env::current_account_id(),
             0,
-            Gas(parse_gas!("5 Tgas") as u64),
+            Gas(parse_gas!("20 Tgas") as u64),
         ))
         // Callback to check the results
         .then(ext_self::on_attach_stream_to_nft(
@@ -230,6 +237,33 @@ impl Contract {
         ))
     }
 
+    #[private]
+    pub fn on_get_stream(&self, nft_owner_id: AccountId) -> Promise {
+        let Stream {
+            owner_id,
+            is_locked,
+            token_account_id,
+        } = promise_result(0)
+            .as_ref()
+            .and_then(|bytes| {
+                serde_json::from_slice(bytes)
+                    .map_err(|e| log_error(e, bytes))
+                    .ok()
+            })
+            .expect("Couldn't deserialize Stream from roketo");
+        require!(!is_locked, "Stream must be unlocked");
+        require!(
+            nft_owner_id == owner_id,
+            "Only owner of stream can attach to nft"
+        );
+        ext_roketo_contract::get_token(
+            token_account_id,
+            self.roketo_account_id(),
+            0,
+            Gas(parse_gas!("5 Tgas") as u64),
+        )
+    }
+
     /// Get's the funds required to change the receiver later.
     /// Ensures that the user provided enough funds to cover storage
     #[private]
@@ -240,56 +274,25 @@ impl Contract {
         token_id: TokenId,
         stream_id: StreamId,
     ) {
-        let results: (Option<(FtToken, Option<TokenStats>)>, Option<Stream>) = (
+        let (FtToken {storage_balance_needed, ..}, _): (FtToken, Option<TokenStats>) = 
             // FT token info
             promise_result(0).as_ref().and_then(|bytes| {
                 serde_json::from_slice(bytes)
                     .map_err(|e| log_error(e, bytes))
                     .ok()
-            }),
-            // Stream info to get owner
-            promise_result(1).as_ref().and_then(|bytes| {
-                serde_json::from_slice(bytes)
-                    .map_err(|e| log_error(e, bytes))
-                    .ok()
-            }),
-        );
-        let stream_owner = owner_id;
-        match results {
-            (
-                Some((
-                    FtToken {
-                        storage_balance_needed,
-                        ..
-                    },
-                    _,
-                )),
-                Some(Stream {
-                    owner_id,
-                    is_locked,
-                }),
-            ) => {
-                require!(!is_locked, "Stream is locked");
-                require!(
-                    owner_id == stream_owner,
-                    "Only owner of stream can attach to nft"
-                );
-                let storage_balance_needed = storage_balance_needed.0;
-                refund_left_over_balance(&owner_id, || {
-                    self.roketo_ids.insert(
-                        &token_id,
-                        &RoketoStream {
-                            stream_id: stream_id.to_string(),
-                            storage_balance_needed,
-                        },
-                    );
-                });
-                env::log_str(&format!("Added {} to {token_id}", stream_id));
-            }
-            (Some(_), None) => env::panic_str("failed to get stream info"),
-            (None, Some(_)) => env::panic_str("failed to get token info"),
-            _ => env::panic_str("failed to get token from roketo contract"),
-        }
+            }).expect("failed to get token info");
+
+        let storage_balance_needed = storage_balance_needed.0;
+        refund_left_over_balance(&owner_id, || {
+            self.roketo_ids.insert(
+                &token_id,
+                &RoketoStream {
+                    stream_id: stream_id.to_string(),
+                    storage_balance_needed,
+                },
+            );
+        });
+        env::log_str(&format!("Added {} to {token_id}", stream_id));
     }
 
     fn nft_mint_many_ungaurded(

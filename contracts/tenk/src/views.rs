@@ -97,4 +97,12 @@ impl Contract {
     pub fn initial(&self) -> u64 {
         self.raffle.len() + self.nft_total_supply().0 as u64
     }
+
+    pub fn get_stream_info(&self, token_id: TokenId) -> Option<RoketoStream> {
+      self.roketo_ids.get(&token_id)
+    }
+    
+    pub fn roketo_address(&self) -> AccountId {
+      self.roketo_account_id()
+    }
 }

@@ -219,4 +219,11 @@ impl Contract {
         self.pending_tokens -= 1;
         promise
     }
+
+    /// @allow ["::admins", "::owner"]
+    pub fn update_roketo_account_id(&mut self, account_id: Option<AccountId>) -> bool {
+      self.assert_owner_or_admin();
+      self.roketo_address = account_id;
+      true
+    }
 }
