@@ -136,8 +136,8 @@ impl Royalties {
             "royalty percent is in basis points and must be between 0 - 10,0000"
         );
         require!(
-            self.accounts.len() <= 10,
-            "can only have a maximum of 10 accounts spliting royalties"
+            self.accounts.len() <= 20,
+            "can only have a maximum of 20 accounts spliting royalties"
         );
         let mut total: BasisPoint = 0;
         self.accounts.iter().for_each(|(_, percent)| {
