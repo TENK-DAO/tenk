@@ -684,6 +684,35 @@ var Contract = /** @class */ (function () {
         var _a, _b;
         return helper_1.transactions.functionCall("delete_linkdrop", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
     };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_roketo_account_id = function (args, options) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
+                    case 0:
+                        _b = (_a = helper_1.providers).getTransactionLastResult;
+                        return [4 /*yield*/, this.update_roketo_account_idRaw(args, options)];
+                    case 1: return [2 /*return*/, _b.apply(_a, [_c.sent()])];
+                }
+            });
+        });
+    };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_roketo_account_idRaw = function (args, options) {
+        return this.account.functionCall(__assign({ contractId: this.contractId, methodName: "update_roketo_account_id", args: args }, options));
+    };
+    /**
+    * @allow ["::admins", "::owner"]
+    */
+    Contract.prototype.update_roketo_account_idTx = function (args, options) {
+        var _a, _b;
+        return helper_1.transactions.functionCall("update_roketo_account_id", args, (_a = options === null || options === void 0 ? void 0 : options.gas) !== null && _a !== void 0 ? _a : helper_1.DEFAULT_FUNCTION_CALL_GAS, (_b = options === null || options === void 0 ? void 0 : options.attachedDeposit) !== null && _b !== void 0 ? _b : new helper_1.BN(0));
+    };
     Contract.prototype.nft_payout = function (args, options) {
         return this.account.viewFunction(this.contractId, "nft_payout", args, options);
     };
@@ -1297,6 +1326,13 @@ var Contract = /** @class */ (function () {
     Contract.prototype.initial = function (args, options) {
         if (args === void 0) { args = {}; }
         return this.account.viewFunction(this.contractId, "initial", args, options);
+    };
+    Contract.prototype.get_stream_info = function (args, options) {
+        return this.account.viewFunction(this.contractId, "get_stream_info", args, options);
+    };
+    Contract.prototype.roketo_address = function (args, options) {
+        if (args === void 0) { args = {}; }
+        return this.account.viewFunction(this.contractId, "roketo_address", args, options);
     };
     Contract.prototype.new_default_meta = function (args, options) {
         return __awaiter(this, void 0, void 0, function () {

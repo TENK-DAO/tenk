@@ -1,12 +1,10 @@
 use std::fmt::Display;
 
 use near_contract_standards::non_fungible_token::{events::NftMint, Token};
-use near_sdk::{env, require, serde::Deserialize, serde_json, AccountId, Promise, PromiseResult};
+use near_sdk::{env, require, AccountId, Promise, PromiseResult};
 
-use crate::{
-    types::{FtToken, Stream, TokenStats},
-    TimestampMs,
-};
+use crate::TimestampMs;
+
 pub fn is_promise_success(num_of_promises: Option<u64>) -> bool {
     let count = env::promise_results_count();
     if num_of_promises.map_or(false, |num| num != count) {

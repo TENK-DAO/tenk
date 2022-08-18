@@ -227,6 +227,9 @@ impl NonFungibleTokenEnumeration for Contract {
         from_index: Option<near_sdk::json_types::U128>,
         limit: Option<u64>,
     ) -> Vec<Token> {
+        if self.tokens.nft_total_supply().0 == 0 {
+          return vec![];
+        }
         self.tokens.nft_tokens(from_index, limit)
     }
 

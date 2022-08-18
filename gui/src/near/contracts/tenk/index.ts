@@ -125,17 +125,11 @@ export type StreamId = string;
 * 
 */
 export interface FtToken {
-  account_id: AccountId;
-  is_payment: boolean;
-  commission_on_create: string;
-  commission_coef: SafeFloat;
   storage_balance_needed: U128;
-  gas_for_ft_transfer: string;
-  gas_for_storage_deposit: string;
 }
-export interface SafeFloat {
-  val: f64;
-  pow: f64;
+export interface RoketoStream {
+  stream_id: StreamId;
+  storage_balance_needed: Balance;
 }
 /**
 * Stream used by Rokte
@@ -146,6 +140,7 @@ export interface SafeFloat {
 export interface Stream {
   owner_id: AccountId;
   is_locked: boolean;
+  token_account_id: AccountId;
 }
 /**
 * StorageUsage is used to count the amount of storage used by a contract.
@@ -771,6 +766,30 @@ export class Contract {
     public_key: PublicKey;
   }, options?: ChangeMethodOptions): transactions.Action {
     return transactions.functionCall("delete_linkdrop", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
+  }
+  /**
+  * @allow ["::admins", "::owner"]
+  */
+  async update_roketo_account_id(args: {
+    account_id?: AccountId;
+  }, options?: ChangeMethodOptions): Promise<boolean> {
+    return providers.getTransactionLastResult(await this.update_roketo_account_idRaw(args, options));
+  }
+  /**
+  * @allow ["::admins", "::owner"]
+  */
+  update_roketo_account_idRaw(args: {
+    account_id?: AccountId;
+  }, options?: ChangeMethodOptions): Promise<providers.FinalExecutionOutcome> {
+    return this.account.functionCall({contractId: this.contractId, methodName: "update_roketo_account_id", args, ...options});
+  }
+  /**
+  * @allow ["::admins", "::owner"]
+  */
+  update_roketo_account_idTx(args: {
+    account_id?: AccountId;
+  }, options?: ChangeMethodOptions): transactions.Action {
+    return transactions.functionCall("update_roketo_account_id", args, options?.gas ?? DEFAULT_FUNCTION_CALL_GAS, options?.attachedDeposit ?? new BN(0))
   }
   nft_payout(args: {
     token_id: string;
@@ -1424,6 +1443,14 @@ export class Contract {
   initial(args = {}, options?: ViewFunctionOptions): Promise<u64> {
     return this.account.viewFunction(this.contractId, "initial", args, options);
   }
+  get_stream_info(args: {
+    token_id: TokenId;
+  }, options?: ViewFunctionOptions): Promise<RoketoStream | null> {
+    return this.account.viewFunction(this.contractId, "get_stream_info", args, options);
+  }
+  roketo_address(args = {}, options?: ViewFunctionOptions): Promise<AccountId> {
+    return this.account.viewFunction(this.contractId, "roketo_address", args, options);
+  }
   async new_default_meta(args: {
     owner_id: AccountId;
     metadata: InitialMetadata;
@@ -2029,6 +2056,29 @@ export interface DeleteLinkdrop {
 }
 export type DeleteLinkdrop__Result = void;
 /**
+* @allow ["::admins", "::owner"]
+* 
+* @contractMethod change
+*/
+export interface UpdateRoketoAccountId {
+  args: {
+    account_id?: AccountId;
+  };
+  options: {
+    /** Units in gas
+    * @pattern [0-9]+
+    * @default "30000000000000"
+    */
+    gas?: string;
+    /** Units in yoctoNear
+    * @default "0"
+    */
+    attachedDeposit?: Balance;
+  }
+  
+}
+export type UpdateRoketoAccountId__Result = boolean;
+/**
 * 
 * @contractMethod view
 */
@@ -2550,6 +2600,26 @@ export interface Initial {
   
 }
 export type Initial__Result = u64;
+/**
+* 
+* @contractMethod view
+*/
+export interface GetStreamInfo {
+  args: {
+    token_id: TokenId;
+  };
+  
+}
+export type GetStreamInfo__Result = RoketoStream | null;
+/**
+* 
+* @contractMethod view
+*/
+export interface RoketoAddress {
+  args: {};
+  
+}
+export type RoketoAddress__Result = AccountId;
 /**
 * 
 * @contractMethod change

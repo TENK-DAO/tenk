@@ -410,36 +410,12 @@
       "additionalProperties": false,
       "description": "Ft Token Type used by Rokte",
       "properties": {
-        "account_id": {
-          "$ref": "#/definitions/AccountId"
-        },
-        "commission_coef": {
-          "$ref": "#/definitions/SafeFloat"
-        },
-        "commission_on_create": {
-          "type": "string"
-        },
-        "gas_for_ft_transfer": {
-          "type": "string"
-        },
-        "gas_for_storage_deposit": {
-          "type": "string"
-        },
-        "is_payment": {
-          "type": "boolean"
-        },
         "storage_balance_needed": {
           "$ref": "#/definitions/U128"
         }
       },
       "required": [
-        "account_id",
-        "is_payment",
-        "commission_on_create",
-        "commission_coef",
-        "storage_balance_needed",
-        "gas_for_ft_transfer",
-        "gas_for_storage_deposit"
+        "storage_balance_needed"
       ],
       "type": "object"
     },
@@ -532,6 +508,38 @@
     },
     "GetSaleInfo__Result": {
       "$ref": "#/definitions/SaleInfo"
+    },
+    "GetStreamInfo": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "token_id": {
+              "$ref": "#/definitions/TokenId"
+            }
+          },
+          "required": [
+            "token_id"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "GetStreamInfo__Result": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/RoketoStream"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "GetUserSaleInfo": {
       "additionalProperties": false,
@@ -1585,6 +1593,39 @@
         }
       ]
     },
+    "RoketoAddress": {
+      "additionalProperties": false,
+      "contractMethod": "view",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "type": "object"
+        }
+      },
+      "required": [
+        "args"
+      ],
+      "type": "object"
+    },
+    "RoketoAddress__Result": {
+      "$ref": "#/definitions/AccountId"
+    },
+    "RoketoStream": {
+      "additionalProperties": false,
+      "properties": {
+        "storage_balance_needed": {
+          "$ref": "#/definitions/Balance"
+        },
+        "stream_id": {
+          "$ref": "#/definitions/StreamId"
+        }
+      },
+      "required": [
+        "stream_id",
+        "storage_balance_needed"
+      ],
+      "type": "object"
+    },
     "Royalties": {
       "additionalProperties": false,
       "properties": {
@@ -1601,22 +1642,6 @@
       "required": [
         "accounts",
         "percent"
-      ],
-      "type": "object"
-    },
-    "SafeFloat": {
-      "additionalProperties": false,
-      "properties": {
-        "pow": {
-          "$ref": "#/definitions/f64"
-        },
-        "val": {
-          "$ref": "#/definitions/f64"
-        }
-      },
-      "required": [
-        "val",
-        "pow"
       ],
       "type": "object"
     },
@@ -1833,11 +1858,15 @@
         },
         "owner_id": {
           "$ref": "#/definitions/AccountId"
+        },
+        "token_account_id": {
+          "$ref": "#/definitions/AccountId"
         }
       },
       "required": [
         "owner_id",
-        "is_locked"
+        "is_locked",
+        "token_account_id"
       ],
       "type": "object"
     },
@@ -2324,6 +2353,50 @@
     "UpdatePublicSaleStart__Result": {
       "type": "boolean"
     },
+    "UpdateRoketoAccountId": {
+      "additionalProperties": false,
+      "allow": [
+        "::admins",
+        "::owner"
+      ],
+      "contractMethod": "change",
+      "properties": {
+        "args": {
+          "additionalProperties": false,
+          "properties": {
+            "account_id": {
+              "$ref": "#/definitions/AccountId"
+            }
+          },
+          "type": "object"
+        },
+        "options": {
+          "additionalProperties": false,
+          "properties": {
+            "attachedDeposit": {
+              "$ref": "#/definitions/Balance",
+              "default": "0",
+              "description": "Units in yoctoNear"
+            },
+            "gas": {
+              "default": "30000000000000",
+              "description": "Units in gas",
+              "pattern": "[0-9]+",
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "args",
+        "options"
+      ],
+      "type": "object"
+    },
+    "UpdateRoketoAccountId__Result": {
+      "type": "boolean"
+    },
     "UpdateRoyalties": {
       "additionalProperties": false,
       "allow": [
@@ -2525,11 +2598,6 @@
     "YoctoNear": {
       "$ref": "#/definitions/U128",
       "description": "String of yocto NEAR; 1N = 1000000000000000000000000 yN"
-    },
-    "f64": {
-      "maximum": 1.7976931348623157e+308,
-      "minimum": -1.7976931348623157e+308,
-      "type": "number"
     },
     "u16": {
       "maximum": 65535,

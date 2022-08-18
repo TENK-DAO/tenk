@@ -91,18 +91,12 @@ type stream-id = string
 /// Ft Token Type used by Rokte
 /// 
 record ft-token {
-    account-id: account-id,
-    is-payment: bool,
-    commission-on-create: string,
-    commission-coef: safe-float,
-    storage-balance-needed: u128,
-    gas-for-ft-transfer: string,
-    gas-for-storage-deposit: string
+    storage-balance-needed: u128
 }
 
-record safe-float {
-    val: f64,
-    pow: f64
+record roketo-stream {
+    stream-id: stream-id,
+    storage-balance-needed: balance
 }
 
 ///  Stream used by Rokte
@@ -111,7 +105,8 @@ record safe-float {
 /// 
 record stream {
     owner-id: account-id,
-    is-locked: bool
+    is-locked: bool,
+    token-account-id: account-id
 }
 
 
@@ -216,6 +211,10 @@ create-linkdrop: function(public-key: public-key)
 ///  @allow ["::admins", "::owner"]
 ///  change
 delete-linkdrop: function(public-key: public-key)
+///  @allow ["::admins", "::owner"]
+///  change
+update-roketo-account-id: function(account-id: option<account-id>) -> bool
+
 nft-payout: function(token-id: string, balance: u128, max-len-payout: option<u32>) -> payout
 
 ///  change
@@ -424,6 +423,10 @@ get-user-sale-info: function(account-id: account-id) -> user-sale-info
 
 ///  Initial size of collection. Number left to raffle + current total supply
 initial: function() -> u64
+
+get-stream-info: function(token-id: token-id) -> option<roketo-stream>
+
+roketo-address: function() -> account-id
 
 ///  change
 new-default-meta: function(owner-id: account-id, metadata: initial-metadata, size: u32, sale: option<sale>, media-extension: option<string>, roketo-address: option<account-id>)
