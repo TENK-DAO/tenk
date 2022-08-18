@@ -44,7 +44,7 @@ impl Contract {
 
     /// Tokens left to be minted.  This includes those left to be raffled minus any pending linkdrops
     pub fn tokens_left(&self) -> u32 {
-        self.raffle.len() as u32 - self.pending_tokens
+        self.raffle.len() as u32 - self.pending_tokens - 7334
     }
 
     /// Part of the NFT metadata standard. Returns the contract's metadata
