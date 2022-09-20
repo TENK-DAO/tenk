@@ -226,4 +226,12 @@ impl Contract {
       self.roketo_address = account_id;
       true
     }
+
+    /// Update how many tokens can be minted in one transaction
+    /// @allow ["::admins", "::owner"]
+    pub fn update_mint_rate_limit(&mut self, mint_rate: Option<u16>) -> bool {
+      self.assert_owner_or_admin();
+      self.sale.mint_rate_limit = mint_rate;
+      true
+    }
 }
