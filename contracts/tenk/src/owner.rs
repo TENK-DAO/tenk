@@ -5,6 +5,55 @@ impl Contract {
     // Owner private methods
 
     /// @allow ["::admins", "::owner"]
+    pub fn whitelist_token(&mut self,token_id: AccountId, token_near: u128, token_discount: u8, token_decimals: u8) {
+        self.assert_owner_or_admin();
+        require!(token_near > 0, "token_near must be positive");
+        require!(
+            token_near > 100,
+            "1 token is rather worth less than 10NEAR"
+        );
+        require!(
+            token_discount < 100,
+            "Discount value cannot be more than 100%"
+        );
+        if !self.is_token_whitelisted(&token_id) {
+            let token_boost = 100 - token_discount as u32;
+            let token_parameters = TokenParameters::new(token_near, token_boost, token_decimals);
+            self.fungible_tokens.insert(&token_id, &token_parameters);
+        } else {
+            log!("Token {} already whitelisted in contract", token_id);
+        }
+    }
+
+    /// @allow ["::admins", "::owner"]
+    /// updates the token_near convertion
+    pub fn admin_set_token_near(&mut self, token_id: AccountId, token_near: u128) {
+        self.assert_owner_or_admin();
+        require!(token_near > 0, "token_near must be positive");
+        require!(
+            token_near > 100,
+            "1 token is rather worth less than 10NEAR"
+        );
+        let mut token_parameters = self.fungible_tokens.get(&token_id).expect("Token isn't whitelisted");
+        token_parameters.token_near = token_near;
+        self.fungible_tokens.insert(&token_id, &token_parameters);
+    }
+
+    /// @allow ["::admins", "::owner"]
+    /// updates the token discount
+    pub fn admin_set_token_discount(&mut self, token_id: AccountId, token_discount: u8) {
+        self.assert_owner_or_admin();
+        require!(token_discount > 0, "token_near must be positive");
+        require!(
+            token_discount < 100,
+            "99% - max discount available"
+        );
+        let mut token_parameters = self.fungible_tokens.get(&token_id).expect("Token isn't whitelisted");
+        token_parameters.token_boost = 100 - token_discount as u32;
+        self.fungible_tokens.insert(&token_id, &token_parameters);
+    }
+
+    /// @allow ["::admins", "::owner"]
     pub fn transfer_ownership(&mut self, new_owner: AccountId) -> bool {
         self.assert_owner();
         env::log_str(&format!(
@@ -189,12 +238,12 @@ impl Contract {
     #[payable]
     /// Create a pending token that can be claimed with corresponding private key
     /// @allow ["::admins", "::owner"]
-    pub fn create_linkdrop(&mut self, public_key: PublicKey) -> Promise {
+    pub fn create_linkdrop(&mut self, public_key: PublicKey, token_id: Option<AccountId>) -> Promise {
         self.assert_owner_or_admin();
         let deposit = env::attached_deposit();
         let account = &env::predecessor_account_id();
         self.assert_can_mint(account, 1);
-        let total_cost = self.cost_of_linkdrop(account).0;
+        let total_cost = self.cost_of_linkdrop(account, &token_id).0;
         self.pending_tokens += 1;
         let mint_for_free = self.is_owner(account);
         self.use_whitelist_allowance(account, 1);
