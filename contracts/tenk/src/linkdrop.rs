@@ -29,7 +29,7 @@ impl Contract {
 
     /// Claim tokens for specific account that are attached to the public key this tx is signed with.
     #[private]
-    pub fn claim(&mut self, account_id: AccountId) -> Promise {
+    pub fn claim(&mut self, account_id: AccountId, token_id: Option<AccountId>) -> Promise {
         // require!(false, "Cannot claim at this time try again later");
         let (mint_for_free, deletion_promise) = self.delete_current_access_key();
         deletion_promise
@@ -38,7 +38,7 @@ impl Contract {
                 account_id.clone(),
                 mint_for_free,
                 env::current_account_id(),
-                self.total_cost(1, &account_id).0,
+                self.total_cost(1, &account_id, &token_id).0,
                 GAS_REQUIRED_FOR_LINKDROP,
             ))
             .then(ext_linkdrop::on_create_and_claim(
@@ -55,6 +55,7 @@ impl Contract {
         &mut self,
         new_account_id: AccountId,
         new_public_key: PublicKey,
+        token_id: Option<AccountId>
     ) -> Promise {
         // require!(false, "Cannot claim at this time try again later");
         let (mint_for_free, deletion_promise) = self.delete_current_access_key();
@@ -64,7 +65,7 @@ impl Contract {
                 new_account_id.clone(),
                 mint_for_free,
                 env::current_account_id(),
-                self.total_cost(1, &new_account_id).0,
+                self.total_cost(1, &new_account_id, &token_id).0,
                 GAS_REQUIRED_FOR_LINKDROP,
             ))
             .then(ext_linkdrop::on_create_and_claim(
