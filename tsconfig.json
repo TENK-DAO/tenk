@@ -1,3 +1,3 @@
 {
-  "extends": "near-willem-workspaces-ava/tsconfig.ava.json"
+  "extends": "near-workspaces-ava/tsconfig.ava.json"
 }
