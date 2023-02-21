@@ -3585,23 +3585,23 @@ near-units@^0.1.9:
   dependencies:
     bn.js "^5.2.0"
 
-near-willem-workspaces-ava@^1.0.3-alpha.0:
-  version "1.0.3-alpha.0"
-  resolved "https://registry.yarnpkg.com/near-willem-workspaces-ava/-/near-willem-workspaces-ava-1.0.3-alpha.0.tgz#75e1e171fcef905b3568bd8998ebbba2b04ed030"
-  integrity sha512-vsWLfOskQgSgYzg2TU+KxBsB4yaJoULEPWyDAqx4OouC155y7H5y7GL0oZB0vu4bCm0WBs1VEPFei1RgVtOuWQ==
+near-workspaces-ava@^1.0.3-alpha.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/near-workspaces-ava/-/near-workspaces-ava-1.1.0.tgz#63874bdaca74759de94f04228f220bbc8096dded"
+  integrity sha512-gEcR/hg9LMxfc+8PFxzN5p+sdlxGNiUtnSK7rM65uplJE4WaO8fxTRyC00499krC47ya2t/mMEvLt9SqqOE5pg==
   dependencies:
     "@ava/typescript" "^2.0.0"
     "@types/bn.js" "^5.1.0"
     "@types/node" "^16.4.10"
     ava "3.15.0"
-    near-willem-workspaces "^1.0.3-alpha.0"
+    near-workspaces "^1.1.0"
     ts-node "^10.1.0"
     typescript "^4.3.5"
 
-near-willem-workspaces@^1.0.3-alpha.0:
-  version "1.0.3-alpha.0"
-  resolved "https://registry.yarnpkg.com/near-willem-workspaces/-/near-willem-workspaces-1.0.3-alpha.0.tgz#b80495f183d1ac57ca0ca3f58b21774a370a6580"
-  integrity sha512-5JPhXZ82uIXumJKUWEI2CXUjtzk0XSxql0Crnx+whc8BA1x26JOYRp98iNELCOV4+pREoeSKTDKCNpYsanX2Hw==
+near-workspaces@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/near-workspaces/-/near-workspaces-1.1.0.tgz#95167230d10233063224a69ee97dd2b469871669"
+  integrity sha512-cmn3k44Ce+INWhz9JUR9RlPGqVWKoM7ETSnKSXXpUZmVNj6smu7DtWQTAoSjPGvHCnftv7wu/6Gn1qq5F2KnFA==
   dependencies:
     base64url "^3.0.1"
     bn.js "^5.2.0"
