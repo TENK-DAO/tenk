@@ -4,6 +4,60 @@ use crate::*;
 #[witgen]
 pub type YoctoNEAR = U128;
 
+/// Fungible token parameters for computing price and boost
+/* 
+from convertion expressed in 1e3, including the boost:
+amount of token = (amount_near / 1e3) * token_near;
+Example. If 1N = 438 tokens, then we need to set token_near = 438'000 
+token_boost is a factor which will be applied when purchasing NFT with this fungible token
+token_deposits - all deposits by user into this token
+token_boost: 100 - token_discount,
+*/
+#[derive(BorshSerialize, BorshDeserialize)]
+pub struct TokenParameters {
+    pub token_near: u128,
+    pub token_boost: u32,
+    pub token_deposits: LookupMap<AccountId, Balance>,
+    pub decimals: u8
+}
+impl Default for TokenParameters {
+    fn default() -> Self {
+        Self { 
+            token_near: 0, 
+            token_boost: 100, 
+            token_deposits: LookupMap::new(StorageKey::TokenDeposits),
+            decimals: 24 
+        }
+    }
+}
+#[derive(BorshSerialize, BorshDeserialize, Serialize, Deserialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct TokenParametersOutput {
+    pub token_near: u128,
+    pub discount: u8,
+    pub decimals: u8
+}
+impl From<TokenParameters> for TokenParametersOutput {
+    fn from(token_parameters: TokenParameters) -> Self {
+        Self { 
+            token_near: token_parameters.token_near, 
+            discount: 100 - token_parameters.token_boost as u8,
+            decimals: token_parameters.decimals
+        }
+    }
+}
+
+impl TokenParameters {
+    pub fn new(token_near: u128, token_boost: u32, decimals: u8) -> Self {
+        Self { 
+            token_near, 
+            token_boost, 
+            token_deposits: LookupMap::new(StorageKey::TokenDeposits),
+            decimals
+        }
+    }
+}
+
 #[derive(Deserialize, Serialize, Default)]
 #[serde(crate = "near_sdk::serde")]
 #[witgen]
@@ -188,6 +242,6 @@ mod tests {
     #[test]
     fn check_price() {
         let contract = new_contract();
-        assert_eq!(contract.cost_per_token(&account()).0, TEN);
+        assert_eq!(contract.cost_per_token(&account(), 1).0, TEN);
     }
 }

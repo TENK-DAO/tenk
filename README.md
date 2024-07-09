@@ -153,6 +153,8 @@ The key aspect that this hack and others like it on Ethereum rely on is that a s
 
 For more information about the API provided by the NFT standard see [nomicon.io](https://nomicon.io/Standards/NonFungibleToken).
 
+## FT Standards
+For more information about the API provided by the NFT standard see [nomicon.io](https://nomicon.io/Standards/FungibleToken).
 
 ## Development
 
